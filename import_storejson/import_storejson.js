@@ -1,4 +1,5 @@
-// Run this with nodejs. It converts store.json (must be in same directory as this script) to an sqlite database named store.db for use in rentap.js nodejs app.
+// Run this with nodejs. It converts store.json (must be in same directory as this script) 
+// to an sqlite database named store.db for use in rentap.js (a nodejs app).
 
 // INTITcsv would only be necessary if store.json was empty, but there's no reason to use this script in that case. Including for completeness.
 var INITcsv = ['"My First M Last","###-##-####","mo/dy/year","Single/Divorced/Seperated/Married","emailname@emailprovider.com","driver\'s license/ID# and State","555-321-4321","555-123-1234","9080 Example Blvd, $200/mo' +
@@ -36,29 +37,31 @@ var INITcsv = ['"My First M Last","###-##-####","mo/dy/year","Single/Divorced/Se
  * trash  will only have 1 column which lists the rows currently in "Trash"
  * tbl    will contain all the important information obtained from the prospective tenant, as shown below
  *
- * FullName
- * SSN
- * BirthDate
- * MaritalStatus
- * Email
- * StateID
- * Phone1
- * Phone2
- * CurrentAddress
- * PriorAddresses
- * ProposedOccupants
- * ProposedPets
- * Income
- * Employment
- * Evictions
- * FeloniesOrDrugs
- * dateApplied
- * dateGuested
- * dateRented
- * headerid
+ * 0  FullName
+ * 1  SSN
+ * 2  BirthDate
+ * 3  MaritalStatus
+ * 4  Email
+ * 5  StateID
+ * 6  Phone1
+ * 7  Phone2
+ * 8  CurrentAddress
+ * 9  PriorAddresses
+ * 10 ProposedOccupants
+ * 11 ProposedPets
+ * 12 Income
+ * 13 Employment
+ * 14 Evictions
+ * 15 Felonies
+ * 16 dateApplied
+ * 17 dateGuested
+ * 18 dateRented
+ * 19 headerStreetAddress
  *   (header.StreetAddress, header.CityStateZip, header.Title, header.Name)
  *
- * using "." to mean coming from another table - not sure of the correct notation at the moment
+ * using "." to mean coming from another table - not sure of the correct notation at the moment. 
+ * Would like to store headerID in tbl instead of headerStreetAddress, but headerID was not stored 
+ * in original store.json main table, (and neither was headerName)
  *
  * Also need to store some information about the state of what's showing, but I don't think it needs to be stored in store.db 
  * (it was stored in store.json for some reason)
@@ -93,3 +96,18 @@ var rentaps = arrayofcsvToArrayofArrays(storejson.csv);
 var RHEADER = storejson.RHEADER;
 var trash= storejson.trash;
 
+const sqlite3 = require('sqlite3')
+let db = new sqlite3.Database('./store.db'); //the database being created
+db.serialize(function() {
+  //create tbl with all 20 columns accepting text (sqlite only has a few datatypes and text is the only suitable one)
+  db.run("CREATE TABLE tbl (FullName text, SSN text, BirthDate text, MaritalStatus text, Email text, StateID text, Phone1 text, Phone2 text, CurrentAddress text, PriorAddresses text, ProposedOccupants text, ProposedPets text, Income text, Employment text, Evictions text, Felonies text, dateApplied text, dateGuested text, dateRented text, headerName text)") 
+  //insert all the rentaps read from store.json
+  var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName) VALUES (?)");
+  for (var i = 0; i < rentaps.length; i++) {
+    //inserts the ith rentap into db (store.db), but rentaps[i] contains more than 20 items while tbl only has 20 columns (so using slice)
+    stmt.run([rentaps[i].slice(0,20));
+  }
+}
+stmt.finalize();
+db.close();
+ 
