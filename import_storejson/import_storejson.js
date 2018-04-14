@@ -77,7 +77,7 @@ function arrayofcsvToArrayofArrays(arrayofcsv) {
       for(var i=0; i<arrayofcsv.length; i++) {
          if (typeof(arrayofcsv[i]) === 'string') {
             arrayofArrays[i] = CSV.csvToArray(arrayofcsv[i])[0];
-         } else if (i == 0) {
+         } else if (i === 0) {
                arrayofArrays = CSV.csvToArray(INITcsv)[0];
          } else {
             arrayofArrays[i] = [null];
@@ -96,18 +96,19 @@ var rentaps = arrayofcsvToArrayofArrays(storejson.csv);
 var RHEADER = storejson.RHEADER;
 var trash= storejson.trash;
 
-const sqlite3 = require('sqlite3')
+const sqlite3 = require('sqlite3');
 let db = new sqlite3.Database('./store.db'); //the database being created
 db.serialize(function() {
   //create tbl with all 20 columns accepting text (sqlite only has a few datatypes and text is the only suitable one)
-  db.run("CREATE TABLE tbl (FullName text, SSN text, BirthDate text, MaritalStatus text, Email text, StateID text, Phone1 text, Phone2 text, CurrentAddress text, PriorAddresses text, ProposedOccupants text, ProposedPets text, Income text, Employment text, Evictions text, Felonies text, dateApplied text, dateGuested text, dateRented text, headerName text)") 
+  db.run("CREATE TABLE tbl (FullName text, SSN text, BirthDate text, MaritalStatus text, Email text, StateID text, Phone1 text, Phone2 text, CurrentAddress text, PriorAddresses text, ProposedOccupants text, ProposedPets text, Income text, Employment text, Evictions text, Felonies text, dateApplied text, dateGuested text, dateRented text, headerName text)"); 
   //insert all the rentaps read from store.json
-  var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName) VALUES (?)");
+  var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
   for (var i = 0; i < rentaps.length; i++) {
-    //inserts the ith rentap into db (store.db), but rentaps[i] contains more than 20 items while tbl only has 20 columns (so using slice)
-    stmt.run(rentaps[i].slice(0,20));
-  }
-}
-stmt.finalize();
+    //inserts the ith rentap into db (store.db), but rentaps[i] contains more than 20 items while tbl only has 20 columns
+    //also, don't know how to specify the list by using the array, so spelling it out
+    stmt.run(rentaps[i][0],rentaps[i][1],rentaps[i][2],rentaps[i][3],rentaps[i][4],rentaps[i][5],rentaps[i][6],rentaps[i][7],rentaps[i][8],rentaps[i][9],rentaps[i][10],rentaps[i][11],rentaps[i][12],rentaps[i][13],rentaps[i][14],rentaps[i][15],rentaps[i][16],rentaps[i][17],rentaps[i][18],rentaps[i][19]);
+  } 
+  stmt.finalize();
+});
 db.close();
  
