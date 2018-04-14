@@ -35,36 +35,37 @@ var INITcsv = ['"My First M Last","###-##-####","mo/dy/year","Single/Divorced/Se
  *
  * header will only have 4 columns which hold the address being rented, title of the rental application, and name for the header to be used in a drop-down menu
  * trash  will only have 1 column which lists the rows currently in "Trash"
- * tbl    will contain all the important information obtained from the prospective tenant, as shown below
+ * tbl    will contain all the important information obtained from the prospective tenant in the following 20 columns
  *
- * 0  FullName
- * 1  SSN
- * 2  BirthDate
- * 3  MaritalStatus
- * 4  Email
- * 5  StateID
- * 6  Phone1
- * 7  Phone2
- * 8  CurrentAddress
- * 9  PriorAddresses
- * 10 ProposedOccupants
- * 11 ProposedPets
- * 12 Income
- * 13 Employment
- * 14 Evictions
- * 15 Felonies
- * 16 dateApplied
- * 17 dateGuested
- * 18 dateRented
- * 19 headerStreetAddress
- *   (header.StreetAddress, header.CityStateZip, header.Title, header.Name)
+ * 1    FullName
+ * 2    SSN
+ * 3    BirthDate
+ * 4    MaritalStatus
+ * 5    Email
+ * 6    StateID
+ * 7    Phone1
+ * 8    Phone2
+ * 9    CurrentAddress
+ * 10   PriorAddresses
+ * 11   ProposedOccupants
+ * 12   ProposedPets
+ * 13   Income
+ * 14   Employment
+ * 15   Evictions
+ * 16   Felonies
+ * 17   dateApplied
+ * 18   dateGuested
+ * 19   dateRented
+ * 20   headerID
+ *       (StreetAddress, CityStateZip, Title, Name)
+ * 
+ * store.json directly stores the information from header but I just want to store headerID.
+ * The plan is to insert values for the first 19 columns from store.json into store.db tbl, then 
+ * create a temporary 2 column table of header (StreetAddress, CityStateZip) to look up
+ * and insert values for column 20, headerID.
  *
- * using "." to mean coming from another table - not sure of the correct notation at the moment. 
- * Would like to store headerID in tbl instead of headerStreetAddress, but headerID was not stored 
- * in original store.json main table, (and neither was headerName)
- *
- * Also need to store some information about the state of what's showing, but I don't think it needs to be stored in store.db 
- * (it was stored in store.json for some reason)
+ * Also need to store some information about the state of what's showing, but I don't think it needs to be stored in store.db. 
+ * (It was in store.json to be able to return to the same state on restarting the browser, but I've decided that's not really a good idea.)
  * State variables would be row and mode: i.e. what row we're showing and what mode we're in (new, edit, discarded).
  * 
  */
@@ -101,12 +102,13 @@ let db = new sqlite3.Database('./store.db'); //the database being created
 db.serialize(function() {
 
   //create tbl with all 20 columns accepting text (sqlite only has a few datatypes and text is the only suitable one)
-  db.run("CREATE TABLE tbl (FullName text, SSN text, BirthDate text, MaritalStatus text, Email text, StateID text, Phone1 text, Phone2 text, CurrentAddress text, PriorAddresses text, ProposedOccupants text, ProposedPets text, Income text, Employment text, Evictions text, Felonies text, dateApplied text, dateGuested text, dateRented text, headerStreetAddress text)"); 
+  db.run("CREATE TABLE tbl (FullName text, SSN text, BirthDate text, MaritalStatus text, Email text, StateID text, Phone1 text, Phone2 text, CurrentAddress text, PriorAddresses text, ProposedOccupants text, ProposedPets text, Income text, Employment text, Evictions text, Felonies text, dateApplied text, dateGuested text, dateRented text, headerID integer)"); 
   //insert all the rentaps read from store.json
-  var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerStreetAddress) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+  var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
   for (var i = 0; i < rentaps.length; i++) {
-    //inserts the ith rentap into db (store.db), but rentaps[i] contains more than 20 items while tbl only has 20 columns (so using slice)
-    stmt.run(rentaps[i].slice(0,20));
+    //inserts the ith rentap into db (store.db) up to dateRented, will later lookup headerID based on 
+    //headerAddress = header(StreetAddress+", "+CityStateZip) = rentaps[19] + ", " + rentaps[20]
+    stmt.run(rentaps[i].slice(0,19));
   } 
   stmt.finalize();
 
@@ -120,6 +122,19 @@ db.serialize(function() {
   } 
   stmt.finalize();
 
+  //create headerAddresses with 2 column text
+  db.run("CREATE TABLE headerAddresses (StreetAddress text, CityStateZip text)"); 
+  //insert all the headerAddresses read from rentaps in store.json
+  var stmt = db.prepare("INSERT INTO headerAddresses (StreetAddress, CityStateZip) VALUES (?,?)");
+  for (var i = 0; i < rentaps.length; i++) {
+    //inserts the ith headerAddress from rentaps in store.json
+    stmt.run(rentaps[i][19],rentaps[i][20]);
+  } 
+  stmt.finalize();
+
+  //now need to lookup headerID for each rentap based on corresponding headderAddress
+  db.run("UPDATE tbl SET headerID = (SELECT h.rowid FROM headers AS h WHERE h.StreetAddress = (SELECT ha.StreetAddress FROM headerAddresses AS ha WHERE ha.rowid = tbl.rowid) AND h.CityStateZip = (SELECT ha.CityStateZip FROM headerAddresses AS ha WHERE ha.rowid = tbl.rowid))");
+
   //create trash with just 1 column of integers (the rows in tbl that are discarded)
   db.run("CREATE TABLE trash (discardedRow integer)"); 
   //insert all the trash read from store.json
@@ -130,9 +145,10 @@ db.serialize(function() {
   } 
   stmt.finalize();
 
-/* tested printing out all FullNames not in trash, and it works */
-  db.each("SELECT rowid AS id, FullName FROM tbl where id not in (SELECT discardedRow FROM trash)", function(err, row) {
-    console.log(row.id + ": " + row.FullName);
+/*test*/
+
+  db.each("SELECT rowid AS id, FullName, headerID FROM tbl where id not in (SELECT discardedRow FROM trash)", function(err, row) {
+    console.log(row.id + ": " + row.FullName + " headerID: " + row.headerID);
   });
 
 }); //ends db.serialize(function() {
