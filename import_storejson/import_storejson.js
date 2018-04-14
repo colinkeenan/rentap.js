@@ -104,11 +104,15 @@ db.serialize(function() {
   //insert all the rentaps read from store.json
   var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
   for (var i = 0; i < rentaps.length; i++) {
-    //inserts the ith rentap into db (store.db), but rentaps[i] contains more than 20 items while tbl only has 20 columns
-    //also, don't know how to specify the list by using the array, so spelling it out
-    stmt.run(rentaps[i][0],rentaps[i][1],rentaps[i][2],rentaps[i][3],rentaps[i][4],rentaps[i][5],rentaps[i][6],rentaps[i][7],rentaps[i][8],rentaps[i][9],rentaps[i][10],rentaps[i][11],rentaps[i][12],rentaps[i][13],rentaps[i][14],rentaps[i][15],rentaps[i][16],rentaps[i][17],rentaps[i][18],rentaps[i][19]);
+    //inserts the ith rentap into db (store.db), but rentaps[i] contains more than 20 items while tbl only has 20 columns (so using slice)
+    stmt.run(rentaps[i].slice(0,20));
   } 
   stmt.finalize();
+
+  db.each("SELECT rowid AS id, FullName FROM tbl", function(err, row) {
+    console.log(row.id + ": " + row.FullName);
+  });
 });
+
 db.close();
  
