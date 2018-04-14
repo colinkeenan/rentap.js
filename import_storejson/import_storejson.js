@@ -112,10 +112,13 @@ db.serialize(function() {
   } 
   stmt.finalize();
 
+  //remove null rows
+  db.run("DELETE FROM tbl WHERE FullName IS NULL"); //really only want to remove null, blank space is fine
+
   //create headers with 4 columns, all text again
-  db.run("CREATE TABLE headers (StreetAddress text, CityStateZip text, Title text, Name text)"); 
-  //insert all the headers read from store.json
-  var stmt = db.prepare("INSERT INTO headers (StreetAddress, CityStateZip, Title, Name) VALUES (?,?,?,?)");
+  db.run("CREATE TABLE headers (StreetAddress text, CityStateZip text, Title text, Name text PRIMARY Key)"); 
+  //insert all the headers (but no duplicates) read from store.json
+  var stmt = db.prepare("INSERT OR REPLACE INTO headers (StreetAddress, CityStateZip, Title, Name) VALUES (?,?,?,?)");
   for (var i = 0; i < headers.length; i++) {
     //inserts the ith header into db (store.db) 
     stmt.run(headers[i]);
@@ -145,12 +148,30 @@ db.serialize(function() {
   } 
   stmt.finalize();
 
-/*test*/
-
-  db.each("SELECT rowid AS id, FullName, headerID FROM tbl where id not in (SELECT discardedRow FROM trash)", function(err, row) {
-    console.log(row.id + ": " + row.FullName + " headerID: " + row.headerID);
+  //because the rentap extension allowed user to change the header address without assigning it to a new header, many tbl.headerID will be null now
+  //So, find those null's and get user to choose correct header
+  
+  //first, give list of headers
+  db.each("SELECT rowid AS id, * FROM headers", function(err,row) {
+    console.log(row.id + " " + row.Name + ": " + row.StreetAddress + ", " + row.CityStateZip + " " + row.Title)
   });
 
+  //then, get correct headerID for each null
+  var readlineSync = require('readline-sync');
+  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID AS IDheader, headerAddresses.StreetAddress AS addr, headerAddresses.CityStateZip AS city FROM tbl JOIN headerAddresses ON id = headerAddresses.rowid WHERE IDheader IS NULL", function(err, row) {
+    console.log(row.id + ": " + row.FullName + ", " + row.addr + ", " + row.city);
+    var answer = readlineSync.questionInt('Correct headerID (number)? ');
+    var stmt = db.prepare("UPDATE tbl SET headerID = (?)");
+    stmt.run(answer);
+    stmt.finalize();
+  });
+
+/*test
+
+  db.each("SELECT rowid AS id, FullName, headerID FROM tbl WHERE id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
+    console.log(row.id + ": " + row.FullName + " headerID: " + row.headerID);
+  });
+*/
 }); //ends db.serialize(function() {
 
 db.close();
