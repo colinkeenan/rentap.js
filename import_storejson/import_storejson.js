@@ -93,26 +93,49 @@ function arrayofcsvToArrayofArrays(arrayofcsv) {
 
 var storejson = require('./store.json'); //from rentap firefox addon - want to convert it to sqlite and save as store.db
 var rentaps = arrayofcsvToArrayofArrays(storejson.csv);
-var RHEADER = storejson.RHEADER;
-var trash= storejson.trash;
+var headers = storejson.RHEADER;
+var trash = storejson.trash;
 
 const sqlite3 = require('sqlite3');
 let db = new sqlite3.Database('./store.db'); //the database being created
 db.serialize(function() {
+
   //create tbl with all 20 columns accepting text (sqlite only has a few datatypes and text is the only suitable one)
-  db.run("CREATE TABLE tbl (FullName text, SSN text, BirthDate text, MaritalStatus text, Email text, StateID text, Phone1 text, Phone2 text, CurrentAddress text, PriorAddresses text, ProposedOccupants text, ProposedPets text, Income text, Employment text, Evictions text, Felonies text, dateApplied text, dateGuested text, dateRented text, headerName text)"); 
+  db.run("CREATE TABLE tbl (FullName text, SSN text, BirthDate text, MaritalStatus text, Email text, StateID text, Phone1 text, Phone2 text, CurrentAddress text, PriorAddresses text, ProposedOccupants text, ProposedPets text, Income text, Employment text, Evictions text, Felonies text, dateApplied text, dateGuested text, dateRented text, headerStreetAddress text)"); 
   //insert all the rentaps read from store.json
-  var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+  var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerStreetAddress) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
   for (var i = 0; i < rentaps.length; i++) {
     //inserts the ith rentap into db (store.db), but rentaps[i] contains more than 20 items while tbl only has 20 columns (so using slice)
     stmt.run(rentaps[i].slice(0,20));
   } 
   stmt.finalize();
 
-  db.each("SELECT rowid AS id, FullName FROM tbl", function(err, row) {
+  //create headers with 4 columns, all text again
+  db.run("CREATE TABLE headers (StreetAddress text, CityStateZip text, Title text, Name text)"); 
+  //insert all the headers read from store.json
+  var stmt = db.prepare("INSERT INTO headers (StreetAddress, CityStateZip, Title, Name) VALUES (?,?,?,?)");
+  for (var i = 0; i < headers.length; i++) {
+    //inserts the ith header into db (store.db) 
+    stmt.run(headers[i]);
+  } 
+  stmt.finalize();
+
+  //create trash with just 1 column of integers (the rows in tbl that are discarded)
+  db.run("CREATE TABLE trash (discardedRow integer)"); 
+  //insert all the trash read from store.json
+  var stmt = db.prepare("INSERT INTO trash (discardedRow) VALUES (?)");
+  for (var i = 0; i < trash.length; i++) {
+    //inserts the ith discardedRow (just the row number) into db (store.db) 
+    stmt.run(trash[i] + 1); //have to add one because sqlite starts from 1 instead of 0
+  } 
+  stmt.finalize();
+
+/* tested printing out all FullNames not in trash, and it works */
+  db.each("SELECT rowid AS id, FullName FROM tbl where id not in (SELECT discardedRow FROM trash)", function(err, row) {
     console.log(row.id + ": " + row.FullName);
   });
-});
+
+}); //ends db.serialize(function() {
 
 db.close();
  
