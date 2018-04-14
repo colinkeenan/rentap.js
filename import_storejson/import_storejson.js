@@ -105,7 +105,7 @@ db.serialize(function() {
   var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName) VALUES (?)");
   for (var i = 0; i < rentaps.length; i++) {
     //inserts the ith rentap into db (store.db), but rentaps[i] contains more than 20 items while tbl only has 20 columns (so using slice)
-    stmt.run([rentaps[i].slice(0,20));
+    stmt.run(rentaps[i].slice(0,20));
   }
 }
 stmt.finalize();
