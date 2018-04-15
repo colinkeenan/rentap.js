@@ -185,7 +185,7 @@ db.serialize(function() {
   //show it worked by listing good names and discarded ones separately along with header names
 
   var good1st = 1;
-  db.each("SELECT tbl.rowid AS id, tbl.FullName, headers.Name FROM tbl, headers WHERE id = headers.rowid AND id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
+  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, headers.Name FROM tbl JOIN headers ON tbl.headerID = headers.rowid WHERE id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
     if (good1st) {
       console.log("\nGOOD NAMES WITH HEADER NAME\n");
       good1st = 0;
@@ -194,7 +194,7 @@ db.serialize(function() {
   });
 
   var trash1st = 1;
-  db.each("SELECT tbl.rowid AS id, tbl.FullName, headers.Name FROM tbl, headers WHERE id = headers.rowid AND id IN (SELECT discardedRow FROM trash)", function(err, row) {
+  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, headers.Name FROM tbl JOIN headers ON tbl.headerID = headers.rowid WHERE id IN (SELECT discardedRow FROM trash)", function(err, row) {
     if (trash1st) {
       console.log("\nTRASHED NAMES WITH HEADER NAME\n");
       trash1st = 0;
