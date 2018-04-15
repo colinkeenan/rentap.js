@@ -107,13 +107,13 @@ db.serialize(function() {
   var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
   for (i = 0; i < rentaps.length; i++) {
     //inserts the ith rentap into db (store.db) up to dateRented, will later lookup headerID based on 
-    //headerAddress = header(StreetAddress+", "+CityStateZip) = rentaps[19] + ", " + rentaps[20]
+    //[headers.StreetAddress, headers.CityStateZip] = [rentaps[i][19], rentaps[i][20]]
     stmt.run(rentaps[i].slice(0,19));
   } 
   stmt.finalize();
 
   //remove null rows
-  db.run("DELETE FROM tbl WHERE FullName IS NULL"); //really only want to remove null, blank space is fine
+  db.run("DELETE FROM tbl WHERE FullName IS NULL"); //this will leave blank-space names, which is fine - just getting rid of actually null rows
 
   //create headers with 4 columns, all text again
   db.run("CREATE TABLE headers (StreetAddress text, CityStateZip text, Title text, Name text PRIMARY Key)"); 
@@ -125,7 +125,7 @@ db.serialize(function() {
   } 
   stmt.finalize();
 
-  //create headerAddresses with 2 column text
+  //create headerAddresses with 2 column text (will drop this table after using it to look up headerID's for tbl)
   db.run("CREATE TABLE headerAddresses (StreetAddress text, CityStateZip text)"); 
   //insert all the headerAddresses read from rentaps in store.json
   stmt = db.prepare("INSERT INTO headerAddresses (StreetAddress, CityStateZip) VALUES (?,?)");
@@ -171,56 +171,34 @@ db.serialize(function() {
     console.log(row.id + " " + row.Name + ": " + row.StreetAddress + ", " + row.CityStateZip + " " + row.Title);
   });
 
-  //then, get correct headerID for each null (This isn't working - need to put this in a function and then the rest as a callback
-  var question1st = 1;
+  //then, get correct headerID for each null
+  var answers = 0;
+  var headerIDarray = [];
   var readlineSync = require('readline-sync');
   db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, ha.StreetAddress, ha.CityStateZip FROM tbl JOIN headerAddresses AS ha ON id = ha.rowid WHERE headerID IS NULL", function(err, row) {
-    if (question1st) {
+    if (!answers) {
       console.log("\nSUPPLY " + badcount + " headerIDs THAT COULD NOT BE DETERMINED AUTOMATICALLY\n");
-      question1st = 0;
     }
     console.log(row.id + ": " + row.FullName + ", " + row.StreetAddress + ", " + row.CityStateZip);
     var answer = readlineSync.questionInt('Correct headerID (number)? ');
-    db = new sqlite3.Database('./store.db'); //by the time answer is givin, db handle closed
-    db.serialize(function() {
-      stmt = db.prepare("UPDATE tbl SET headerID = (?)");
-      stmt.run(answer);
-      stmt.finalize();
-    }); db.close();
-  });
-
-  //show records still not matching headers.rowid, if any
-  var bad1st = 1;
-  db.each("SELECT rowid AS id, FullName, headerID FROM tbl WHERE headerID IS NULL OR headerID NOT IN (SELECT rowid FROM headers)", function(err, row) {
-    if (bad1st) {
-      console.log("\nNAMES WITH IMPROPER headerID (shown between angle brackets <>)\n");
-      bad1st = 0;
+    answers++;
+    headerIDarray.push([answer, row.id]);
+    if (answers === badcount) { //after asking last question, output array to console and save in badheaders.json
+      console.log(JSON.stringify(headerIDarray));
+      require('fs').writeFile('./badheaders.json', JSON.stringify(headerIDarray), function (err) {
+        if (err) {
+          console.error(err);
+        }
+        console.log("\nYour answers have been saved in badheaders.json.\nNow just run 'node update_storedb.js' to update the database with your answers and remove badheaders.json.\nSome lists will be displayed to help verify the update worked.\n\n");
+      });
     }
-    console.log(row.id + " <" + row.headerID + ">:" + row.FullName + ", ");
-  });
+  }); //ends db.each(....function(err, row) {
 
-  //show it worked by listing good names and discarded ones separately along with header names
+  //done using headerAddresses table and not needed for rentap.js
+  db.run("DROP TABLE headerAddresses");
 
-  var good1st = 1;
-  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, headers.Name FROM tbl JOIN headers ON tbl.headerID = headers.rowid WHERE id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
-    if (good1st) {
-      console.log("\nGOOD NAMES WITH HEADER NAME\n");
-      good1st = 0;
-    }
-    console.log(row.id + " " + row.Name + ": " + row.FullName);
-  });
-
-  var trash1st = 1;
-  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, headers.Name FROM tbl JOIN headers ON tbl.headerID = headers.rowid WHERE id IN (SELECT discardedRow FROM trash)", function(err, row) {
-    if (trash1st) {
-      console.log("\nTRASHED NAMES WITH HEADER NAME\n");
-      trash1st = 0;
-    }
-    console.log(row.id + " " + row.Name + ": " + row.FullName);
-  });
 
 }); //ends db.serialize(function() {
-
-
 db.close();
- 
+
+
