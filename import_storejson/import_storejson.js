@@ -177,10 +177,20 @@ db.serialize(function() {
 
   //update tbl with answers that are in headerIDarray
   stmt = db.prepare("UPDATE tbl SET headerID = (?) WHERE headerID IS NULL");
-  for (i = 0; i < headerIDarray; i++) {
+  for (i = 0; i < headerIDarray.length; i++) {
     stmt.run(headerIDarray[i]);
   }
   stmt.finalize();
+
+  //show records still not matching headers.rowid, if any
+  var bad1st = 1;
+  db.each("SELECT rowid AS id, FullName, headerID FROM tbl WHERE headerID IS NULL OR NOT IN (SELECT rowid FROM headers)", function(err, row) {
+    if (bad1st) {
+      console.log("\nNAMES WITH IMPROPER headerID (shown between angle brackets <>)\n");
+      bad1st = 0;
+    }
+    console.log(row.id + ": " + row.FullName + ", " + "<" + row.headerID + ">");
+  });
 
   //show it worked by listing good names and discarded ones separately along with header names
 
