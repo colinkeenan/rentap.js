@@ -184,7 +184,7 @@ db.serialize(function() {
 
   //show records still not matching headers.rowid, if any
   var bad1st = 1;
-  db.each("SELECT rowid AS id, FullName, headerID FROM tbl WHERE headerID IS NULL OR NOT IN (SELECT rowid FROM headers)", function(err, row) {
+  db.each("SELECT rowid AS id, FullName, headerID FROM tbl WHERE headerID IS NULL OR headerID NOT IN (SELECT rowid FROM headers)", function(err, row) {
     if (bad1st) {
       console.log("\nNAMES WITH IMPROPER headerID (shown between angle brackets <>)\n");
       bad1st = 0;
