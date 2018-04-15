@@ -152,14 +152,24 @@ db.serialize(function() {
   //So, find those null's and get user to choose correct header
   
   //first, give list of headers
+  var header1st = 1;
   db.each("SELECT rowid AS id, * FROM headers", function(err,row) {
+    if (header1st) {
+      console.log("\nLIST OF HEADERS");
+      header1st = 0;
+    }
     console.log(row.id + " " + row.Name + ": " + row.StreetAddress + ", " + row.CityStateZip + " " + row.Title)
   });
 
   //then, get correct headerID for each null, storing answers in array (can't immediately put into database at same time because not syncronized)
+  var question1st = 1;
   var headerIDarray = [];
   var readlineSync = require('readline-sync');
   db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, headerAddresses.StreetAddress AS addr, headerAddresses.CityStateZip AS city FROM tbl JOIN headerAddresses ON id = headerAddresses.rowid WHERE headerID IS NULL", function(err, row) {
+    if (question1st) {
+      console.log("\nSUPPLY headerIDs THAT COULD NOT BE DETERMINED AUTOMATICALLY");
+      question1st = 0;
+    }
     console.log(row.id + ": " + row.FullName + ", " + row.addr + ", " + row.city);
     var answer = readlineSync.questionInt('Correct headerID (number)? ');
     headerIDarray.push(answer);
@@ -175,21 +185,21 @@ db.serialize(function() {
   //show it worked by listing good names and discarded ones separately along with header names
 
   var good1st = 1;
-  var trash1st = 1;
-  db.each("SELECT tbl.rowid AS id, tbl.FullName, headers.rowid FROM tbl JOIN headers ON id = headers.rowid WHERE id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
+  db.each("SELECT tbl.rowid AS id, tbl.FullName, headers.Name FROM tbl, headers WHERE id = headers.rowid AND id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
     if (good1st) {
       console.log("\nGOOD NAMES WITH HEADER NAME\n");
       good1st = 0;
     }
-    console.log(row.id + ": " + row.FullName + ", " + row.Name);
+    console.log(row.id + " " + row.Name + ": " + row.FullName);
   });
 
-  db.each("SELECT tbl.rowid AS id, tbl.FullName, headers.rowid FROM tbl JOIN headers ON id = headers.rowid WHERE id IN (SELECT discardedRow FROM trash)", function(err, row) {
+  var trash1st = 1;
+  db.each("SELECT tbl.rowid AS id, tbl.FullName, headers.Name FROM tbl, headers WHERE id = headers.rowid AND id IN (SELECT discardedRow FROM trash)", function(err, row) {
     if (trash1st) {
       console.log("\nTRASHED NAMES WITH HEADER NAME\n");
       trash1st = 0;
     }
-    console.log(row.id + ": " + row.FullName + ", " + row.Name);
+    console.log(row.id + " " + row.Name + ": " + row.FullName);
   });
 
 }); //ends db.serialize(function() {
