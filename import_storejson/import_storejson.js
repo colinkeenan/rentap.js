@@ -105,7 +105,7 @@ db.serialize(function() {
   db.run("CREATE TABLE tbl (FullName text, SSN text, BirthDate text, MaritalStatus text, Email text, StateID text, Phone1 text, Phone2 text, CurrentAddress text, PriorAddresses text, ProposedOccupants text, ProposedPets text, Income text, Employment text, Evictions text, Felonies text, dateApplied text, dateGuested text, dateRented text, headerID integer)"); 
   //insert all the rentaps read from store.json
   var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-  for (var i = 0; i < rentaps.length; i++) {
+  for (i = 0; i < rentaps.length; i++) {
     //inserts the ith rentap into db (store.db) up to dateRented, will later lookup headerID based on 
     //headerAddress = header(StreetAddress+", "+CityStateZip) = rentaps[19] + ", " + rentaps[20]
     stmt.run(rentaps[i].slice(0,19));
@@ -118,8 +118,8 @@ db.serialize(function() {
   //create headers with 4 columns, all text again
   db.run("CREATE TABLE headers (StreetAddress text, CityStateZip text, Title text, Name text PRIMARY Key)"); 
   //insert all the headers (but no duplicates) read from store.json
-  var stmt = db.prepare("INSERT OR REPLACE INTO headers (StreetAddress, CityStateZip, Title, Name) VALUES (?,?,?,?)");
-  for (var i = 0; i < headers.length; i++) {
+  stmt = db.prepare("INSERT OR REPLACE INTO headers (StreetAddress, CityStateZip, Title, Name) VALUES (?,?,?,?)");
+  for (i = 0; i < headers.length; i++) {
     //inserts the ith header into db (store.db) 
     stmt.run(headers[i]);
   } 
@@ -128,8 +128,8 @@ db.serialize(function() {
   //create headerAddresses with 2 column text
   db.run("CREATE TABLE headerAddresses (StreetAddress text, CityStateZip text)"); 
   //insert all the headerAddresses read from rentaps in store.json
-  var stmt = db.prepare("INSERT INTO headerAddresses (StreetAddress, CityStateZip) VALUES (?,?)");
-  for (var i = 0; i < rentaps.length; i++) {
+  stmt = db.prepare("INSERT INTO headerAddresses (StreetAddress, CityStateZip) VALUES (?,?)");
+  for (i = 0; i < rentaps.length; i++) {
     //inserts the ith headerAddress from rentaps in store.json
     stmt.run(rentaps[i][19],rentaps[i][20]);
   } 
@@ -141,8 +141,8 @@ db.serialize(function() {
   //create trash with just 1 column of integers (the rows in tbl that are discarded)
   db.run("CREATE TABLE trash (discardedRow integer)"); 
   //insert all the trash read from store.json
-  var stmt = db.prepare("INSERT INTO trash (discardedRow) VALUES (?)");
-  for (var i = 0; i < trash.length; i++) {
+  stmt = db.prepare("INSERT INTO trash (discardedRow) VALUES (?)");
+  for (i = 0; i < trash.length; i++) {
     //inserts the ith discardedRow (just the row number) into db (store.db) 
     stmt.run(trash[i] + 1); //have to add one because sqlite starts from 1 instead of 0
   } 
@@ -156,22 +156,42 @@ db.serialize(function() {
     console.log(row.id + " " + row.Name + ": " + row.StreetAddress + ", " + row.CityStateZip + " " + row.Title)
   });
 
-  //then, get correct headerID for each null
+  //then, get correct headerID for each null, storing answers in array (can't immediately put into database at same time because not syncronized)
+  var headerIDarray = [];
   var readlineSync = require('readline-sync');
-  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID AS IDheader, headerAddresses.StreetAddress AS addr, headerAddresses.CityStateZip AS city FROM tbl JOIN headerAddresses ON id = headerAddresses.rowid WHERE IDheader IS NULL", function(err, row) {
+  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, headerAddresses.StreetAddress AS addr, headerAddresses.CityStateZip AS city FROM tbl JOIN headerAddresses ON id = headerAddresses.rowid WHERE headerID IS NULL", function(err, row) {
     console.log(row.id + ": " + row.FullName + ", " + row.addr + ", " + row.city);
     var answer = readlineSync.questionInt('Correct headerID (number)? ');
-    var stmt = db.prepare("UPDATE tbl SET headerID = (?)");
-    stmt.run(answer);
-    stmt.finalize();
+    headerIDarray.push(answer);
   });
 
-/*test
+  //update tbl with answers that are in headerIDarray
+  stmt = db.prepare("UPDATE tbl SET headerID = (?) WHERE headerID IS NULL");
+  for (i = 0; i < headerIDarray; i++) {
+    stmt.run(headerIDarray[i]);
+  }
+  stmt.finalize();
 
-  db.each("SELECT rowid AS id, FullName, headerID FROM tbl WHERE id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
-    console.log(row.id + ": " + row.FullName + " headerID: " + row.headerID);
+  //show it worked by listing good names and discarded ones separately along with header names
+
+  var good1st = 1;
+  var trash1st = 1;
+  db.each("SELECT tbl.rowid AS id, tbl.FullName, headers.rowid FROM tbl JOIN headers ON id = headers.rowid WHERE id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
+    if (good1st) {
+      console.log("\nGOOD NAMES WITH HEADER NAME\n");
+      good1st = 0;
+    }
+    console.log(row.id + ": " + row.FullName + ", " + row.Name);
   });
-*/
+
+  db.each("SELECT tbl.rowid AS id, tbl.FullName, headers.rowid FROM tbl JOIN headers ON id = headers.rowid WHERE id IN (SELECT discardedRow FROM trash)", function(err, row) {
+    if (trash1st) {
+      console.log("\nTRASHED NAMES WITH HEADER NAME\n");
+      trash1st = 0;
+    }
+    console.log(row.id + ": " + row.FullName + ", " + row.Name);
+  });
+
 }); //ends db.serialize(function() {
 
 db.close();
