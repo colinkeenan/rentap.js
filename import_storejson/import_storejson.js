@@ -175,30 +175,70 @@ db.serialize(function() {
   var answers = 0;
   var headerIDarray = [];
   var readlineSync = require('readline-sync');
-  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, ha.StreetAddress, ha.CityStateZip FROM tbl JOIN headerAddresses AS ha ON id = ha.rowid WHERE headerID IS NULL", function(err, row) {
-    if (!answers) {
-      console.log("\nSUPPLY " + badcount + " headerIDs THAT COULD NOT BE DETERMINED AUTOMATICALLY\n");
-    }
-    console.log(row.id + ": " + row.FullName + ", " + row.StreetAddress + ", " + row.CityStateZip);
-    var answer = readlineSync.questionInt('Correct headerID (number)? ');
-    answers++;
-    headerIDarray.push([answer, row.id]);
-    if (answers === badcount) { //after asking last question, output array to console and save in badheaders.json
-      console.log(JSON.stringify(headerIDarray));
-      require('fs').writeFile('./badheaders.json', JSON.stringify(headerIDarray), function (err) {
-        if (err) {
-          console.error(err);
+
+  //db.each rows with null headerIDs showing the corresponding headerAddress
+  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, ha.StreetAddress, ha.CityStateZip FROM tbl JOIN headerAddresses AS ha ON id = ha.rowid WHERE headerID IS NULL",
+
+    function(err, row) { //1st callback function: row callback (for each null headerID, get the correct one from user)
+      if (!answers) {
+        console.log("\nSUPPLY " + badcount + " headerIDs THAT COULD NOT BE DETERMINED AUTOMATICALLY\n");
+      }
+      console.log(row.id + ": " + row.FullName + ", " + row.StreetAddress + ", " + row.CityStateZip);
+      var answer = readlineSync.questionInt('Correct headerID (number)? ');
+      answers++;
+      headerIDarray.push([answer, row.id]);
+    }, //end 1st callback (row callback) 
+
+    function(err,rowcount) { //2nd callback function: complete callback which is called after the row callback is called for the last row
+      let db = new sqlite3.Database('./store.db'); //the database being verified has been closed by now, but I don't know why
+        db.serialize(function() {
+
+        //update tbl with answers that are in headerIDarray
+        stmt = db.prepare("UPDATE tbl SET headerID = (?) WHERE rowid = (?)");
+        for (i = 0; i < headerIDarray.length; i++) {
+          stmt.run(headerIDarray[i]);
         }
-        console.log("\nYour answers have been saved in badheaders.json.\nNow just run 'node update_storedb.js' to update the database with your answers and remove badheaders.json.\nSome lists will be displayed to help verify the update worked.\n\n");
-      });
-    }
-  }); //ends db.each(....function(err, row) {
+        stmt.finalize();
+
+        //show records still not matching headers.rowid, if any
+        var bad1st = 1;
+        db.each("SELECT rowid AS id, FullName, headerID FROM tbl WHERE headerID IS NULL OR headerID NOT IN (SELECT rowid FROM headers)", function(err, row) {
+          if (err) console.error(err);
+          if (bad1st) {
+            console.log("\nNAMES WITH IMPROPER headerID (shown between angle brackets <>)\n");
+            bad1st = 0;
+          }
+          console.log(row.id + " <" + row.headerID + ">:" + row.FullName + ", ");
+        });
+
+        //show it worked by listing good names and discarded ones separately along with header names
+
+        var good1st = 1;
+        db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, headers.Name FROM tbl JOIN headers ON tbl.headerID = headers.rowid WHERE id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
+          if (good1st) {
+            console.log("\nGOOD NAMES WITH HEADER NAME\n");
+            good1st = 0;
+          }
+          console.log(row.id + " " + row.Name + " " + row.headerID + ": " + row.FullName);
+        });
+
+        var trash1st = 1;
+        db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerID, headers.Name FROM tbl JOIN headers ON tbl.headerID = headers.rowid WHERE id IN (SELECT discardedRow FROM trash)", function(err, row) {
+          if (trash1st) {
+            console.log("\nTRASHED NAMES WITH HEADER NAME\n");
+            trash1st = 0;
+          }
+          console.log(row.id + " " + row.Name + " " + row.headerID + ": " + row.FullName);
+        });
+      }); //ends db.serialize(function() inside 2nd callback
+      db.close(); //closing the 2nd time opened the database
+    }//ends 2nd callback (complete callback)
+  );//ends db.each for rows with null headerIDs showing the corresponding headerAddress 
 
   //done using headerAddresses table and not needed for rentap.js
   db.run("DROP TABLE headerAddresses");
 
-
 }); //ends db.serialize(function() {
-db.close();
+db.close(); //this one gets called first, or the database just closes for some other reason before the 2nd callback is called, I don't know
 
 
