@@ -112,7 +112,8 @@ exports.save_ap = function (ap_id, ap) {
   db.serialize(function() {
     db.run("UPDATE tbl FullName = (?), SSN = (?), BirthDate = (?), MaritalStatus = (?), Email = (?), StateID = (?), Phone1 = (?), Phone2 = (?), CurrentAddress = (?), PriorAddresses = (?), ProposedOccupants = (?), ProposedPets = (?), Income = (?), Employment = (?), Evictions = (?), Felonies = (?), dateApplied = (?), dateGuested = (?), dateRented = (?), headerID = (?) WHERE rowid = (?)", ap.FullName, ap.SSN, ap.BirthDate, ap.MaritalStatus, ap.Email, ap.StateID, ap.Phone1, ap.Phone2, ap.CurrentAddress, ap.PriorAddresses, ap.ProposedOccupants, ap.ProposedPets, ap.Income, ap.Employment, ap.Evictions, ap.Felonies, ap.dateApplied, ap.dateGuested, ap.dateRented, ap.headerID, ap_id,
       function(err) {
-        if (err) console.error(err) else updated_id = this.lastID;
+        if (err) console.error(err) 
+        else updated_id = this.lastID;
       }
     ); 
   });
