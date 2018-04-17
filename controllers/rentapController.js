@@ -1,4 +1,4 @@
-var rentaps = require('../models/rentaps');
+var rentap = require('../models/rentap');
 
 exports.goodaps = function(req, res) {
   res.send('NOT IMPLEMENTED: Listing of All Rental Application Data not in Trash');
