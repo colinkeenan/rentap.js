@@ -96,7 +96,8 @@ exports.save_new_ap = function (ap) {
   db.serialize(function() {
     db.run("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", ap.FullName, ap.SSN, ap.BirthDate, ap.MaritalStatus, ap.Email, ap.StateID, ap.Phone1, ap.Phone2, ap.CurrentAddress, ap.PriorAddresses, ap.ProposedOccupants, ap.ProposedPets, ap.Income, ap.Employment, ap.Evictions, ap.Felonies, ap.dateApplied, ap.dateGuested, ap.dateRented, ap.headerID, 
       function(err) {
-        if (err) console.error(err) else ap_id = this.lastID;
+        if (err) console.error(err) 
+        else ap_id = this.lastID;
       }
     ); 
   });
