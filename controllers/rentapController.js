@@ -61,10 +61,10 @@ exports.search_column = function(req, res) {
   res.send('NOT IMPLEMENTED: Find All Applications that have ' + req.params.search_column + ' that match pattern: ' + req.params.pattern);
 };
 
-exports.search_col-good = function(req, res) {
+exports.search_col_good = function(req, res) {
   res.send('NOT IMPLEMENTED: Find All Non-Trash Applications that have ' + req.params.search_column + ' that match pattern: ' + req.params.pattern);
 };
 
-exports.search_col-trash = function(req, res) {
+exports.search_col_trash = function(req, res) {
   res.send('NOT IMPLEMENTED: Find All Trashed Applications that have ' + req.params.search_column + ' that match pattern: ' + req.params.pattern);
 };

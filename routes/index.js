@@ -23,7 +23,7 @@ router.get('/find/:pattern', rentap_controller.search_allaps); //searches every 
 router.get('/find_in_good/:pattern', rentap_controller.search_goodaps); //same but exclude rows in trash
 router.get('/find_in_trash/:pattern', rentap_controller.search_trashaps); //same but only rows in trash
 router.get('/find_in_col/:column/:pattern', rentap_controller.search_column); //search only the specified column for pattern and return matching rows
-router.get('/find_in_col-good/:column/:pattern', rentap_controller.search_col-good); //same but exclude rows in trash
-router.get('/find_in_col-trash/:column/:pattern', rentap_controller.search_col-trash); //same but only rows in trash
+router.get('/find_in_col_good/:column/:pattern', rentap_controller.search_col_good); //same but exclude rows in trash
+router.get('/find_in_col_trash/:column/:pattern', rentap_controller.search_col_trash); //same but only rows in trash
 
 module.exports = router;
