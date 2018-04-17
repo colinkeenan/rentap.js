@@ -20,12 +20,20 @@ exports.getap = function(req, res) {
   res.send('NOT IMPLEMENTED: Display Application: ' + req.params.ap_id);
 };
 
+exports.discard_ap = function(req, res) {
+  res.send('NOT IMPLEMENTED: Discard Application (putting in Trash)' + req.params.ap_id)
+};
+
 exports.rm_ap = function(req, res) {
   res.send('NOT IMPLEMENTED: Delete Application: ' + req.params.ap_id);
 };
 
+exports.show_new_ap = function(req, res) {
+  res.send('NOT IMPLEMENTED: Show New (blank) Application');
+};
+
 exports.save_new_ap = function(req, res) {
-  res.send('NOT IMPLEMENTED: Save New Application');
+  res.send('NOT IMPLEMENTED: Save New (filled in) Application');
 };
 
 exports.save_edited_ap = function(req, res) {
