@@ -72,11 +72,21 @@ exports.rm_ap = function (ap_id) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   db.serialize(function() {
-    db.run("DELETE FROM tbl WHERE rowid=(?)", ap_id, function(err, row) {
+    db.run("DELETE FROM tbl WHERE rowid = (?)", ap_id, function(err, row) {
       if (err) console.error(err);
     });
   });
-  return ap;
+}
+
+exports.restore_ap = function (ap_id) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  db.serialize(function() {
+    //deleting ap_id from trash "restores" the row which was never changed in tbl
+    db.run("DELETE FROM trash WHERE discardedRow = (?)", ap_id, function(err, row) {
+      if (err) console.error(err);
+    });
+  });
 }
 
 exports.save_new_ap = function (ap) {
@@ -94,7 +104,7 @@ exports.save_new_ap = function (ap) {
   return ap_id;
 }
 
-exports.save_edited_ap = function (ap_id, ap) {
+exports.save_ap = function (ap_id, ap) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var updated_id = null;

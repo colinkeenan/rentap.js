@@ -1,23 +1,27 @@
 var rentap = require('../models/rentap');
 
-exports.goodaps = function(req, res) {
-  res.send('NOT IMPLEMENTED: Listing of All Rental Application Data not in Trash');
+exports.show_goodaps = function(req, res) {
+  res.send('NOT IMPLEMENTED: Table of All Rental Application Data not in Trash');
 };
 
-exports.trashaps = function(req, res) {
-  res.send('NOT IMPLEMENTED: Listing of All Trashed Rental Application Data');
+exports.show_trashaps = function(req, res) {
+  res.send('NOT IMPLEMENTED: Table of All Trashed Rental Application Data');
 };
 
-exports.goodnames = function(req, res) {
+exports.show_goodnames = function(req, res) {
   res.send('NOT IMPLEMENTED: Listing of All Full Names not in Trash');
 };
 
-exports.trashnames = function(req, res) {
+exports.show_trashnames = function(req, res) {
   res.send('NOT IMPLEMENTED: Listing of All Trashed Full Names');
 };
 
-exports.getap = function(req, res) {
+exports.show_ap = function(req, res) {
   res.send('NOT IMPLEMENTED: Display Application: ' + req.params.ap_id);
+};
+
+exports.save_ap = function(req, res) {
+  res.send('NOT IMPLEMENTED: Save Edited Application');
 };
 
 exports.discard_ap = function(req, res) {
@@ -28,16 +32,16 @@ exports.rm_ap = function(req, res) {
   res.send('NOT IMPLEMENTED: Delete Application: ' + req.params.ap_id);
 };
 
+exports.restore_ap = function(req, res) {
+  res.send('NOT IMPLEMENTED: Restore Discarded Application: ' + req.params.ap_id);
+};
+
 exports.show_new_ap = function(req, res) {
   res.send('NOT IMPLEMENTED: Show New (blank) Application');
 };
 
 exports.save_new_ap = function(req, res) {
   res.send('NOT IMPLEMENTED: Save New (filled in) Application');
-};
-
-exports.save_edited_ap = function(req, res) {
-  res.send('NOT IMPLEMENTED: Save Edited Application');
 };
 
 exports.search_goodaps = function(req, res) {
