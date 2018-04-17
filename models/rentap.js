@@ -3,7 +3,7 @@ exports.goodaps = function() { //rentap extension didn't provide this functional
   let db = new sqlite3.Database('./store.db');
   var goodaps = [];
   db.serialize(function() {
-    db.all("SELECT * FROM tbl WHERE id NOT IN (SELECT discardedRow FROM trash)", function(err, rows) {
+    db.all("SELECT * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash)", function(err, rows) {
       if (err) console.error(err);
       goodaps = rows; //will be null if error
     });
@@ -17,7 +17,7 @@ exports.trashaps = function() { //rentap extension didn't provide this functiona
   let db = new sqlite3.Database('./store.db');
   var trashaps = [];
   db.serialize(function() {
-    db.all("SELECT * FROM tbl WHERE id IN (SELECT discardedRow FROM trash)", function(err, rows) {
+    db.all("SELECT * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash)", function(err, rows) {
       if (err) console.error(err);
       trashaps = rows; //will be null if error
     });
@@ -31,7 +31,7 @@ exports.goodnames = function() { //for dropdown list of full names to choose an 
   let db = new sqlite3.Database('./store.db');
   var goodnames = [];
   db.serialize(function() {
-    db.all("SELECT FullName FROM tbl WHERE id NOT IN (SELECT discardedRow FROM trash)", function(err, rows) {
+    db.all("SELECT FullName FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash)", function(err, rows) {
       if (err) console.error(err);
       goodnames = rows; //will be null if error
     });
@@ -45,7 +45,7 @@ exports.trashnames = function() { //for dropdown list of full names to choose an
   let db = new sqlite3.Database('./store.db');
   var trashnames = [];
   db.serialize(function() {
-    db.all("SELECT FullName FROM tbl WHERE id IN (SELECT discardedRow FROM trash)", function(err, rows) {
+    db.all("SELECT FullName FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash)", function(err, rows) {
       if (err) console.error(err);
       trashnames = rows; //will be null if error
     });
@@ -71,8 +71,8 @@ exports.getap = function (ap_id) {
 exports.rm_ap = function (ap_id) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
-  db.serialize(function() {
-    db.run("DELETE FROM tbl WHERE rowid = (?)", ap_id, function(err, row) {
+  db.serialize(function() { //do not allow an ap to be deleted unless it is in trash
+    db.run("DELETE FROM tbl WHERE rowid = (?) AND rowid IN (SELECT discardedRow FROM trash)", ap_id, function(err, row) {
       if (err) console.error(err);
     });
   });
@@ -126,7 +126,7 @@ exports.search_goodaps = function(pattern) {
   let db = new sqlite3.Database('./store.db');
   var matching_goodaps = [];
   db.serialize(function() {
-    db.all("SELECT * FROM tbl WHERE id NOT IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
+    db.all("SELECT * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
       pattern, function(err, rows) {
         if (err) console.error(err);
         matching_goodaps = rows; //will be null if error (or nothing matches, of course)
@@ -142,7 +142,7 @@ exports.search_trashaps = function(pattern) {
   let db = new sqlite3.Database('./store.db');
   var matching_trashaps = [];
   db.serialize(function() {
-    db.all("SELECT * FROM tbl WHERE id IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
+    db.all("SELECT * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
       pattern, function(err, rows) {
         if (err) console.error(err);
         matching_trashaps = rows; //will be null if error (or nothing matches, of course)

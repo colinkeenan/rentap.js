@@ -5,7 +5,7 @@ exports.show_new_ap = function(req, res) {
 };
 
 exports.save_new_ap = function(req, res) {
-  res.send('NOT IMPLEMENTED: Save New (filled in) Application');
+  res.send('NOT IMPLEMENTED: Save New (filled in) Application with values: ' + req.params.ap_id);
 };
 
 exports.show_ap = function(req, res) {
@@ -13,11 +13,11 @@ exports.show_ap = function(req, res) {
 };
 
 exports.save_ap = function(req, res) {
-  res.send('NOT IMPLEMENTED: Save Edited Application');
+  res.send('NOT IMPLEMENTED: Save Edited Application:' + req.params.ap_id + 'with values: ' + req.params.ap);
 };
 
 exports.discard_ap = function(req, res) {
-  res.send('NOT IMPLEMENTED: Discard Application (putting in Trash)' + req.params.ap_id)
+  res.send('NOT IMPLEMENTED: Discard Application: ' + req.params.ap_id)
 };
 
 exports.rm_ap = function(req, res) {
@@ -58,13 +58,13 @@ exports.search_trashaps = function(req, res) {
 };
 
 exports.search_column = function(req, res) {
-  res.send('NOT IMPLEMENTED: Find All Applications that have ' + req.params.search_column + ' that match pattern: ' + req.params.pattern);
+  res.send('NOT IMPLEMENTED: Find All Applications that have ' + req.params.column + ' that match pattern: ' + req.params.pattern);
 };
 
 exports.search_col_good = function(req, res) {
-  res.send('NOT IMPLEMENTED: Find All Non-Trash Applications that have ' + req.params.search_column + ' that match pattern: ' + req.params.pattern);
+  res.send('NOT IMPLEMENTED: Find All Non-Trash Applications that have ' + req.params.column + ' that match pattern: ' + req.params.pattern);
 };
 
 exports.search_col_trash = function(req, res) {
-  res.send('NOT IMPLEMENTED: Find All Trashed Applications that have ' + req.params.search_column + ' that match pattern: ' + req.params.pattern);
+  res.send('NOT IMPLEMENTED: Find All Trashed Applications that have ' + req.params.column + ' that match pattern: ' + req.params.pattern);
 };
