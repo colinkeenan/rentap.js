@@ -1,8 +1,4 @@
 var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var rentapRouter = require('./routes/rentap');
@@ -18,5 +14,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/rentap', rentapRouter);
+
+app.set('views', './views'));
+app.set('view engine', 'pug');
 
 module.exports = app;
