@@ -1,0 +1,195 @@
+html(lang='en')
+  head
+    title= title
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='shortcut icon' href='/images/icon.png')
+    link(rel='stylesheet' media='print' href='/stylesheets/rentap-print.css')
+    link(rel='stylesheet' media='screen' href='/stylesheets/rentap-screen.css')
+  body
+    form
+      table#rentapheader
+        tr 
+          td 
+            img(src='/images/icon.png')
+
+          td
+             input#rentaladdress(type='text' value='enter rental address')
+             input#rentalcitystzip(type='text' value='enter city, state, zip')
+
+          td#tdrtitle
+             input.inlineshort#mode(type='text' value='' readonly)
+             input#rtitle(type='text' value='enter title')
+          
+          td 
+            label.smalllabelinputApplied(for='authdate') Applied 
+            input#authdate(type='text' value='' ) 
+            div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') Row: 
+            input#rowprint(type='text' value='' readonly) 
+            br 
+            div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') ID: 
+            input#rentapID(type='text' id='' value='' readonly)
+          
+          td
+            label.smalllabelinputGuest(for='guestdate') Guest 
+            textarea#guestdate(cols='8' rows='2')
+          
+          td
+           label.smalllabelinputRented(for='rentdate') Rented
+           textarea#rentdate(cols='8' rows='2')
+            
+          td#headercontrols
+           input(type='text' id='headername' class='inline')
+           div#saverheaderbutton.inline(title='Save New Header')
+           div#editheaderbutton.inline(title='Save Edited Header')
+           div#delrheaderbutton.inline(title='Delete Header')
+           div#listheadermenu.inline)
+           div#defaultheaderbutton.inline(title='Set as default header shown on start')
+      
+      script(type='text/javascript')
+         var sel = document.createElement('select');
+         var opt0 = document.createElement('option');
+         opt0.text = 'Choose Header';
+         sel.add(opt0, null);
+         document.getElementById('listheadermenu').appendChild(sel); //- put the dropdown menu list on the page
+
+      table#rentapbody 
+        tr 
+          td 
+            ul 
+              li.section_header 
+                #[strong Personal Information]
+               
+               li
+                  label.personalinfo(for='fullname') Full Name
+                  input#fullname(type='text' value='')
+               
+               li
+                  label.personalinfo(for='ssnumber') Social Security Number
+                  input#ssnumber(type='text' value='')
+               
+               li
+                  label.personalinfo(for='birthdate') Birth Date
+                  input#birthdate(type='text' value='')
+               
+               li
+                  label.personalinfo(for='maritalstatus') Marital Status
+                  input#maritalstatus(type='text' value='')
+               
+               li
+                  label.personalinfol(for='email') Email
+                  input#email(type='text' value='')
+               
+               li
+                  label.personalinfol(for='stateid') State ID#
+                  input#stateid(type='text' value='')
+               
+               li
+                  label.personalinfol(for='phone1') Phone 1
+                  input#phone1(type='text' value='')
+               
+               li
+                  label.personalinfo(for='phone2')Phone 2
+                  input(type='text' id='phone2' value='' )
+               
+               li
+                 label#currentaddresslabel(for='currentaddress') #[strong Current Address, City, State, Zip, Dates, Rent, Landlord name and phone number]... 
+                 textarea#currentaddress
+               
+               li
+                 label(for='previousaddresses') #[strong Prior Addresses, Cities, States, Zips, Dates, Rents, Landlords]... 
+                 textarea#previousaddresses
+
+         td
+            ul
+               li
+                 label(for='occupants') #[strong Proposed Occupants: self+age, other+age]... 
+                 textarea#occupants
+               
+               li
+                 label(for='pets') #[<strong>Proposed Pets] 
+                 textarea#pets
+               
+               li
+                 label(for='income') #[strong Income &amp Food Stamps] 
+                 textarea#income
+               
+               li
+                 label(for='employment') #[strong Employment: address, job, dates, hours, supervisor name and phone number]... 
+                 textarea#employment
+         
+         td
+            ul
+               li
+                 label(for='evictions') #[strong Evictions Past 10 Years] 
+                 textarea#evictions
+                
+               li
+                 label(for='felonies') #[strong Felonies/Drug Convictions] 
+                 textarea#felonies
+               
+               li
+                 label(style='position: relative; top: 7px;') #[strong Applicant Authorization] 
+                 div(style='position: relative; top: 7px;')
+|                     Applicant authorizes the landlord to
+|                     contact past and present landlords,
+|                     employers, and any other sources deemed 
+|                     necessary. All information is true, 
+|                     accurate, and complete to the best of 
+|                     applicant's knowledge. 
+|                     ANY PERSON IS AUTHORIZED TO RELEASE INFORMATION 
+|                     ABOUT THE UNDERSIGNED
+                  
+                  div(style='position: relative; top: 36px;')
+|                     Sign _________________ Date ________
+                  
+                  div(style='position: relative; top: 70px;')
+|                     Print ______________________________ 
+         
+         td#controls
+            ul
+               li
+                  div#savebutton.inline
+                  div#restorebutton.inline(style='padding-left:20px')
+                  div#newbutton.inline(style='padding-left:20px')
+                  div#discardbutton.inline(style='padding-left:20px')
+                  div#delrentapbutton.inline(style='padding-left:20px')
+                  div#trashbutton.inline(style='padding-left:20px')
+                  div#backbutton.inline(style='padding-left:20px')
+               
+               li
+                 div(style='padding:14px') 
+                   label(for='rownumber' style='min-width:125px; text-align:right; position:relative; top:+16px;') -  row  - 
+                   label(for='idnumber' style='min-width:78px; text-align:right; position:relative; top:+16px;') -  ID  -
+               
+               li
+                  div#prevbutton.inline
+                  input#prevbutton.inlinebutton(type='button' onClick='javascript:prevButton();' value='Prev')
+                  input#nextbutton.inlinebutton(type='button' onClick='javascript:nextButton();' value='Next')
+                  input#row.inline(type='text' style='text-align: right;' value='')
+                  input#rownumber.inline(type='text' onfocus='javascript:setClickButton('row')' onkeydown='return processKey(event)' title='Jump to 0 to find printable instructions for applicants.' value='')
+                  input#id.inline(type='text' style='text-align: right;' value='')
+                  input#idnumber.inline(type='text' onfocus='javascript:setClickButton('id')' onkeydown='return processKey(event)' title='Jump to 0 to find printable instructions for applicants.' value='')
+                  input#jumpbutton.inlinebutton(type='button' onClick='javascript:jumpButton();' value='Go')
+                  input#findname(type='text' onfocus='javascript:setClickButton('search')' onkeydown='return processKey(event)' title='Hint: Use &quot; to search names only. For example, &quot;d, for names starting with D.' value='' )
+                  input#searchbutton.inlinebutton(type='button' onClick='javascript:searchButton();' value='Search' title='Click while empty to clear previous search and list all names.')
+                  div#listsearchmenu.inline
+               
+               li
+                  div(style='padding:8px')
+               
+               li
+                 #[strong Printing] Either ctrl-p or (Hamburger Menu)->Print... Set #[em Page Setup, Paper Orientation]
+                   to #[strong Landscape]. Experiment with Scale. Set #[em Options, headers and footers] to what you want.
+               
+               li
+                  input#toggleBordersButton.inlinewidebutton'(type='button' onClick='javascript:toggleBorders();' value='Toggle Borders')
+               
+      script(type='text/javascript')
+         trashButton(); // if not already viewing a discard, put trash button on page to view discards
+         backButton();  // if viewing a discard, put back button on page to get back to non-discarded rentaps
+         var searchSel = document.createElement('select');
+         var chooseName = document.createElement('option');
+         chooseName.text = 'Choose Name';
+         searchSel.add(chooseName, null);
+         document.getElementById('listsearchmenu').appendChild(searchSel); //put the dropdown menu list on the page

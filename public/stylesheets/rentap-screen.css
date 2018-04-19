@@ -1,0 +1,36 @@
+.defaultsink {position: absolute; left: -100%;}
+#rentapheader {min-width: 1240px; margin:0px}
+#headercontrols {min-width: 250px; max-width: 250px}
+#controls, #headercontrols {margin-left:20px; padding-left:20px;}
+#tdrtitle,#rtitle {font:26px sans-serif; font-weight: bold; text-align:center; border-width:0px; vertical-align:top; max-width:380px; width:380px; margin:0px; padding:0px;display: inline-block}
+#rentaladdress, #rentalcitystzip {font:12px serif; font-weight: bold; border-width:0px; vertical-align:top; max-width: 180px; width: 180px; max-height: 18px; margin:0px; padding:0px; display: block}
+#authdate {width:84px; display:block; position: relative; top: -8px;}
+#guestdate, #rentdate {width:84px; display:block; position: relative; top: -8px;}
+#rowprint, #rentapID {width:42px; border-width:0px; position: relative; top: -8px;}
+#row, #id {width:26px; border-width:0px; position: relative; left: -4px;}
+#rentapbody {min-width: 1300px; margin:0px;}
+ul {margin-left:0px; padding-left:0px;}
+li {list-style: none;}
+label, .section_header {font: 14px serif; display: inline-block; min-width: 76px; max-width: 276px; vertical-align:bottom; white-space: nowrap; overflow: hidden}
+.personalinfo {margin-left: 5px; width: 76px; vertical-align:middle}
+input {font:14px serif; width:200px}
+#rownumber, #idnumber {text-align:center;}
+textarea {font:14px serif; width:292px}
+td {vertical-align:top; max-width:304px}
+.button {max-width: 131px}
+.inline {display: inline-block;}
+.inlineshort {display: inline-block; max-width:80px}
+.inlinebutton {display: inline-block; max-width:60px;}
+#jumpbutton, #idnumber, #rownumber, #prevbutton, #nextbutton {max-width:40px; position: relative; left: -4px}
+#prevbutton {position: relative; left: -4px}
+.inlinewidebutton {display: inline-block; max-width:120px}
+#findname {width: 250px}
+.smalllabelinput {font:12px sans-serif; position: relative; top: -6px; display:block; width:72px;}
+#currentaddresslabel {margin-top:16px}
+#currentaddress {height:70px}
+#previousaddresses {height:140px}
+#occupants {height:50px}
+#pets {height:40px}
+#income {height:76px}
+#employment {height:244px}
+#evictions, #felonies {height:90px}
