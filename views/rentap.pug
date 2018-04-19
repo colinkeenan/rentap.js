@@ -1,4 +1,5 @@
 html(lang='en')
+  //- trying to make this a general template that can be used as is or extended for many routes
   head
     title= title
     meta(charset='utf-8')
@@ -7,7 +8,25 @@ html(lang='en')
     link(rel='stylesheet' media='print' href='/stylesheets/rentap-print.css')
     link(rel='stylesheet' media='screen' href='/stylesheets/rentap-screen.css')
   body
-    form
+
+    //- Currently, this is a straight translation of rentap.html used in the extension
+    //- except left off some stuff, like the submit button, which was defined to do
+    //- nothing because have custom buttons for all the things I want to do
+    //- including save. 
+    //- I think the submit button will be for save, and other buttons (discard/restore/delete)
+    //- will change the url and immediately submit the form, and as part of submitting the
+    //- form, it will change the url again
+
+    //- action='' in the form definition below means use the current url for the POST action
+    //- So, if url is /rentap, the new ap would be saved (if it had anything on it), and
+    //- if url is /rentap/show/5, the 5th rentap (which would be the one displayed) 
+    //- would be saved (if it had been edited) (but, of course, I have to put a submit button
+    //- on the form to do the POST)
+    
+    //- Maybe I need to break this up into more than one form though because
+    //- there's the header stuff that saves data in the header table,
+    //- and then there's the ap which saves data in the tbl table.
+    form (method=POST action='')
       table#rentapheader
         tr 
           td 
