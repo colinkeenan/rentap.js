@@ -1,7 +1,7 @@
 html(lang='en')
   //- trying to make this a general template that can be used as is or extended for many routes
   head
-    title= title
+    title Rental Application
     meta(charset='utf-8')
     meta(name='viewport', content='width=device-width, initial-scale=1')
     link(rel='shortcut icon' href='/images/icon.png')
@@ -9,37 +9,33 @@ html(lang='en')
     link(rel='stylesheet' media='screen' href='/stylesheets/rentap-screen.css')
   body
 
-    //- Currently, this is a straight translation of rentap.html used in the extension
-    //- except left off some stuff, like the submit button, which was defined to do
-    //- nothing because have custom buttons for all the things I want to do
-    //- including save. 
-    //- I think the submit button will be for save, and other buttons (discard/restore/delete)
-    //- will change the url and immediately submit the form, and as part of submitting the
-    //- form, it will change the url again
-
     //- action='' in the form definition below means use the current url for the POST action
     //- So, if url is /rentap, the new ap would be saved (if it had anything on it), and
     //- if url is /rentap/show/5, the 5th rentap (which would be the one displayed) 
-    //- would be saved (if it had been edited) (but, of course, I have to put a submit button
-    //- on the form to do the POST)
-    
-    //- Maybe I need to break this up into more than one form though because
-    //- there's the header stuff that saves data in the header table,
-    //- and then there's the ap which saves data in the tbl table.
-    form (method=POST action='')
-      table#rentapheader
+    //- would be saved (if it had been edited) 
+    //- 
+    //- However, I've discovered buttons (which are of type submit by default) can have
+    //- formaction='' where the path is specified for that button and that will overide
+    //- the action=''. Same can be done with method, a button can be set to method=GET
+    //- to overide the form method of POST. So, that's how I'll handle it and there will 
+    //- be multiple buttons on the form as it was in the rentap firefox extension
+
+    //- Unlike rentap firefox extension, trying to break this into 2 forms, one for header
+    //- and another for the application data
+    form#headerform(method=POST action='') 
+      table#rentapheader 
         tr 
           td 
             img(src='/images/icon.png')
 
-          td
-             input#rentaladdress(type='text' value='enter rental address')
-             input#rentalcitystzip(type='text' value='enter city, state, zip')
+          td 
+            input#rentaladdress(type='text' value='enter rental address') 
+            input#rentalcitystzip(type='text' value='enter city, state, zip')
 
-          td#tdrtitle
-             input.inlineshort#mode(type='text' value='' readonly)
-             input#rtitle(type='text' value='enter title')
-          
+          td#tdrtitle 
+            input.inlineshort#mode(type='text' value='' readonly) 
+            input#rtitle(type='text' value='enter title')
+
           td 
             label.smalllabelinputApplied(for='authdate') Applied 
             input#authdate(type='text' value='' ) 
@@ -47,143 +43,131 @@ html(lang='en')
             input#rowprint(type='text' value='' readonly) 
             br 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') ID: 
-            input#rentapID(type='text' id='' value='' readonly)
-          
-          td
-            label.smalllabelinputGuest(for='guestdate') Guest 
-            textarea#guestdate(cols='8' rows='2')
-          
-          td
-           label.smalllabelinputRented(for='rentdate') Rented
-           textarea#rentdate(cols='8' rows='2')
+            input#rentapID(type='text' id='' value='' readonly) 
             
-          td#headercontrols
-           input(type='text' id='headername' class='inline')
-           div#saverheaderbutton.inline(title='Save New Header')
-           div#editheaderbutton.inline(title='Save Edited Header')
-           div#delrheaderbutton.inline(title='Delete Header')
-           div#listheadermenu.inline)
-           div#defaultheaderbutton.inline(title='Set as default header shown on start')
-      
-      script(type='text/javascript')
-         var sel = document.createElement('select');
-         var opt0 = document.createElement('option');
-         opt0.text = 'Choose Header';
-         sel.add(opt0, null);
-         document.getElementById('listheadermenu').appendChild(sel); //- put the dropdown menu list on the page
+          td 
+            label.smalllabelinputGuest(for='guestdate') Guest 
+            textarea#guestdate(cols='8' rows='2') 
 
+          td 
+            label.smalllabelinputRented(for='rentdate') Rented 
+            textarea#rentdate(cols='8' rows='2')
+
+          td#headercontrols 
+            input#headername.inline(type='text') 
+            //- each of these routes need to continue to show whatever ap was showing before, so have to somehow return
+            button#saverheaderbutton.inline(title='Save New Header' formaction='/rentap/:row_id/header') +
+            button#editheaderbutton.inline(title='Save Edited Header') ~
+            button#delrheaderbutton.inline(title='Delete Header') -
+            //- This is where the script below puts the dropdown menu, but not sure it will work this way in nodejs/pug
+            div#listheadermenu.inline 
+            button#defaultheaderbutton.inline(title='Set as default header shown on start') ->0
+
+            script(type='text/javascript') 
+              var sel = document.createElement('select'); 
+              var opt0 = document.createElement('option'); 
+              opt0.text = 'Choose Header'; 
+              sel.add(opt0, null); 
+              //- This probably has to be done a different way using pug and nodejs
+              //- For one thing, I need to get the selection into the sqlite db
+              document.getElementById('listheadermenu').appendChild(sel); //- put the dropdown menu list on the page
+
+    form#rentapform(method=POST action='') 
       table#rentapbody 
         tr 
           td 
             ul 
               li.section_header 
                 #[strong Personal Information]
-               
-               li
-                  label.personalinfo(for='fullname') Full Name
-                  input#fullname(type='text' value='')
-               
-               li
-                  label.personalinfo(for='ssnumber') Social Security Number
-                  input#ssnumber(type='text' value='')
-               
-               li
-                  label.personalinfo(for='birthdate') Birth Date
-                  input#birthdate(type='text' value='')
-               
-               li
-                  label.personalinfo(for='maritalstatus') Marital Status
-                  input#maritalstatus(type='text' value='')
-               
-               li
-                  label.personalinfol(for='email') Email
-                  input#email(type='text' value='')
-               
-               li
-                  label.personalinfol(for='stateid') State ID#
-                  input#stateid(type='text' value='')
-               
-               li
-                  label.personalinfol(for='phone1') Phone 1
-                  input#phone1(type='text' value='')
-               
-               li
-                  label.personalinfo(for='phone2')Phone 2
-                  input(type='text' id='phone2' value='' )
-               
-               li
-                 label#currentaddresslabel(for='currentaddress') #[strong Current Address, City, State, Zip, Dates, Rent, Landlord name and phone number]... 
-                 textarea#currentaddress
-               
-               li
-                 label(for='previousaddresses') #[strong Prior Addresses, Cities, States, Zips, Dates, Rents, Landlords]... 
-                 textarea#previousaddresses
 
-         td
+              li
+                label.personalinfo(for='fullname') Full Name 
+                input#fullname(type='text' value='')
+
+              li 
+                label.personalinfo(for='ssnumber') Social Security Number 
+                input#ssnumber(type='text' value='')
+
+              li 
+                label.personalinfo(for='birthdate') Birth Date 
+                input#birthdate(type='text' value='')
+
+              li 
+                label.personalinfo(for='maritalstatus') Marital Status 
+                input#maritalstatus(type='text' value='')
+
+              li 
+                label.personalinfol(for='email') Email 
+                input#email(type='text' value='')
+
+              li 
+                label.personalinfol(for='stateid') State ID# 
+                input#stateid(type='text' value='')
+
+              li 
+                label.personalinfol(for='phone1') Phone 1 
+                input#phone1(type='text' value='')
+
+              li 
+                label.personalinfo(for='phone2')Phone 2 
+                input(type='text' id='phone2' value='' )
+
+              li 
+                label#currentaddresslabel(for='currentaddress') #[strong Current Address, City, State, Zip, Dates, Rent, Landlord name and phone number]...  
+                textarea#currentaddress
+
+              li 
+                label(for='previousaddresses') #[strong Prior Addresses, Cities, States, Zips, Dates, Rents, Landlords]...  
+                textarea#previousaddresses
+
+          td 
+            ul 
+              li 
+                label(for='occupants') #[strong Proposed Occupants: self+age, other+age]...  
+                textarea#occupants
+
+              li 
+                label(for='pets') #[<strong>Proposed Pets] 
+                textarea#pets
+
+              li 
+                label(for='income') #[strong Income &amp Food Stamps] 
+                textarea#income
+
+              li
+                label(for='employment') #[strong Employment: address, job, dates, hours, supervisor name and phone number]... 
+                textarea#employment
+
+          td
             ul
-               li
-                 label(for='occupants') #[strong Proposed Occupants: self+age, other+age]... 
-                 textarea#occupants
-               
-               li
-                 label(for='pets') #[<strong>Proposed Pets] 
-                 textarea#pets
-               
-               li
-                 label(for='income') #[strong Income &amp Food Stamps] 
-                 textarea#income
-               
-               li
-                 label(for='employment') #[strong Employment: address, job, dates, hours, supervisor name and phone number]... 
-                 textarea#employment
-         
-         td
-            ul
-               li
-                 label(for='evictions') #[strong Evictions Past 10 Years] 
-                 textarea#evictions
-                
-               li
-                 label(for='felonies') #[strong Felonies/Drug Convictions] 
-                 textarea#felonies
-               
-               li
-                 label(style='position: relative; top: 7px;') #[strong Applicant Authorization] 
-                 div(style='position: relative; top: 7px;')
-|                     Applicant authorizes the landlord to
-|                     contact past and present landlords,
-|                     employers, and any other sources deemed 
-|                     necessary. All information is true, 
-|                     accurate, and complete to the best of 
-|                     applicant's knowledge. 
-|                     ANY PERSON IS AUTHORIZED TO RELEASE INFORMATION 
-|                     ABOUT THE UNDERSIGNED
-                  
-                  div(style='position: relative; top: 36px;')
-|                     Sign _________________ Date ________
-                  
-                  div(style='position: relative; top: 70px;')
-|                     Print ______________________________ 
-         
-         td#controls
-            ul
-               li
-                  div#savebutton.inline
-                  div#restorebutton.inline(style='padding-left:20px')
-                  div#newbutton.inline(style='padding-left:20px')
-                  div#discardbutton.inline(style='padding-left:20px')
-                  div#delrentapbutton.inline(style='padding-left:20px')
-                  div#trashbutton.inline(style='padding-left:20px')
-                  div#backbutton.inline(style='padding-left:20px')
-               
-               li
-                 div(style='padding:14px') 
-                   label(for='rownumber' style='min-width:125px; text-align:right; position:relative; top:+16px;') -  row  - 
+              li
+                label(for='evictions') #[strong Evictions Past 10 Years] 
+                textarea#evictions
+
+              li
+                label(for='felonies') #[strong Felonies/Drug Convictions] 
+                textarea#felonies
+
+          td#controls 
+            ul 
+              li 
+                //- for save, just use the curren url for the action, for all the rest, override with formaction path
+                button#savebutton.inline Save
+                button#restorebutton.inline(formaction='/restore' style='padding-left:20px') Restore
+                button#newbutton.inline(formaction='/' style='padding-left:20px') New
+                button#discardbutton.inline(formaction='' style='padding-left:20px') Discard
+                button#delrentapbutton.inline(formaction='' style='padding-left:20px') Delete
+                button#trashbutton.inline(formaction='' style='padding-left:20px') Trash
+                button#backbutton.inline(formaction='' style='padding-left:20px') Back
+
+                              li
+                                div(style='padding:14px') 
+                                  label(for='rownumber' style='min-width:125px; text-align:right; position:relative; top:+16px;') -  row  - 
                    label(for='idnumber' style='min-width:78px; text-align:right; position:relative; top:+16px;') -  ID  -
-               
+
                li
-                  div#prevbutton.inline
-                  input#prevbutton.inlinebutton(type='button' onClick='javascript:prevButton();' value='Prev')
+                 div#prevbutton.inline
+                   input#prevbutton.inlinebutton(type='button' onClick='javascript:prevButton();' value='Prev')
                   input#nextbutton.inlinebutton(type='button' onClick='javascript:nextButton();' value='Next')
                   input#row.inline(type='text' style='text-align: right;' value='')
                   input#rownumber.inline(type='text' onfocus='javascript:setClickButton('row')' onkeydown='return processKey(event)' title='Jump to 0 to find printable instructions for applicants.' value='')
@@ -193,20 +177,20 @@ html(lang='en')
                   input#findname(type='text' onfocus='javascript:setClickButton('search')' onkeydown='return processKey(event)' title='Hint: Use &quot; to search names only. For example, &quot;d, for names starting with D.' value='' )
                   input#searchbutton.inlinebutton(type='button' onClick='javascript:searchButton();' value='Search' title='Click while empty to clear previous search and list all names.')
                   div#listsearchmenu.inline
-               
-               li
-                  div(style='padding:8px')
-               
-               li
-                 #[strong Printing] Either ctrl-p or (Hamburger Menu)->Print... Set #[em Page Setup, Paper Orientation]
+
+                    li
+                      div(style='padding:8px')
+
+                        li
+                          #[strong Printing] Either ctrl-p or (Hamburger Menu)->Print... Set #[em Page Setup, Paper Orientation]
                    to #[strong Landscape]. Experiment with Scale. Set #[em Options, headers and footers] to what you want.
-               
+
                li
-                  input#toggleBordersButton.inlinewidebutton'(type='button' onClick='javascript:toggleBorders();' value='Toggle Borders')
-               
+                 input#toggleBordersButton.inlinewidebutton'(type='button' onClick='javascript:toggleBorders();' value='Toggle Borders')
+
       script(type='text/javascript')
-         trashButton(); // if not already viewing a discard, put trash button on page to view discards
-         backButton();  // if viewing a discard, put back button on page to get back to non-discarded rentaps
+        trashButton(); // if not already viewing a discard, put trash button on page to view discards
+          backButton();  // if viewing a discard, put back button on page to get back to non-discarded rentaps
          var searchSel = document.createElement('select');
          var chooseName = document.createElement('option');
          chooseName.text = 'Choose Name';
