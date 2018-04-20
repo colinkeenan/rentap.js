@@ -55,21 +55,22 @@ html(lang='en')
 
           td#headercontrols 
             input#headername.inline(type='text') 
-            //- each of these routes need to continue to show whatever ap was showing before, so have to somehow return
-            button#saverheaderbutton.inline(title='Save New Header' formaction='/rentap/:row_id/header') +
-            button#editheaderbutton.inline(title='Save Edited Header') ~
-            button#delrheaderbutton.inline(title='Delete Header') -
+            //- res.render in controller will provide url: req.originalUrl along with ap_id etc. formaction needs to preserve the current route
+            //- in order to keep displaying the same page as user changes header. the buttons just have one character on them (+, ~, -)
+            //- except the default header button has this ->0
+            button#saverheaderbutton.inline(title='Save New Header' formaction=url + "/header") +
+            button#editheaderbutton.inline(title='Save Edited Header' formaction=url + "/header/" + header_id) ~
+            button#delrheaderbutton.inline(title='Delete Header' formaction=url + "/header/" + header_id + "/delete") -
             //- This is where the script below puts the dropdown menu, but not sure it will work this way in nodejs/pug
             div#listheadermenu.inline 
-            button#defaultheaderbutton.inline(title='Set as default header shown on start') ->0
+            button#defaultheaderbutton.inline(title='Set as default header shown on start' formaction=url + "/header/" + header_id + "/default") ->0
 
             script(type='text/javascript') 
+              //- This probably should be done a different way using pug and nodejs/sqlite3
               var sel = document.createElement('select'); 
               var opt0 = document.createElement('option'); 
               opt0.text = 'Choose Header'; 
               sel.add(opt0, null); 
-              //- This probably has to be done a different way using pug and nodejs
-              //- For one thing, I need to get the selection into the sqlite db
               document.getElementById('listheadermenu').appendChild(sel); //- put the dropdown menu list on the page
 
     form#rentapform(method=POST action='') 
@@ -152,22 +153,23 @@ html(lang='en')
             ul 
               li 
                 //- for save, just use the curren url for the action, for all the rest, override with formaction path
+                //- and for those that need it, also overide POST with GET by using formmethod
                 button#savebutton.inline Save
-                button#restorebutton.inline(formaction='/restore' style='padding-left:20px') Restore
-                button#newbutton.inline(formaction='/' style='padding-left:20px') New
-                button#discardbutton.inline(formaction='' style='padding-left:20px') Discard
-                button#delrentapbutton.inline(formaction='' style='padding-left:20px') Delete
-                button#trashbutton.inline(formaction='' style='padding-left:20px') Trash
-                button#backbutton.inline(formaction='' style='padding-left:20px') Back
+                button#restorebutton.inline(formaction='/restore/' + ap_id + '/trash' style='padding-left:20px') Restore
+                button#newbutton.inline(formmethod=GET formaction='/' style='padding-left:20px') New
+                button#discardbutton.inline(formaction='/discard/' + ap_id style='padding-left:20px') Discard
+                button#delrentapbutton.inline(formaction='/delete/' + ap_id + '/trash'  style='padding-left:20px') Delete
+                button#trashbutton.inline(formmethod=GET formaction='/show/' + ap_id + '/trash' style='padding-left:20px') Trash
+                button#backbutton.inline(formmethod=GET formaction='/show/' + back_ap_id style='padding-left:20px') Back 
 
-                              li
-                                div(style='padding:14px') 
-                                  label(for='rownumber' style='min-width:125px; text-align:right; position:relative; top:+16px;') -  row  - 
-                   label(for='idnumber' style='min-width:78px; text-align:right; position:relative; top:+16px;') -  ID  -
+              li
+                div(style='padding:14px') 
+                  label(for='rownumber' style='min-width:125px; text-align:right; position:relative; top:+16px;') -  row  - 
+                  label(for='idnumber' style='min-width:78px; text-align:right; position:relative; top:+16px;') -  ID  -
 
-               li
-                 div#prevbutton.inline
-                   input#prevbutton.inlinebutton(type='button' onClick='javascript:prevButton();' value='Prev')
+              li
+                div#prevbutton.inline
+                  input#prevbutton.inlinebutton(type='button' onClick='javascript:prevButton();' value='Prev')
                   input#nextbutton.inlinebutton(type='button' onClick='javascript:nextButton();' value='Next')
                   input#row.inline(type='text' style='text-align: right;' value='')
                   input#rownumber.inline(type='text' onfocus='javascript:setClickButton('row')' onkeydown='return processKey(event)' title='Jump to 0 to find printable instructions for applicants.' value='')

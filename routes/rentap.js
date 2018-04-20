@@ -13,6 +13,7 @@ var rentap_controller = require('../controllers/rentapController.js');
  * an individual ap */
 router.get('/', rentap_controller.show_new_ap); //home page is just blank ap
 router.get('/show/:ap_id', rentap_controller.show_ap); //show particular ap for viewing/editing/discarding (or deleting/restoring if in trash)
+router.get('/show/:ap_id/trash', rentap_controller.show_closest_ap_in_trash); //find the next highest or lowest ap_id that's in trash and show it
 
 router.post('/', rentap_controller.save_new_ap); //if changed, can post to save new app and get the new rowid if worked, or null if error
 router.post('/show/:ap_id', rentap_controller.save_ap); //if changed and not in trash, can post to save edited ap
@@ -21,18 +22,12 @@ router.post('/restore/:ap_id/trash', rentap_controller.restore_ap); //restores b
 router.post('/delete/:ap_id/trash', rentap_controller.rm_ap); //actually deletes the row from tbl, but only if in trash
 
 /* routes for manipulating headers
- * need ap_id too because want 
- * to continue showing the same ap
- * while working on header list */
-router.post('/show/:ap_id/header', rentap_controller.save_new_header); //if not empty, save new header
-router.post('/show/:ap_id/header/:header_id', rentap_controller.save_header_edited); //if actually changed, save changes
-router.post('/show/:ap_id/header/:header_id/delete', rentap_controller.rm_header); //actually deletes the row from headers without verifying
-
-/* guess I need all the same header stuff
- * when working on a new ap too */
-router.post('/header', rentap_controller.save_new_header); //if not empty, save new header
-router.post('/header/:header_id', rentap_controller.save_header_edited); //if actually changed, save changes
-router.post('/header/:header_id/delete', rentap_controller.rm_header); //actually deletes the row from headers without verifying
+ * need to continue showing the same ap while working on header list 
+ * so view post buttons preserve req.originaUrl and just add /header etc to end */
+router.post('*/header', rentap_controller.save_new_header); //if not empty, save new header
+router.post('*/header/:header_id', rentap_controller.save_header); //if actually changed, save changes
+router.post('*/header/:header_id/delete', rentap_controller.rm_header); //actually deletes the row from headers without verifying
+router.post('*/header/:header_id/default', rentap_controller.set_default_header); 
 
 /* routes for displaying a table of matching aps,
  * or just one column from matching aps*/

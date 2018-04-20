@@ -1,5 +1,7 @@
 var rentap = require('../models/rentap');
 
+//when implimented, will get data from rentap.whatever, and also from req.whatever and pass them to view through res.render
+
 exports.show_new_ap = function(req, res) {
   res.send('NOT IMPLEMENTED: Show New (blank) Application');
 };
@@ -22,6 +24,19 @@ exports.discard_ap = function(req, res) {
 
 exports.rm_ap = function(req, res) {
   res.send('NOT IMPLEMENTED: Delete Application: ' + req.params.ap_id);
+};
+
+
+exports.save_new_header = function(req, res) {
+  res.send('NOT IMPLEMENTED: Save New Header while on Ap' + req.params.ap_id + 'with values: ' + req.params.ap + '. This url: ' + req.originalUrl);
+};
+
+exports.save_header = function(req, res) {
+  res.send('NOT IMPLEMENTED: Save Header: ' + req.params.header_id + ' while on Ap' + req.params.ap_id + 'with values: ' + req.params.ap + '. This url: ' + req.originalUrl);
+};
+
+exports.rm_header = function(req, res) {
+  res.send('NOT IMPLEMENTED: Delete Header: ' + req.params.header_id + ' while on Ap' + req.params.ap_id + '. This url: ' + req.originalUrl);
 };
 
 exports.restore_ap = function(req, res) {
