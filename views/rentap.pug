@@ -78,8 +78,7 @@ html(lang='en')
         tr 
           td 
             ul 
-              li.section_header 
-                #[strong Personal Information]
+              li.section_header#[strong Personal Information]
 
               li
                 label.personalinfo(for='fullname') Full Name 
@@ -154,45 +153,44 @@ html(lang='en')
               li 
                 //- for save, just use the curren url for the action, for all the rest, override with formaction path
                 //- and for those that need it, also overide POST with GET by using formmethod
-                button#savebutton.inline Save
-                button#restorebutton.inline(formaction='/restore/' + ap_id + '/trash' style='padding-left:20px') Restore
-                button#newbutton.inline(formmethod=GET formaction='/' style='padding-left:20px') New
-                button#discardbutton.inline(formaction='/discard/' + ap_id style='padding-left:20px') Discard
-                button#delrentapbutton.inline(formaction='/delete/' + ap_id + '/trash'  style='padding-left:20px') Delete
-                button#trashbutton.inline(formmethod=GET formaction='/show/' + ap_id + '/trash' style='padding-left:20px') Trash
-                button#backbutton.inline(formmethod=GET formaction='/show/' + back_ap_id style='padding-left:20px') Back 
+                if (url === '/rentap' || url === '/rentap/show/' + ap_id) 
+                  button#savebutton.inline Save 
+                  button#newbutton.inline(formmethod=GET formaction='/' style='padding-left:20px') New 
+                  button#discardbutton.inline(formaction='/discard/' + ap_id style='padding-left:20px') Discard
+                  button#trashbutton.inline(formmethod=GET formaction='/show/' + ap_id + '/trash' style='padding-left:20px') Trash
+                else 
+                  button#restorebutton.inline(formaction='/restore/' + ap_id + '/trash' style='padding-left:20px') Restore
+                  button#delrentapbutton.inline(formaction='/delete/' + ap_id + '/trash'  style='padding-left:20px') Delete
+                  button#backbutton.inline(formmethod=GET formaction='/show/' + back_ap_id style='padding-left:20px') Back 
 
               li
                 div(style='padding:14px') 
                   label(for='rownumber' style='min-width:125px; text-align:right; position:relative; top:+16px;') -  row  - 
                   label(for='idnumber' style='min-width:78px; text-align:right; position:relative; top:+16px;') -  ID  -
 
-              li
-                div#prevbutton.inline
-                  input#prevbutton.inlinebutton(type='button' onClick='javascript:prevButton();' value='Prev')
-                  input#nextbutton.inlinebutton(type='button' onClick='javascript:nextButton();' value='Next')
-                  input#row.inline(type='text' style='text-align: right;' value='')
-                  input#rownumber.inline(type='text' onfocus='javascript:setClickButton('row')' onkeydown='return processKey(event)' title='Jump to 0 to find printable instructions for applicants.' value='')
-                  input#id.inline(type='text' style='text-align: right;' value='')
-                  input#idnumber.inline(type='text' onfocus='javascript:setClickButton('id')' onkeydown='return processKey(event)' title='Jump to 0 to find printable instructions for applicants.' value='')
-                  input#jumpbutton.inlinebutton(type='button' onClick='javascript:jumpButton();' value='Go')
-                  input#findname(type='text' onfocus='javascript:setClickButton('search')' onkeydown='return processKey(event)' title='Hint: Use &quot; to search names only. For example, &quot;d, for names starting with D.' value='' )
-                  input#searchbutton.inlinebutton(type='button' onClick='javascript:searchButton();' value='Search' title='Click while empty to clear previous search and list all names.')
-                  div#listsearchmenu.inline
+    //- decided a third form is needed here for these jump buttons so it will only post the necessary data for the jump
+    //- i.e row and findname (decided not to include jumping to a specific id here because user can just enter that
+    //- in the url. Even thought the result is to display an existing app, still need method=POST to get
+    //- the data to the controller
+    form#rentapjump(method=POST action='') 
+      //- prev and next don't need to send data from the form so changing method to GET
+      button#prevbutton.inlinebutton(formmethod=GET formaction='/show/' + ap_id + '/prev') Prev
+      button#nextbutton.inlinebutton(formmethod=GET formaction='/show/' + ap_id + '/next') Next
 
-                    li
-                      div(style='padding:8px')
-
-                        li
-                          #[strong Printing] Either ctrl-p or (Hamburger Menu)->Print... Set #[em Page Setup, Paper Orientation]
-                   to #[strong Landscape]. Experiment with Scale. Set #[em Options, headers and footers] to what you want.
-
-               li
-                 input#toggleBordersButton.inlinewidebutton'(type='button' onClick='javascript:toggleBorders();' value='Toggle Borders')
+      label(for='row' style='min-width:125px; text-align:right; position:relative; top:+16px;') row
+      input#row.inline(type='text' style='text-align: right;' value='' title='Jump to 0 to find printable instructions for applicants.')
+      button#jumpbutton.inlinebutton(formaction='/show/' + ap_id + '/jump') Go
+      
+      input#findname(type='text' title='Hint: Use &quot; to search names only. For example, &quot;d, for names starting with D.' value='' )
+      //- the search action is /find/:pattern/good or find/:pattern/trash
+      //- and also have actions for more restrictive search by column,
+      //- but have to POST the search data from this form before those can be constructed
+      //- and might need to just stay on the current ap_id so the action is /show/:ap_id/search
+      button#searchbutton.inlinebutton(formaction='show/' + ap_id + '/search' title='Click while empty to clear previous search and list all names.') Search
+      div#listsearchmenu.inline
 
       script(type='text/javascript')
-        trashButton(); // if not already viewing a discard, put trash button on page to view discards
-          backButton();  // if viewing a discard, put back button on page to get back to non-discarded rentaps
+        //- again, not sure this is the right way with nodejs and pug
          var searchSel = document.createElement('select');
          var chooseName = document.createElement('option');
          chooseName.text = 'Choose Name';

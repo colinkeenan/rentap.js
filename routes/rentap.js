@@ -13,6 +13,8 @@ var rentap_controller = require('../controllers/rentapController.js');
  * an individual ap */
 router.get('/', rentap_controller.show_new_ap); //home page is just blank ap
 router.get('/show/:ap_id', rentap_controller.show_ap); //show particular ap for viewing/editing/discarding (or deleting/restoring if in trash)
+router.get('/show/:ap_id/prev', rentap_controller.show_ap_prev); //prev & next skips trash items (or if in trash, skips not trash items)
+router.get('/show/:ap_id/next', rentap_controller.show_ap_next); 
 router.get('/show/:ap_id/trash', rentap_controller.show_closest_ap_in_trash); //find the next highest or lowest ap_id that's in trash and show it
 
 router.post('/', rentap_controller.save_new_ap); //if changed, can post to save new app and get the new rowid if worked, or null if error
