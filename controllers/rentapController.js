@@ -14,6 +14,19 @@ exports.show_ap = function(req, res) {
   res.send('NOT IMPLEMENTED: Display Application: ' + req.params.ap_id);
 };
 
+exports.show_ap_prev = function(req, res) {
+  res.send('NOT IMPLEMENTED: Display Previous Application: ' + req.params.ap_id);
+};
+
+exports.show_ap_next = function(req, res) {
+  res.send('NOT IMPLEMENTED: Display Next Application: ' + req.params.ap_id);
+};
+
+exports.show_closest_ap_in_trash = function(req, res) {
+  res.send('NOT IMPLEMENTED: Go to trash from: ' + req.params.ap_id);
+};
+
+
 exports.save_ap = function(req, res) {
   res.send('NOT IMPLEMENTED: Save Edited Application:' + req.params.ap_id + 'with values: ' + req.params.ap);
 };
@@ -37,6 +50,10 @@ exports.save_header = function(req, res) {
 
 exports.rm_header = function(req, res) {
   res.send('NOT IMPLEMENTED: Delete Header: ' + req.params.header_id + ' while on Ap' + req.params.ap_id + '. This url: ' + req.originalUrl);
+};
+
+exports.set_default_header = function(req, res) {
+  res.send('NOT IMPLEMENTED: Set Default Header: ' + req.params.header_id + ' while on Ap' + req.params.ap_id + '. This url: ' + req.originalUrl);
 };
 
 exports.restore_ap = function(req, res) {
