@@ -20,24 +20,31 @@ html(lang='en')
     //- to overide the form method of POST. So, that's how I'll handle it and there will 
     //- be multiple buttons on the form as it was in the rentap firefox extension
 
-    //- Unlike rentap firefox extension, trying to break this into 2 forms, one for header
-    //- and another for the application data
+    //- Unlike rentap firefox extension, trying to break this into 3 forms, header
+    //- rentap, and navigationcontrols
     form#headerform(method=POST action='') 
+      //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
+      //- headerform expects the following variables from get headerid, (header will be undefined for get new header) 
+      
+      //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], ap_mode
+
+      //- where header is header[headerID] and 
+      //- headerID comes from rentaps[ap_id] -- the get will happen when getting rentaps[ap_id]
       table#rentapheader 
         tr 
           td 
             img(src='/images/icon.png')
 
           td 
-            input#rentaladdress(type='text' value='enter rental address') 
-            input#rentalcitystzip(type='text' value='enter city, state, zip')
+            input#rentaladdress(type='text' value=(undefined===headers.StreetAddress? 'enter rental address' : headers.StreetAddress)) 
+            input#rentalcitystzip(type='text' value=(undefined===headers.CityStateZip ? 'enter city, state, zip' : headers.CityStateZip))
 
           td#tdrtitle 
-            input.inlineshort#mode(type='text' value='' readonly) 
-            input#rtitle(type='text' value='enter title')
+            input#mode.inlineshort(type='text' value=ap_mode readonly) 
+            input#rtitle(type='text' value=(undefined===headers.Title ? 'enter title' : headers.Title))
 
           td 
-            label.smalllabelinputApplied(for='authdate') Applied 
+            label.smalllabelinput(for='authdate') Applied 
             input#authdate(type='text' value='' ) 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') Row: 
             input#rowprint(type='text' value='' readonly) 
@@ -61,17 +68,12 @@ html(lang='en')
             button#saverheaderbutton.inline(title='Save New Header' formaction=url + "/header") +
             button#editheaderbutton.inline(title='Save Edited Header' formaction=url + "/header/" + header_id) ~
             button#delrheaderbutton.inline(title='Delete Header' formaction=url + "/header/" + header_id + "/delete") -
-            //- This is where the script below puts the dropdown menu, but not sure it will work this way in nodejs/pug
-            div#listheadermenu.inline 
+            //- seems like this is how to put the dropdown list on the page using Pug
+            select#headername
+              each headerName in headerNames
+                option(value=headername selected=(header.Name === headerName)) headerName
             button#defaultheaderbutton.inline(title='Set as default header shown on start' formaction=url + "/header/" + header_id + "/default") ->0
 
-            script(type='text/javascript') 
-              //- This probably should be done a different way using pug and nodejs/sqlite3
-              var sel = document.createElement('select'); 
-              var opt0 = document.createElement('option'); 
-              opt0.text = 'Choose Header'; 
-              sel.add(opt0, null); 
-              document.getElementById('listheadermenu').appendChild(sel); //- put the dropdown menu list on the page
 
     form#rentapform(method=POST action='') 
       table#rentapbody 
