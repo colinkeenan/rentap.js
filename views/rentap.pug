@@ -197,8 +197,9 @@ html(lang='en')
     //- i.e row and findname (decided not to include jumping to a specific id here because user can just enter that
     //- in the url). Even thought the result is to display an existing app, still need method=POST to get
     //- the data to the controller
-    //- after posting a search and getting this page, have to pass Names array
-    form#rentapjump(method=POST action='') 
+    //- after posting a search and getting this page, have to pass Names [{ap_id, FullName},...]
+    //- or if selecting a name from the dropdown list, go straight to the selectedAp_id as the default action
+    form#rentapjump(method=POST action='/show/' + selectedAp_id) 
       //- prev and next don't need to send data from the form so using method GET
       button#prevbutton.inlinebutton(formmethod=GET formaction='/show/' + ap_id + '/prev') Prev
       button#nextbutton.inlinebutton(formmethod=GET formaction='/show/' + ap_id + '/next') Next
@@ -213,7 +214,7 @@ html(lang='en')
       //- but have to POST the search data from this form before those can be constructed
       //- and might need to just stay on the current ap_id so the action is /show/:ap_id/search
       button#searchbutton.inlinebutton(formaction='show/' + ap_id + '/search' title='Click while empty to clear previous search and list all names.') Search
-      //- need selecting somthing here to submit action show/ap_id, not sure how at the moment
-      select#listsearchmenu.inline()
+      //- I think the following will submit this form (form#rentapjump) when a new name is selected, with selectedAp_id being one of the values submitted
+      select#listsearchmenu.inline(name='selectedAp_id' onchange='rentapjump.submit()')
         each Name in Names
-          option(value=Name selected=(rentap.FullName === Name)) Name
+          option(value=Name.ap_id selected=(ap_id === Name.ap_id)) Name.FullName
