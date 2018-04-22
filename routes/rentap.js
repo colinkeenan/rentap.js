@@ -27,9 +27,9 @@ router.post('/delete/:ap_id/trash', rentap_controller.rm_ap); //actually deletes
  * need to continue showing the same ap while working on header list 
  * so view post buttons preserve req.originaUrl and just add /header etc to end */
 router.post('*/header', rentap_controller.save_new_header); //if not empty, save new header
-router.get('*/header/:header_id', rentap_controller.save_header); //if actually changed, save changes
-router.post('*/header/:header_id/delete', rentap_controller.rm_header); //actually deletes the row from headers without verifying
-router.post('*/header/:header_id/default', rentap_controller.set_default_header); 
+router.post('*/header/save', rentap_controller.save_header); //if actually changed, save changes
+router.post('*/header/delete', rentap_controller.rm_header); //actually deletes the row from headers without verifying
+router.post('*/header/default', rentap_controller.set_default_header); 
 
 /* routes for displaying a table of matching aps,
  * or just one column from matching aps*/
