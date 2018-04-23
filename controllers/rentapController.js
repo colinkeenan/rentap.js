@@ -3,32 +3,42 @@ var rentap = require('../models/rentap');
 //when implimented, will get data from rentap.whatever, and also from req.whatever and pass them to view through res.render
 
 exports.show_new_ap = function(req, res) {
+  //- no rentap method needed
   res.send('NOT IMPLEMENTED: Show New (blank) Application');
 };
 
-exports.save_new_ap = function(req, res) {
-  res.send('NOT IMPLEMENTED: Save New (filled in) Application with values: ' + req.params.ap_id);
+exports.save_new_ap = function(ap_form, res) {
+  //- rentap.save_new_ap
+  //- new_ap {authdate, guestdate, rentdate, rentapHeadername, fullname, ssnumber, birthdate, maritalstatus, email, stateid, phone1, phone2, currentaddress, previousaddresses, occupants, pets, income, employment, evictions, felonies}
+  var new_ap = ap_form.body
+  res.send('NOT IMPLEMENTED: Save New (filled in) Application with values: ' + new_ap.fullname + '. . .');
 };
 
 exports.show_ap = function(req, res) {
+  //- rentap.getap(req.params.ap_id)
   res.send('NOT IMPLEMENTED: Display Application: ' + req.params.ap_id);
 };
 
 exports.show_ap_prev = function(req, res) {
+  //- rentap. [need to define this method]
   res.send('NOT IMPLEMENTED: Display Previous Application: ' + req.params.ap_id);
 };
 
 exports.show_ap_next = function(req, res) {
+  //- rentap. [need to define this method]
   res.send('NOT IMPLEMENTED: Display Next Application: ' + req.params.ap_id);
 };
 
 exports.show_closest_ap_in_trash = function(req, res) {
+  //- rentap. [need to define this method]
   res.send('NOT IMPLEMENTED: Go to trash from: ' + req.params.ap_id);
 };
 
 
-exports.save_ap = function(req, res) {
-  res.send('NOT IMPLEMENTED: Save Edited Application:' + req.params.ap_id + 'with values: ' + req.params.ap);
+exports.save_ap = function(ap_form, res) {
+  //- rentap.save_ap
+  var edited_ap = ap_form.body
+  res.send('NOT IMPLEMENTED: Save Edited Application:' + ap_form.params.ap_id + 'with values: ' + edited_ap.fullname + '. . .');
 };
 
 exports.discard_ap = function(req, res) {

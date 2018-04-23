@@ -88,7 +88,8 @@ exports.restore_ap = function (ap_id) {
     });
   });
 }
-
+//either I need to just use headerName instead of headerID, or I need to lookup 
+//headerID from headerName
 exports.save_new_ap = function (ap) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');

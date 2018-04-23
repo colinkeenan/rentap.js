@@ -132,7 +132,7 @@ html(lang='en')
 
               li 
                 label.personalinfo(for='phone2')Phone 2 
-                input(type='text' id='phone2' value=(undefined===rentap? '' : rentap.Phone2))
+                input#phone2(type='text' value=(undefined===rentap? '' : rentap.Phone2))
 
               li 
                 - var ca = undefined===rentap ? '' : rentap.CurrentAddress
@@ -195,7 +195,7 @@ html(lang='en')
 
     //- decided a third form is needed here for these jump buttons so it will only post the necessary data for the jump
     //- i.e row and findname (decided not to include jumping to a specific id here because user can just enter that
-    //- in the url). Even thought the result is to display an existing app, still need method=POST to get
+    //- in the url). Even though the result is to display an existing app, still need method=POST to get
     //- the data to the controller
     //- after posting a search and getting this page, have to pass Names [{ap_id, FullName},...]
     //- or if selecting a name from the dropdown list, go straight to the selectedAp_id as the default action
