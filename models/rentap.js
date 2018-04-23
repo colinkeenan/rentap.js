@@ -88,14 +88,13 @@ exports.restore_ap = function (ap_id) {
     });
   });
 }
-//either I need to just use headerName instead of headerID, or I need to lookup 
-//headerID from headerName
+
 exports.save_new_ap = function (ap) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var ap_id = null;
   db.serialize(function() {
-    db.run("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", ap.FullName, ap.SSN, ap.BirthDate, ap.MaritalStatus, ap.Email, ap.StateID, ap.Phone1, ap.Phone2, ap.CurrentAddress, ap.PriorAddresses, ap.ProposedOccupants, ap.ProposedPets, ap.Income, ap.Employment, ap.Evictions, ap.Felonies, ap.dateApplied, ap.dateGuested, ap.dateRented, ap.headerID, 
+    db.run("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", ap.fullname, ap.ssnumber, ap.birthdate, ap.maritalstatus, ap.email, ap.stateid, ap.phone1, ap.phone2, ap.currentaddress, ap.previousaddresses, ap.occupants, ap.pets, ap.income, ap.employment, ap.evictions, ap.felonies, ap.authdate, ap.guestdate, ap.rentdate, ap.rentapHeadername, 
       function(err) {
         if (err) console.error(err) 
         else ap_id = this.lastID;
@@ -111,7 +110,7 @@ exports.save_ap = function (ap_id, ap) {
   let db = new sqlite3.Database('./store.db');
   var updated_id = null;
   db.serialize(function() {
-    db.run("UPDATE tbl FullName = (?), SSN = (?), BirthDate = (?), MaritalStatus = (?), Email = (?), StateID = (?), Phone1 = (?), Phone2 = (?), CurrentAddress = (?), PriorAddresses = (?), ProposedOccupants = (?), ProposedPets = (?), Income = (?), Employment = (?), Evictions = (?), Felonies = (?), dateApplied = (?), dateGuested = (?), dateRented = (?), headerID = (?) WHERE rowid = (?)", ap.FullName, ap.SSN, ap.BirthDate, ap.MaritalStatus, ap.Email, ap.StateID, ap.Phone1, ap.Phone2, ap.CurrentAddress, ap.PriorAddresses, ap.ProposedOccupants, ap.ProposedPets, ap.Income, ap.Employment, ap.Evictions, ap.Felonies, ap.dateApplied, ap.dateGuested, ap.dateRented, ap.headerID, ap_id,
+    db.run("UPDATE tbl FullName = (?), SSN = (?), BirthDate = (?), MaritalStatus = (?), Email = (?), StateID = (?), Phone1 = (?), Phone2 = (?), CurrentAddress = (?), PriorAddresses = (?), ProposedOccupants = (?), ProposedPets = (?), Income = (?), Employment = (?), Evictions = (?), Felonies = (?), dateApplied = (?), dateGuested = (?), dateRented = (?), headerName = (?) WHERE rowid = (?)", ap.fullname, ap.ssnumber, ap.birthdate, ap.maritalstatus, ap.email, ap.stateid, ap.phone1, ap.phone2, ap.currentaddress, ap.previousaddresses, ap.occupants, ap.pets, ap.income, ap.employment, ap.evictions, ap.felonies, ap.authdate, ap.guestdate, ap.rentdate, ap.rentapHeadername, ap_id,
       function(err) {
         if (err) console.error(err) 
         else updated_id = this.lastID;

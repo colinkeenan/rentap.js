@@ -20,13 +20,11 @@ html(lang='en')
     //- rentap, and rentapjump (navigation controls form)
     form#headerform(method=POST action='') 
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
-      //- headerform expects the following variables from get headerid, (header will be undefined for get new header) 
+      //- headerform expects the following variables from get headername, (header will be undefined for get new header) 
       
-      //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], header_id, ap_mode, 
-      //- and *still need to figure out dates and row variables*
+      //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], ap_mode, 
 
-      //- where header is headers[headerID] and 
-      //- headerID comes from rentaps[ap_id] -- the get will happen when getting rentaps[ap_id]
+      //- where header from headers is chosen by tbl.headerName = headers.Name
       table#rentapheader 
         tr 
           td 
@@ -41,7 +39,7 @@ html(lang='en')
             input#rtitle(type='text' value=(undefined===header ? 'enter title' : header.Title))
 
           td 
-            //- below is part of rentapform so gets ap_id and rentap {... dateApplied, dateGuested, dateRented, headerID} when there's a get for rentapform
+            //- below is part of rentapform so gets ap_id and rentap {... dateApplied, dateGuested, dateRented, headerName} when there's a get for rentapform
             //-
             label.smalllabelinput(for='authdate') Applied 
             input#authdate(type='text' form='rentapform' value=(undefined===rentap? '' : rentap.dateApplied)) 
@@ -91,7 +89,7 @@ html(lang='en')
 
     form#rentapform(method=POST action='') 
       //- this form should receive one rentap from 
-      //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerID}, ...] 
+      //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...] 
       //- and the ap_id=rowid of the rentap to display
       //- For a new ap, rentap will be undefined
       //- hidden input below is set by changeInputHeadername above when select#changeHeadername is changed
