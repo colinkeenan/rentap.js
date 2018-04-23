@@ -184,7 +184,7 @@ db.serialize(function() {
         console.log("\nSUPPLY " + badcount + " headerNames THAT COULD NOT BE DETERMINED AUTOMATICALLY\n");
       }
       console.log(row.id + ": " + row.FullName + ", " + row.StreetAddress + ", " + row.CityStateZip);
-      var answer = readlineSync.questionInt('Correct headerName? ');
+      var answer = readlineSync.question('Correct headerName? ');
       answers++;
       headerNameArray.push([answer, row.id]);
     }, //end 1st callback (row callback) 
