@@ -17,7 +17,7 @@ html(lang='en')
     //- on each form as it was in the rentap firefox extension
 
     //- Unlike rentap firefox extension, trying to break this into 3 forms, header
-    //- rentap, and rentapjump (navigation controls form)
+    //- rentap, and rentapsearch (navigation controls form)
     form#headerform(method=POST action='') 
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
       //- headerform expects the following variables from get headername, (header will be undefined for get new header) 
@@ -192,12 +192,12 @@ html(lang='en')
                   button#backbutton.inline(formmethod=GET formaction='/show/' + back_ap_id style='padding-left:20px') Back 
 
     //- decided a third form is needed here for these jump buttons so it will only post the necessary data for the jump
-    //- i.e row and findname (decided not to include jumping to a specific id here because user can just enter that
+    //- i.e row and pattern (decided not to include jumping to a specific id here because user can just enter that
     //- in the url). Even though the result is to display an existing app, still need method=POST to get
     //- the data to the controller
     //- after posting a search and getting this page, have to pass Names [{ap_id, FullName},...]
     //- or if selecting a name from the dropdown list, go straight to the selectedAp_id as the default action
-    form#rentapjump(method=POST action='/show/' + selectedAp_id) 
+    form#rentapsearch(method=POST action='/show/' + selectedAp_id) 
       //- prev and next don't need to send data from the form so using method GET
       button#prevbutton.inlinebutton(formmethod=GET formaction='/show/' + ap_id + '/prev') Prev
       button#nextbutton.inlinebutton(formmethod=GET formaction='/show/' + ap_id + '/next') Next
@@ -206,13 +206,13 @@ html(lang='en')
       input#row.inline(type='text' style='text-align: right;' value='' title='Jump to 0 to find printable instructions for applicants.')
       button#jumpbutton.inlinebutton(formaction='/show/' + ap_id + '/jump') Go
       
-      input#findname(type='text' title='Hint: Use &quot; to search names only. For example, &quot;d, for names starting with D.' value='' )
-      //- the search action is /find/:pattern/good or find/:pattern/trash
-      //- and also have actions for more restrictive search by column,
-      //- but have to POST the search data from this form before those can be constructed
-      //- and might need to just stay on the current ap_id so the action is /show/:ap_id/search
-      button#searchbutton.inlinebutton(formaction='show/' + ap_id + '/search' title='Click while empty to clear previous search and list all names.') Search
-      //- I think the following will submit this form (form#rentapjump) when a new name is selected, with selectedAp_id being one of the values submitted
-      select#listsearchmenu.inline(name='selectedAp_id' onchange='rentapjump.submit()')
+      input#pattern(type='text' title='Hint: Use &quot; to search names only. For example, &quot;d, for names starting with D.' value='' )
+      //- might need to just stay on the current ap_id so the action is /show/:ap_id/search
+      //- and the pattern to search for is in the posted data (...body.pattern)
+      //- this button will assume search is to be limited to goodaps or trashaps
+      //- based on what the current ap is
+      button#searchbutton.inlinebutton(formaction='/show/' + ap_id + '/search' title='Click while empty to clear previous search and list all names.') Search
+      //- I think the following will submit this form (form#rentapsearch) when a new name is selected, with selectedAp_id being one of the values submitted
+      select#listsearchmenu.inline(name='selectedAp_id' onchange='rentapsearch.submit()')
         each Name in Names
           option(value=Name.ap_id selected=(ap_id === Name.ap_id)) Name.FullName

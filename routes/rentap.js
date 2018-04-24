@@ -22,6 +22,7 @@ router.post('/show/:ap_id', rentap_controller.save_ap); //if changed and not in 
 router.post('/discard/:ap_id', rentap_controller.discard_ap); //just puts the rowid in the trash table
 router.post('/restore/:ap_id/trash', rentap_controller.restore_ap); //restores by removing rowid from trash table
 router.post('/delete/:ap_id/trash', rentap_controller.rm_ap); //actually deletes the row from tbl, but only if in trash
+router.post('/show/:ap_id/jump', rentap_controller.jump_ap); //for the "Go" button which jumps to the row entered from the one shown (ap_id)
 
 /* routes for manipulating headers
  * need to continue showing the same ap while working on header list 
@@ -37,11 +38,9 @@ router.get('/goodaps', rentap_controller.show_goodaps); //table of aps not in tr
 router.get('/trashaps', rentap_controller.show_trashaps); //table of trashed aps
 router.get('/goodnames', rentap_controller.show_goodnames); //list of names not in trash
 router.get('/trashnames', rentap_controller.show_trashnames); //list of trashed names
-router.get('/find/:pattern', rentap_controller.search_allaps); //searches every column for pattern and returns matching rows
-router.get('/find/:pattern/good', rentap_controller.search_goodaps); //same but exclude rows in trash
-router.get('/find/:pattern/good/col/:column', rentap_controller.search_col_good); //same but exclude rows in trash
-router.get('/find/:pattern/trash', rentap_controller.search_trashaps); //same but only rows in trash
-router.get('/find/:pattern/trash/col/:column', rentap_controller.search_col_trash); //same but only rows in trash
-router.get('/find/:pattern/col/:column', rentap_controller.search_column); //search only the specified column for pattern and return matching rows
+router.get('/show/:ap_id/search/all', rentap_controller.search_allaps); //searches every column for pattern (from post) and returns matching rows. searches both goodaps and trashaps
+router.get('/show/:ap_id/search', rentap_controller.search); //searches every column for pattern (from post) and returns matching rows. searches trash if ap_id in trash, otherwise, goodaps.
+router.get('/show/:ap_id/search/:column/all', rentap_controller.search_col_allaps); //searches specified column for pattern (from post) and returns matching rows. searches both goodaps and trashaps
+router.get('/show/:ap_id/search/:column', rentap_controller.search_col); //searches specified column for pattern (from post) and returns matching rows. searches trash if ap_id in trash, otherwise, goodaps.
 
 module.exports = router;

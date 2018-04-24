@@ -68,11 +68,50 @@ exports.getap = function (ap_id) {
   return ap;
 }
 
+exports.get_row = function (ap_id, row) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  var ap;
+  db.serialize(function() {
+    db.get("SELECT * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid LIMIT 1 OFFSET (?)", row-1, function(err, rowth_ap) {
+      if (err) console.error(err);
+      ap=rowth_ap; //will be null if error
+    });
+  });
+  db.close
+  return ap;
+}
+
+exports.get_trash_row = function (ap_id, row) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  var ap;
+  db.serialize(function() {
+    db.get("SELECT * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid LIMIT 1 OFFSET (?)", row-1, function(err, rowth_ap) {
+      if (err) console.error(err);
+      ap=rowth_ap; //will be null if error
+    });
+  });
+  db.close
+  return ap;
+}
+
 exports.rm_ap = function (ap_id) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   db.serialize(function() { //do not allow an ap to be deleted unless it is in trash
     db.run("DELETE FROM tbl WHERE rowid = (?) AND rowid IN (SELECT discardedRow FROM trash)", ap_id, function(err, row) {
+      if (err) console.error(err);
+    });
+  });
+}
+
+exports.discard_ap = function (ap_id) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  db.serialize(function() {
+    //adding ap_id to trash "discards" the row without actually changing it in tbl
+    db.run("INSERT INTO trash (discardedRow) VALUES (?)", ap_id, function(err, row) {
       if (err) console.error(err);
     });
   });
