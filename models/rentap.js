@@ -81,7 +81,7 @@ exports.get_row = function (ap_id, row) {
   db.close
   return ap;
 }
-
+//should not have get_trash_row, instead, get_row has to figure out if ap_id is in trash or not ...
 exports.get_trash_row = function (ap_id, row) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
@@ -159,7 +159,8 @@ exports.save_ap = function (ap_id, ap) {
   db.close
   return updated_id;
 }
-
+//should not have search.goodaps and search.trashaps, just search, which will
+//decide which to search based on ap_id (if in trash or not)
 exports.search_goodaps = function(pattern) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');

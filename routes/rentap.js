@@ -23,6 +23,7 @@ router.post('/discard/:ap_id', rentap_controller.discard_ap); //just puts the ro
 router.post('/restore/:ap_id/trash', rentap_controller.restore_ap); //restores by removing rowid from trash table
 router.post('/delete/:ap_id/trash', rentap_controller.rm_ap); //actually deletes the row from tbl, but only if in trash
 router.post('/show/:ap_id/jump', rentap_controller.jump_ap); //for the "Go" button which jumps to the row entered from the one shown (ap_id)
+//It's the same "Go" button for Trash and not trash, so jump_ap decides based on if ap_id is in trash or not
 
 /* routes for manipulating headers
  * need to continue showing the same ap while working on header list 

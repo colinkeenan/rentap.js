@@ -82,45 +82,46 @@ exports.search_allaps = function(search_form, res) {
 };
 
 exports.search = function(search_form, res) {
+  //- rentap.search(search_form.body.pattern)
+  //- based on whether or not ap_id is in trash, finds rows that match pattern either in trash or not in trash
   res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + search_form.params.pattern + ' for ap_id ' + search_form.params.ap_id);
 };
 
 exports.search_col_allaps = function(search_form, res) {
   //- currently no way to triger this from view and there's no field named column
-  res.send('NOT IMPLEMENTED: Find All Applications that have ' + search_form.body.column + ' that match pattern: ' + search_form.params.pattern);
+  //- rentap.search(search_form.body.pattern, search_form.body.column)
+  res.send('NOT IMPLEMENTED: Find All Applications that have ' + search_form.body.column + ' that match pattern: ' + search_form.body.pattern);
 };
 
 exports.search_col = function(search_form, res) {
   //- currently no way to triger this from view and there's no field named column
-  res.send('NOT IMPLEMENTED: Find All Non-Trash Applications that have ' + search_form.params.column + ' that match pattern: ' + search_form.params.pattern);
+  //- rentap.search(search_form.body.pattern, search_form.body.column, search_form.params.ap_id)
+  res.send('NOT IMPLEMENTED: Find All Non-Trash Applications that have ' + search_form.body.column + ' that match pattern: ' + search_form.body.pattern + ' for ap_id ' +search_form.params.ap_id);
 };
 
+//- in the view, row is not the same as ap_id because tbl contains all aps, even those in trash but view displays either those rows in trash or not in trash
+//- and row is always consecutive without any skips. In other words, there are two row 1's, one in trash, and one out. Many rows are like that.
 exports.jump_ap = function(search_form, res) {
-  //rentap.get_row(search_form.body.row)
+  //rentap.get_row(search_form.body.row, search_form.params.ap_id) either in trash or not depending on whether or not ap_id is in trash
   //or if that fails, rentap.getap(search_form.params.ap_id)
   res.send('NOT IMPLEMENTED: Jump to row ' + search_form.body.row + ' from ap ' + search_form.params.ap_id)
 };
 
-exports.jump_trash_ap = function(search_form, res) {
-  //rentap.get_trash_row(search_form.body.row)
-  //or if that fails, rentap.getap(search_form.params.ap_id)
-  res.send('NOT IMPLEMENTED: Jump to row ' + search_form.body.row + ' from Trash ap ' + search_form.params.ap_id)
-};
-
 //headers
+//still need to make all the headers methods in models/rentap.js
 exports.save_new_header = function(header_form, res) {
-  res.send('NOT IMPLEMENTED: Save New Header while on Ap' + header_form.params.ap_id + 'with values: ' + header_form.params.ap + '. This url: ' + header_form.originalUrl);
+  res.send('NOT IMPLEMENTED: Save New Header while on Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);
 };
 
 exports.save_header = function(header_form, res) {
-  res.send('NOT IMPLEMENTED: Save Header: ' + header_form.params.header_id + ' while on Ap' + header_form.params.ap_id + 'with values: ' + header_form.params.ap + '. This url: ' + header_form.originalUrl);
+  res.send('NOT IMPLEMENTED: Save Header: ' + header_form.body.headername + ' while on Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);
 };
 
 exports.rm_header = function(header_form, res) {
-  res.send('NOT IMPLEMENTED: Delete Header: ' + header_form.params.header_id + ' while on Ap' + header_form.params.ap_id + '. This url: ' + header_form.originalUrl);
+  res.send('NOT IMPLEMENTED: Delete Header: ' + header_form.body.headername + ' while on Ap' + header_form.params.ap_id + '. This url: ' + header_form.originalUrl);
 };
 
 exports.set_default_header = function(header_form, res) {
-  res.send('NOT IMPLEMENTED: Set Default Header: ' + header_form.params.header_id + ' while on Ap' + header_form.params.ap_id + '. This url: ' + header_form.originalUrl);
+  res.send('NOT IMPLEMENTED: Set Default Header: ' + header_form.body.headername + ' while on Ap' + header_form.params.ap_id + '. This url: ' + header_form.originalUrl);
 };
 
