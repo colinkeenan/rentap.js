@@ -1,6 +1,6 @@
 var express = require('express');
-var indexRouter = require('./routes/index');
-var rentapRouter = require('./routes/rentap');
+var indexRouter = require('./index');
+var rentapRouter = require('./rentapRoutes.js');
 
 var app = express();
 

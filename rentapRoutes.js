@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-var rentap_controller = require('../controllers/rentapController.js');
+var rentap_controller = require('./rentapController.js');
 
 /* All the routes defined below are relative to /rentap because 
  * in app.js, there's a use /rentap as the router defined in
