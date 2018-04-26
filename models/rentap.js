@@ -1,18 +1,21 @@
-exports.goodaps = function() { //rentap extension didn't provide this functionality
+exports.good = function(ap_id) { //returns good {aps, displayedRow} where displayedRow is the index in aps where tbl.rowid = ap_id
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
-  var goodaps = [];
+  var good;
   db.serialize(function() {
-    db.all("SELECT * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash)", function(err, rows) {
+    db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
       if (err) console.error(err);
-      goodaps = rows; //will be null if error
+      good = {aps: rows, displayedRow: rows.findIndex(obj => obj.rowid == ap_id)};
+      //good.aps[good.displayedRow] is the ap that matches ap_id
+      console.log(JSON.stringify(good) + "\n" + JSON.stringify(good.aps[good.displayedRow])); //test
     });
   });
   db.close
-  return goodaps;
+  return good;
 };
+this.good(47); //test
 
-exports.trashaps = function() { //rentap extension didn't provide this functionality
+exports.trashaps = function() { 
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var trashaps = [];
@@ -62,35 +65,28 @@ exports.getap = function (ap_id) {
     db.get("SELECT * FROM tbl WHERE rowid=(?)", ap_id, function(err, row) {
       if (err) console.error(err);
       ap=row; //will be null if error and undefined if no row found
-      console.log("\ngetap 33\n" + JSON.stringify(ap)); //test
     });
   });
   db.close
   return ap;
 }
-this.getap(33); //test
 
 //if ap_id in trash, mode is discarded, else edit (don't need to call on
 //the database to figure out if an ap is new, so don't need to worry about
-//mode being new). row is determined by ordering aps in trash (or not)
-//by ap_id and finding the number of the result with tbl.rowid = ap_id
-exports.get_row_and_mode = function (ap_id) {
+//mode being new)
+exports.getmode = function (ap_id) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var rowmode;
   db.serialize(function() {
-    //working on this still. so far, confirmed it returns mode, still have to figure out how to get row.
-    //doing both at the same time because need to know the mode before row can be found
     db.get("SELECT CASE WHEN (?) IN (SELECT discardedRow FROM trash) THEN 'discarded' ELSE 'edit' END mode", ap_id, function(err, ap) {
       if (err) console.error(err);
       rowmode = ap; //will be null if error
-      console.log("\nget_row_and_mode 33\n" + JSON.stringify(ap)); //test
     });
   });
   db.close
   return rowmode;
 }
-this.get_row_and_mode(33); //test
 
 //getap_prev and getap_next have to determine if in trash or not, then find row+1 or
 //row-1 in trash or not. It is an effective row not the same as ap_id=tbl.rowid
