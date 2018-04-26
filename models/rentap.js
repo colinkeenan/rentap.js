@@ -68,7 +68,61 @@ exports.getap = function (ap_id) {
   return ap;
 }
 
-exports.get_row = function (ap_id, row) {
+//if ap_id in trash, mode is discarded, else edit (don't need to call on
+//the database to figure out if an ap is new, so don't need to worry about
+//mode being new). row is determined by ordering aps in trash (or not)
+//by ap_id and finding the number of the result with tbl.rowid = ap_id
+exports.get_row_and_mode = function (ap_id) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  var rowmode;
+  db.serialize(function() {
+    //working on this still. so far, I think it returns mode, still have to figure out how to get row.
+    //doing both at the same time because need to know the mode before row can be found
+    db.get("SELECT CASE rowid WHEN IN (SELECT discardedRow FROM trash) THEN 'discarded' ELSE 'edit' END mode FROM tbl WHERE rowid=(?)", ap_id, function(err, ap) {
+      if (err) console.error(err);
+      rowmode = null===ap ? null : {row: ap.row, mode: ap.mode}; //will be null if error
+    });
+  });
+  db.close
+  return rowmode;
+}
+
+//getap_prev and getap_next have to determine if in trash or not, then find row+1 or
+//row-1 in trash or not. It is an effective row not the same as ap_id=tbl.rowid
+exports.getap_prev = function (ap_id) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  var ap;
+  db.serialize(function() {
+    //need to fill this SQL in still - will be based on get_row_and_mode above since trying to get the previous row
+    db.get("rowid=(?)", ap_id, function(err, row) {
+      if (err) console.error(err);
+      ap=row; //will be null if error
+    });
+  });
+  db.close
+  return ap;
+}
+
+exports.getap_next = function (ap_id) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  var ap;
+  db.serialize(function() {
+    //need to fill this SQL in still - will be based on get_row_and_mode above since trying to get the next row
+    db.get("rowid=(?)", ap_id, function(err, row) {
+      if (err) console.error(err);
+      ap=row; //will be null if error
+    });
+  });
+  db.close
+  return ap;
+}
+
+//ap_id is tbl.rowid, row is the rowth ap found where rowid is either in or not in trash
+//based on whether or not ap_id is in trash. For this method, row comes from the search form.
+exports.get_rowth_ap = function (ap_id, row) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var ap;

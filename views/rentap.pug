@@ -18,11 +18,11 @@ html(lang='en')
 
     //- Unlike rentap firefox extension, trying to break this into 3 forms, header
     //- rentap, and rentapsearch (navigation controls form)
-    form#headerform(method=POST action='') 
+    form#headerform(method=POST action=url + '/header/update') 
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
       //- headerform expects the following variables from get headername, (header will be undefined for get new header) 
       
-      //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], ap_mode, 
+      //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], 
 
       //- where header from headers is chosen by tbl.headerName = headers.Name
       table#rentapheader 
@@ -35,17 +35,19 @@ html(lang='en')
             input#rentalcitystzip(type='text' value=(undefined===header ? 'enter city, state, zip' : header.CityStateZip))
 
           td#tdrtitle 
-            input#mode.inlineshort(type='text' value=ap_mode readonly) 
+            //- it makes sense to get the mode when getting 
+            //- rentapform which also needs row, both come from same database method
+            input#mode.inlineshort(type='text' form='rentapform' readonly value=(undefined===rowmode ? 'new' : rowmode.mode)) 
             input#rtitle(type='text' value=(undefined===header ? 'enter title' : header.Title))
 
           td 
-            //- below is part of rentapform so gets ap_id and rentap {... dateApplied, dateGuested, dateRented, headerName} when there's a get for rentapform
-            //-
+            //- below is part of rentapform so gets ap_id and rentap {... dateApplied, dateGuested, dateRented, headerName} 
+            //- when there's a get for rentapform
             label.smalllabelinput(for='authdate') Applied 
             input#authdate(type='text' form='rentapform' value=(undefined===rentap? '' : rentap.dateApplied)) 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') Row: 
-            //- need some sort of function to calculate the row
-            input#rowprint(type='text' form='rentapform' readonly) 
+            
+            input#rowprint(type='text' form='rentapform' value=(undefined===rowmode? '' : rowmode.row) readonly) 
             br 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') ID: 
             input#rentapID(type='text' id=''  form='rentapform' value=ap_id readonly) 
@@ -72,26 +74,30 @@ html(lang='en')
             button#editheaderbutton.inline(title='Save Edited Header' formaction=url + "/header/save") ~
             button#delrheaderbutton.inline(title='Delete Header' formaction=url + "/header/delete") -
             //- seems like this is how to put the dropdown list on the page using Pug
-            //- onchange... makes input#headername update to match whatever is selected
+            //- onchange... makes hidden input#rentapHeadername update to match whatever is selected
+            //- and then submits the header form to update header (which includes input#headername above)
             //- I can't figure out how I did it in the rentap extension though
-            select#changeHeadername(onchange="changeInputHeadername(event)")
+            select#changeHeadername(name='selectedHeadername' onchange="changeInputHeadername(event)")
               each headerName in headerNames
                 option(value=headerName selected=(header.Name === headerName)) headerName
             button#defaultheaderbutton.inline(title='Set as default header shown on start' formaction=url + "/header/" + header_id + "/default") ->0
 
-      //- below script defines changeInputHeadername(event) that is used in select#changeHeadername above to change input#headername above
-      //- and also a hidden input#rentapHeadername below
+      //- below script defines changeInputHeadername(event) that is used in select#changeHeadername above to change 
+      //- hidden input#rentapHeadername below and update the header
       script(type='text/javascript') 
+        //- e is the onchange event
         function changeInputHeadername(e) { 
-          document.getElementById("headername").value = e.target.value
-          document.getElementById("rentapHeadername").value = e.target.value
+          document.getElementById("rentapHeadername").value = e.target.value //this is needed to keep track of which header to use with each rentap
+          rentapheader.submit() //- after changing those fields, submit header form so header can be updated to match selected header name
         }
 
     form#rentapform(method=POST action='') 
       //- this form should receive one rentap from 
-      //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...] 
-      //- and the ap_id=rowid of the rentap to display
-      //- For a new ap, rentap will be undefined
+      //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
+      //- rowmode{row,mode} and the ap_id=tbl.rowid of the rentap to display
+
+      //- For a new ap, ap_id rentap and rowmode will all be undefined
+
       //- hidden input below is set by changeInputHeadername above when select#changeHeadername is changed
       input#rentapHeadername(type='hidden' value='');
       table#rentapbody 
@@ -197,7 +203,7 @@ html(lang='en')
     //- the data to the controller
     //- after posting a search and getting this page, have to pass Names [{ap_id, FullName},...]
     //- or if selecting a name from the dropdown list, go straight to the selectedAp_id as the default action
-    form#rentapsearch(method=POST action='/show/' + selectedAp_id) 
+    form#rentapsearch(method=POST action='/showSelected') 
       //- prev and next don't need to send data from the form so using method GET
       button#prevbutton.inlinebutton(formmethod=GET formaction='/show/' + ap_id + '/prev') Prev
       button#nextbutton.inlinebutton(formmethod=GET formaction='/show/' + ap_id + '/next') Next

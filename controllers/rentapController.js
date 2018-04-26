@@ -1,6 +1,6 @@
 var rentap = require('../models/rentap');
 
-//when implimented, will get data from rentap.whatever, and also from ap_form.whatever and pass them to view through res.render
+//RENTAP FORM
 
 exports.show_new_ap = function(ap_form, res) {
   //- no rentap method needed
@@ -9,7 +9,7 @@ exports.show_new_ap = function(ap_form, res) {
 
 exports.save_new_ap = function(ap_form, res) {
   //- rentap.save_new_ap
-  //- new_ap {fullname, ssnumber, birthdate, maritalstatus, email, stateid, phone1, phone2, currentaddress, previousaddresses, occupants, pets, income, employment, evictions, felonies, authdate, guestdate, rentdate, rentapHeadername}
+  //- ap_form.body {fullname, ssnumber, birthdate, maritalstatus, email, stateid, phone1, phone2, currentaddress, previousaddresses, occupants, pets, income, employment, evictions, felonies, authdate, guestdate, rentdate, rentapHeadername}
   res.send('NOT IMPLEMENTED: Save New (filled in) Application with values: ' + ap_form.body.fullname + '. . .');
 };
 
@@ -20,6 +20,7 @@ exports.save_ap = function(ap_form, res) {
 
 exports.show_ap = function(ap_form, res) {
   //- rentap.getap(ap_form.params.ap_id)
+  //- rentap.get_row_and_mode(ap_form.params.ap_id)
   res.send('NOT IMPLEMENTED: Display Application: ' + ap_form.params.ap_id);
 };
 
@@ -64,14 +65,20 @@ exports.show_trashnames = function(ap_form, res) {
   res.send('NOT IMPLEMENTED: Listing of All Trashed Full Names');
 };
 
-//- searches
+//- SEARCHES FORM
+
+exports.selected_ap = function(search_form, res) {
+  //- rentap.getap(search_form.body.selectedAp_id)
+  res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
+};
+
 exports.show_ap_prev = function(search_form, res) {
-  //- rentap. [need to define this method]
+  //- rentap.getap_prev(rentap.get_row(search_form.params.ap_id - 1))
   res.send('NOT IMPLEMENTED: Display Previous Application: ' + search_form.params.ap_id);
 };
 
 exports.show_ap_next = function(search_form, res) {
-  //- rentap. [need to define this method]
+  //- rentap.getap_next [need to define this method]
   res.send('NOT IMPLEMENTED: Display Next Application: ' + search_form.params.ap_id);
 };
 
@@ -107,8 +114,14 @@ exports.jump_ap = function(search_form, res) {
   res.send('NOT IMPLEMENTED: Jump to row ' + search_form.body.row + ' from ap ' + search_form.params.ap_id)
 };
 
-//headers
+// HEADERS FORM
+
 //still need to make all the headers methods in models/rentap.js
+
+exports.header_update = function(header_form, res) {
+  res.send('NOT IMPLEMENTED: Show Header with name: ' header_form.body.headername 'that goes with Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);
+};
+
 exports.save_new_header = function(header_form, res) {
   res.send('NOT IMPLEMENTED: Save New Header while on Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);
 };
