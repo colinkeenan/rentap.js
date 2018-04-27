@@ -7,26 +7,25 @@ exports.good = function(ap_id) { //returns good {aps, displayedRow} where displa
       if (err) console.error(err);
       good = {aps: rows, displayedRow: rows.findIndex(obj => obj.rowid == ap_id)};
       //good.aps[good.displayedRow] is the ap that matches ap_id
-      console.log(JSON.stringify(good) + "\n" + JSON.stringify(good.aps[good.displayedRow])); //test
     });
   });
   db.close
   return good;
 };
-this.good(47); //test
 
-exports.trashaps = function() { 
+exports.trash = function(ap_id) { //same as good, but in trash instead of not in trash
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
-  var trashaps = [];
+  var trash;
   db.serialize(function() {
-    db.all("SELECT * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash)", function(err, rows) {
+    db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
       if (err) console.error(err);
-      trashaps = rows; //will be null if error
+      trash = {aps: rows, displayedRow: rows.findIndex(obj => obj.rowid == ap_id)};
+      //trash.aps[trash.displayedRow] is the ap that matches ap_id
     });
   });
   db.close
-  return trashaps;
+  return trash;
 }
 
 exports.goodnames = function() { //for dropdown list of full names to choose an ap from
@@ -71,52 +70,39 @@ exports.getap = function (ap_id) {
   return ap;
 }
 
-//if ap_id in trash, mode is discarded, else edit (don't need to call on
-//the database to figure out if an ap is new, so don't need to worry about
-//mode being new)
-exports.getmode = function (ap_id) {
+//if ap_id in trash, mode is 'discarded', else 'edit' (don't need to call on
+//the database to figure out if an ap is 'new')
+exports.getmode = function (ap_id, next) { //next is a callback function
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
-  var rowmode;
+  var mode;
   db.serialize(function() {
     db.get("SELECT CASE WHEN (?) IN (SELECT discardedRow FROM trash) THEN 'discarded' ELSE 'edit' END mode", ap_id, function(err, ap) {
       if (err) console.error(err);
-      rowmode = ap; //will be null if error
+      mode = ap.mode; //ap is just {mode:'edit'} or {mode:'discarded'}, so no reason to return the whole object
+      console.log(mode); //test
     });
   });
   db.close
-  return rowmode;
+  console.log(typeof next);
+  next(ap_id, mode); //after getting the mode, run whatever needed to know the mode like getap_prev
 }
 
-//getap_prev and getap_next have to determine if in trash or not, then find row+1 or
-//row-1 in trash or not. It is an effective row not the same as ap_id=tbl.rowid
-exports.getap_prev = function (ap_id) {
-  const sqlite3 = require('sqlite3');
-  let db = new sqlite3.Database('./store.db');
-  var ap; db.serialize(function() {
-    //need to fill this SQL in still - will be based on get_row_and_mode above since trying to get the previous row
-    db.get("rowid=(?)", ap_id, function(err, row) {
-      if (err) console.error(err);
-      ap=row; //will be null if error
-    });
-  });
-  db.close
-  return ap;
+exports.getap_prev = function (ap_id, mode) {
+  console.log(mode); //test
+  var modeaps = mode==='discarded' ? this.trash(ap_id) : this.good(ap_id);
+  var prev_i = modeaps.displayedRow>0 ? modeaps.displayedRow-1 : 0;
+  console.log(JSON.stringify(modeaps.aps[prev_i])) //test
+  return modeaps.aps[prev_i];
 }
+
+this.getmode(47, this.getap_prev)
 
 exports.getap_next = function (ap_id) {
-  const sqlite3 = require('sqlite3');
-  let db = new sqlite3.Database('./store.db');
-  var ap;
-  db.serialize(function() {
-    //need to fill this SQL in still - will be based on get_row_and_mode above since trying to get the next row
-    db.get("rowid=(?)", ap_id, function(err, row) {
-      if (err) console.error(err);
-      ap=row; //will be null if error
-    });
-  });
-  db.close
-  return ap;
+  var mode = this.getmode(ap_id);
+  var modeaps = mode==='discarded' ? this.trash(ap_id) : this.good(ap_id);
+  var next_i = modeaps.displayedRow<modeaps.aps.length ? modeaps.displayedRow+1 : modeaps.aps.length;
+  return modeaps.aps[next_i];
 }
 
 //ap_id is tbl.rowid, row is the rowth ap found where rowid is either in or not in trash
