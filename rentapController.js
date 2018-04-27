@@ -73,13 +73,13 @@ exports.selected_ap = function(search_form, res) {
 };
 
 exports.show_ap_prev = function(search_form, res) {
-  //- rentap.getap_prev(rentap.get_row(search_form.params.ap_id - 1))
-  res.send('NOT IMPLEMENTED: Display Previous Application: ' + search_form.params.ap_id);
+  //- rentap.modeway(ap_id, -1, rentap.trash, rentap.good);
+  res.send('NOT IMPLEMENTED: Display Previous Application ' + rentap.modeway(ap_id, -1, rentap.trash, rentap.good) + ' while on: ' + search_form.params.ap_id);
 };
 
 exports.show_ap_next = function(search_form, res) {
-  //- rentap.getap_next [need to define this method]
-  res.send('NOT IMPLEMENTED: Display Next Application: ' + search_form.params.ap_id);
+  //- rentap.modeway(ap_id, +1, rentap.trash, rentap.good);
+  res.send('NOT IMPLEMENTED: Display Next Application ' + rentap.modeway(ap_id, +1, rentap.trash, rentap.good) + ' while on: ' + search_form.params.ap_id);
 };
 
 exports.search_allaps = function(search_form, res) {
