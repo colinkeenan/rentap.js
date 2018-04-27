@@ -3,114 +3,129 @@ var rentap = require('./rentapModels.js');
 //RENTAP FORM
 
 exports.show_new_ap = function(ap_form, res) {
-  //- no rentap method needed
+  // no rentap method needed
   res.send('NOT IMPLEMENTED: Show New (blank) Application');
 };
 
 exports.save_new_ap = function(ap_form, res) {
-  //- rentap.save_new_ap
-  //- ap_form.body {fullname, ssnumber, birthdate, maritalstatus, email, stateid, phone1, phone2, currentaddress, previousaddresses, occupants, pets, income, employment, evictions, felonies, authdate, guestdate, rentdate, rentapHeadername}
+  // rentap.save_new_ap
+  // ap_form.body {fullname, ssnumber, birthdate, maritalstatus, email, stateid, phone1, phone2, currentaddress, previousaddresses, occupants, pets, income, employment, evictions, felonies, authdate, guestdate, rentdate, rentapHeadername}
   res.send('NOT IMPLEMENTED: Save New (filled in) Application with values: ' + ap_form.body.fullname + '. . .');
 };
 
 exports.save_ap = function(ap_form, res) {
-  //- rentap.save_ap
+  // rentap.save_ap
   res.send('NOT IMPLEMENTED: Save Edited Application:' + ap_form.params.ap_id + 'with values: ' + ap_form.body.fullname + '. . .');
 };
 
 exports.show_ap = function(ap_form, res) {
-  //- rentap.getap(ap_form.params.ap_id)
-  //- rentap.get_row_and_mode(ap_form.params.ap_id)
+  // getaps = rentap.modeway(ap_form.params.ap_id, 0)
+  // getaps.mode
+  // getaps.rownum
+  // ap = getaps.aps[getaps.rownum]
   res.send('NOT IMPLEMENTED: Display Application: ' + ap_form.params.ap_id);
 };
 
 exports.show_closest_ap_in_trash = function(ap_form, res) {
-  //- rentap. [need to define this method]
+  // rentap. [need to define this method]
   res.send('NOT IMPLEMENTED: Go to trash from: ' + ap_form.params.ap_id);
 };
 
 
 exports.discard_ap = function(ap_form, res) {
-  //- rentap.discard_ap(ap_form.params.ap_id)
+  // rentap.discard_ap(ap_form.params.ap_id)
   res.send('NOT IMPLEMENTED: Discard Application: ' + ap_form.params.ap_id)
 };
 
 exports.rm_ap = function(ap_form, res) {
-  //- rentap.rm_ap(ap_form.params.ap_id)
+  // rentap.rm_ap(ap_form.params.ap_id)
   res.send('NOT IMPLEMENTED: Delete Application: ' + ap_form.params.ap_id);
 };
 
 exports.restore_ap = function(ap_form, res) {
-  //- rentap.restore_ap(ap_form.params.ap_id)
+  // rentap.restore_ap(ap_form.params.ap_id)
   res.send('NOT IMPLEMENTED: Restore Discarded Application: ' + ap_form.params.ap_id);
 };
 
 exports.show_goodaps = function(ap_form, res) {
-  //- rentap.goodaps()
+  // rentap.goodaps()
   res.send('NOT IMPLEMENTED: Table of All Rental Application Data not in Trash');
 };
 
 exports.show_trashaps = function(ap_form, res) {
-  //- rentap.trashaps()
+  // rentap.trashaps()
   res.send('NOT IMPLEMENTED: Table of All Trashed Rental Application Data');
 };
 
 exports.show_goodnames = function(ap_form, res) {
-  //- rentap.goodnames()
+  // rentap.goodnames()
   res.send('NOT IMPLEMENTED: Listing of All Full Names not in Trash');
 };
 
 exports.show_trashnames = function(ap_form, res) {
-  //- rentap.trashnames()
+  // rentap.trashnames()
   res.send('NOT IMPLEMENTED: Listing of All Trashed Full Names');
 };
 
-//- SEARCHES FORM
+// SEARCHES FORM
 
 exports.selected_ap = function(search_form, res) {
-  //- rentap.getap(search_form.body.selectedAp_id)
+  // getaps = rentap.modeway(search_form.body.selectedAp_id, 0)
+  // getaps.mode
+  // getaps.rownum
+  // ap = getaps.aps[getaps.rownum]
   res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
 };
 
 exports.show_ap_prev = function(search_form, res) {
-  //- rentap.modeway(ap_id, -1);
+  // getaps = rentap.modeway(ap_id, -1);
+  // getaps.mode
+  // getaps.rownum
+  // ap = getaps.aps[getaps.rownum]
   res.send('NOT IMPLEMENTED: Display Previous Application ' + rentap.modeway(ap_id, -1) + ' while on: ' + search_form.params.ap_id);
 };
 
 exports.show_ap_next = function(search_form, res) {
-  //- rentap.modeway(ap_id, 1);
+  // getaps = rentap.modeway(ap_id, 1);
+  // getaps.mode
+  // getaps.rownum
+  // ap = getaps.aps[getaps.rownum]
   res.send('NOT IMPLEMENTED: Display Next Application ' + rentap.modeway(ap_id, 1) + ' while on: ' + search_form.params.ap_id);
 };
 
 exports.search_allaps = function(search_form, res) {
-  //- rentap.serach_allaps(search_form.body.pattern)
-  //- currently no way to triger this from view
+  // rentap.serach_allaps(search_form.body.pattern)
+  // currently no way to triger this from view
   res.send('NOT IMPLEMENTED: Find All Applications that match pattern: ' + search_form.body.pattern + ' from ap ' + search_from.params.ap_id);
 };
 
 exports.search = function(search_form, res) {
-  //- rentap.search(search_form.body.pattern)
-  //- based on whether or not ap_id is in trash, finds rows that match pattern either in trash or not in trash
+  // rentap.search(search_form.body.pattern)
+  // based on whether or not ap_id is in trash, finds rows that match pattern either in trash or not in trash
   res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + search_form.params.pattern + ' for ap_id ' + search_form.params.ap_id);
 };
 
 exports.search_col_allaps = function(search_form, res) {
-  //- currently no way to triger this from view and there's no field named column
-  //- rentap.search(search_form.body.pattern, search_form.body.column)
+  // currently no way to triger this from view and there's no field named column
+  // rentap.search(search_form.body.pattern, search_form.body.column)
   res.send('NOT IMPLEMENTED: Find All Applications that have ' + search_form.body.column + ' that match pattern: ' + search_form.body.pattern);
 };
 
 exports.search_col = function(search_form, res) {
-  //- currently no way to triger this from view and there's no field named column
-  //- rentap.search(search_form.body.pattern, search_form.body.column, search_form.params.ap_id)
+  // currently no way to triger this from view and there's no field named column
+  // rentap.search(search_form.body.pattern, search_form.body.column, search_form.params.ap_id)
   res.send('NOT IMPLEMENTED: Find All Non-Trash Applications that have ' + search_form.body.column + ' that match pattern: ' + search_form.body.pattern + ' for ap_id ' +search_form.params.ap_id);
 };
 
-//- in the view, row is not the same as ap_id because tbl contains all aps, even those in trash but view displays either those rows in trash or not in trash
-//- and row is always consecutive without any skips. In other words, there are two row 1's, one in trash, and one out. Many rows are like that.
+// in the view, row is not the same as ap_id because tbl contains all aps, even those in trash but view displays either those rows in trash or not in trash
+// and row is always consecutive without any skips. In other words, there are two row 1's, one in trash, and one out. Many rows are like that.
 exports.jump_ap = function(search_form, res) {
-  //rentap.get_row(search_form.body.row, search_form.params.ap_id) either in trash or not depending on whether or not ap_id is in trash
-  //or if that fails, rentap.getap(search_form.params.ap_id)
+  // ap = modeway(search_form.params.ap_id, search_form.body.row + 2)
+  // adding 2 makes "way" greater than 1 in all cases which signals
+  // modway to use get_rowth_ap instead of getaps
+  // ap.mode
+  // ap.rownum
+  // ap.ap
   res.send('NOT IMPLEMENTED: Jump to row ' + search_form.body.row + ' from ap ' + search_form.params.ap_id)
 };
 
