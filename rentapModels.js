@@ -1,4 +1,5 @@
-exports.good = function(ap_id, way) { //returns good {aps, rownum} where rownum is the (index in aps where tbl.rowid = ap_id) + way
+//good and trash are not exported because they are called from modeway which decides which to call based on the mode (discarded or not)
+good = function(ap_id, way) { //returns good {aps, rownum} where rownum is the (index in aps where tbl.rowid = ap_id) + way
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var good;
@@ -8,15 +9,16 @@ exports.good = function(ap_id, way) { //returns good {aps, rownum} where rownum 
       good = {aps: rows, rownum: rows.findIndex(obj => obj.rowid == ap_id)};
       //way should normally be -1, 0, or +1 where -1 and +1 are for prev and next and 0 is for getting the current rownum
       good.rownum = good.rownum + way;
-      if (good.rownum < 0) good.rownum = 0;
-      if (good.rownum > good.aps.length) good.rownum = good.aps.length;
+      //wrap around from 0 to end of list or from end of list to 0
+      if (good.rownum < 0) good.rownum = good.aps.length; 
+      if (good.rownum > good.aps.length) good.rownum = 0;
     });
   });
   db.close
   return good;
 };
 
-exports.trash = function(ap_id, way) { //same as good, but in trash instead of not in trash
+trash = function(ap_id, way) { //same as good, but in trash instead of not in trash
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var trash;
@@ -26,8 +28,9 @@ exports.trash = function(ap_id, way) { //same as good, but in trash instead of n
       trash = {aps: rows, rownum: rows.findIndex(obj => obj.rowid == ap_id)};
       //way should normally be -1, 0, or +1 where -1 and +1 are for prev and next
       trash.rownum = trash.rownum + way;
-      if (trash.rownum < 0) trash.rownum = 0;
-      if (trash.rownum > trash.aps.length) trash.rownum = trash.aps.length;
+      //wrap around from 0 to end of list or from end of list to 0
+      if (trash.rownum < 0) trash.rownum = trash.aps.length; 
+      if (trash.rownum > trash.aps.length) trash.rownum = 0;
     });
   });
   db.close
@@ -76,40 +79,19 @@ exports.getap = function (ap_id) {
   return ap;
 }
 
-//if ap_id in trash, mode is 'discarded', else 'edit' (don't need to call on
-//the database to figure out if an ap is 'new')
-
-//mode     this.modeway(ap_id, 0, this.trash, this.good)
-//prev ap, this.modeway(ap_id, -1, this.trash, this.good)
-//next ap, this.modeway(ap_id, +1, this.trash, this.good)
-exports.modeway = function (ap_id, way, trash, good) { //getap_way(ap_id, mode, trash, good)
-  const sqlite3 = require('sqlite3');
-  let db = new sqlite3.Database('./store.db');
-  var mode;
-  db.serialize(function() {
-    db.get("SELECT CASE WHEN (?) IN (SELECT discardedRow FROM trash) THEN 'discarded' ELSE 'edit' END mode", ap_id, function(err, ap) {
-      if (err) console.error(err);
-      mode = ap.mode; //ap is just {mode:'edit'} or {mode:'discarded'}, so no reason to return the whole object
-      if (way===-1 || way===0 || way===+1) 
-        if (mode==='discarded')
-          trash(ap_id, way);
-        else
-          good(ap_id, way);
-    });
-  });
-  db.close
-  return mode;
-}
-this.modeway(47, +1, this.trash, this.good);
-
-//ap_id is tbl.rowid, row is the rowth ap found where rowid is either in or not in trash
-//based on whether or not ap_id is in trash. For this method, row comes from the search form.
-exports.get_rowth_ap = function (ap_id, row) {
+/* get_rowth_goodap and ...trashap are not exported because they are called from this.modeway when "way" is greater than 1 
+ * in which case way is used as the rownum 
+ * 
+ * modeway decides which to call after determining if the mode is discarded or not 
+ * ap_id is tbl.rowid, rownum is an integer (index) for the rowth ap found where rowid is either in or not in trash 
+ * For these 2 functions, rownum comes from the search form.
+*/
+get_rowth_goodap = function (ap_id, rownum) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var ap;
   db.serialize(function() {
-    db.get("SELECT * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid LIMIT 1 OFFSET (?)", row-1, function(err, rowth_ap) {
+    db.get("SELECT * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid LIMIT 1 OFFSET (?)", rownum-1, function(err, rowth_ap) {
       if (err) console.error(err);
       ap=rowth_ap; //will be null if error
     });
@@ -118,8 +100,7 @@ exports.get_rowth_ap = function (ap_id, row) {
   return ap;
 }
 
-//should not have get_trash_row, instead, get_row has to figure out if ap_id is in trash or not ...
-exports.get_trash_row = function (ap_id, row) {
+get_rowth_trashap = function (ap_id, row) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var ap;
@@ -131,6 +112,42 @@ exports.get_trash_row = function (ap_id, row) {
   });
   db.close
   return ap;
+}
+
+/* besides providing the mode of an ap, modeway decides between 2 functions (good func/trash func)
+ * based on whether or not the mode is discarded or not
+ *
+ * if ap_id is in trash, mode is 'discarded', else 'edit' (don't need to call on
+ * the database to figure out if an ap is 'new') 
+ * 
+ * mode     this.modeway(ap_id, 0)
+ * prev ap, this.modeway(ap_id, -1)
+ * next ap, this.modeway(ap_id, +1)
+ * rowth ap, this.modeway(ap_id, rownum+2)
+*/
+exports.modeway = function (ap_id, way) { //getap_way(ap_id, mode, trash, good)
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  var mode;
+  db.serialize(function() {
+    db.get("SELECT CASE WHEN (?) IN (SELECT discardedRow FROM trash) THEN 'discarded' ELSE 'edit' END mode", ap_id, function(err, ap) {
+      if (err) console.error(err);
+      mode = ap.mode; //ap is just {mode:'edit'} or {mode:'discarded'}, so no reason to return the whole object
+      if (way===-1 || way===0 || way===1) 
+        if (mode==='discarded')
+          trash(ap_id, way);
+        else
+          good(ap_id, way);
+      if (way>1) { //way is 2+rownum to distinguish row 0 or 1 from going to next ap or gettting the mode of current ap
+        if (mode==='discarded')
+          get_rowth_trashap(ap_id, way-2); //subtract 2 to pass desired rownum
+        else
+          get_rowth_goodap(ap_id, way-2);
+      }
+    });
+  });
+  db.close
+  return mode; 
 }
 
 exports.rm_ap = function (ap_id) {
