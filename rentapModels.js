@@ -1,27 +1,37 @@
-exports.good = function(ap_id) { //returns good {aps, displayedRow} where displayedRow is the index in aps where tbl.rowid = ap_id
+exports.good = function(ap_id, direction) { //returns good {aps, rownum} where rownum is the (index in aps where tbl.rowid = ap_id) + direction
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var good;
   db.serialize(function() {
     db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
       if (err) console.error(err);
-      good = {aps: rows, displayedRow: rows.findIndex(obj => obj.rowid == ap_id)};
-      //good.aps[good.displayedRow] is the ap that matches ap_id
+      good = {aps: rows, rownum: rows.findIndex(obj => obj.rowid == ap_id)};
+      //direction should normally be -1, 0, or +1 where -1 and +1 are for prev and next
+      good.rownum = good.rownum + direction;
+      if (good.rownum < 0) good.rownum = 0;
+      if (good.rownum > good.aps.length) good.rownum = good.aps.length;
+      console.log(good.rownum); //test
+      console.log(good.aps[good.rownum]); //test
     });
   });
   db.close
   return good;
 };
 
-exports.trash = function(ap_id) { //same as good, but in trash instead of not in trash
+exports.trash = function(ap_id, direction) { //same as good, but in trash instead of not in trash
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var trash;
   db.serialize(function() {
     db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
       if (err) console.error(err);
-      trash = {aps: rows, displayedRow: rows.findIndex(obj => obj.rowid == ap_id)};
-      //trash.aps[trash.displayedRow] is the ap that matches ap_id
+      trash = {aps: rows, rownum: rows.findIndex(obj => obj.rowid == ap_id)};
+      //direction should normally be -1, 0, or +1 where -1 and +1 are for prev and next
+      trash.rownum = trash.rownum + direction;
+      if (trash.rownum < 0) trash.rownum = 0;
+      if (trash.rownum > trash.aps.length) trash.rownum = trash.aps.length;
+      console.log(trash.rownum); //test
+      console.log(trash.aps[trash.rownum]); //test
     });
   });
   db.close
@@ -72,7 +82,7 @@ exports.getap = function (ap_id) {
 
 //if ap_id in trash, mode is 'discarded', else 'edit' (don't need to call on
 //the database to figure out if an ap is 'new')
-exports.getmode = function (ap_id, next) { //next is a callback function
+exports.forward_mode = function (ap_id, nextCallback, param3, param4) { //nextCallback(ap_id, mode, param3, param4)
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var mode;
@@ -80,30 +90,28 @@ exports.getmode = function (ap_id, next) { //next is a callback function
     db.get("SELECT CASE WHEN (?) IN (SELECT discardedRow FROM trash) THEN 'discarded' ELSE 'edit' END mode", ap_id, function(err, ap) {
       if (err) console.error(err);
       mode = ap.mode; //ap is just {mode:'edit'} or {mode:'discarded'}, so no reason to return the whole object
-      console.log(mode); //test
+      nextCallback(ap_id, mode, param3, param4); //after getting the mode, run whatever needed to know the mode like getap_prev
     });
   });
   db.close
-  console.log(typeof next);
-  next(ap_id, mode); //after getting the mode, run whatever needed to know the mode like getap_prev
 }
 
-exports.getap_prev = function (ap_id, mode) {
-  console.log(mode); //test
-  var modeaps = mode==='discarded' ? this.trash(ap_id) : this.good(ap_id);
-  var prev_i = modeaps.displayedRow>0 ? modeaps.displayedRow-1 : 0;
-  console.log(JSON.stringify(modeaps.aps[prev_i])) //test
-  return modeaps.aps[prev_i];
+//not exporting getap_prev and getap_next because they have to be passed to getmode
+getap_prev = function (ap_id, mode, trash, good) {
+  if (mode==='discarded')
+    trash(ap_id, -1);
+  else
+    good(ap_id, -1);
 }
 
-this.getmode(47, this.getap_prev)
-
-exports.getap_next = function (ap_id) {
-  var mode = this.getmode(ap_id);
-  var modeaps = mode==='discarded' ? this.trash(ap_id) : this.good(ap_id);
-  var next_i = modeaps.displayedRow<modeaps.aps.length ? modeaps.displayedRow+1 : modeaps.aps.length;
-  return modeaps.aps[next_i];
+getap_next = function (ap_id, mode, trash, good) {
+  if (mode==='discarded')
+    trash(ap_id, +1);
+  else
+    good(ap_id, +1);
 }
+
+this.forward_mode(47, getap_next, this.trash, this.good) //test
 
 //ap_id is tbl.rowid, row is the rowth ap found where rowid is either in or not in trash
 //based on whether or not ap_id is in trash. For this method, row comes from the search form.
