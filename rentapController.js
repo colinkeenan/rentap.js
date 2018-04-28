@@ -4,7 +4,7 @@ var rentap = require('./rentapModel.js');
 
 exports.show_new_ap = function(ap_form, res) {
   // no rentap method needed
-  res.send('NOT IMPLEMENTED: Show New (blank) Application');
+  res.render('rentap');
 };
 
 exports.save_new_ap = function(ap_form, res) {
@@ -19,12 +19,13 @@ exports.save_ap = function(ap_form, res) {
 };
 
 exports.show_ap = function(ap_form, res) {
-  // rentap.getaps(ap_form.params.ap_id, 0, function(aps) {
-  //   aps.mode
-  //   aps.rownum
-  //   ap = aps.aps[aps.rownum]
-  // });
-  res.send('NOT IMPLEMENTED: Display Application: ' + ap_form.params.ap_id);
+  rentap.getaps(ap_form.params.ap_id, 0, function(aps) {
+    aps.mode
+    aps.rownum
+    ap = aps.aps[aps.rownum]
+    res.render('rentap', {mode:aps.mode, rownum:aps.rownum, ap:aps.aps[aps.rownum]})
+    console.log({mode:aps.mode, rownum:aps.rownum, ap:aps.aps[aps.rownum]})
+  });
 };
 
 exports.show_closest_ap_in_trash = function(ap_form, res) {
@@ -137,7 +138,7 @@ exports.jump_ap = function(search_form, res) {
 //still need to make all the headers methods in rentapModel.js
 
 exports.header_update = function(header_form, res) {
-  res.send('NOT IMPLEMENTED: Show Header with name: ' header_form.body.headername 'that goes with Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);
+  res.send('NOT IMPLEMENTED: Show Header with name: ' + header_form.body.headername + 'that goes with Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ');
 };
 
 exports.save_new_header = function(header_form, res) {

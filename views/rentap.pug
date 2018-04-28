@@ -35,31 +35,29 @@ html(lang='en')
             input#rentalcitystzip(type='text' value=(undefined===header ? 'enter city, state, zip' : header.CityStateZip))
 
           td#tdrtitle 
-            //- it makes sense to get the mode when getting 
-            //- rentapform which also needs row, both come from same database method
-            input#mode.inlineshort(type='text' form='rentapform' readonly value=(undefined===rowmode ? 'new' : rowmode.mode)) 
+            input#mode.inlineshort(type='text' form='rentapform' readonly value=(undefined===rentap ? 'new' : rentap.mode)) 
             input#rtitle(type='text' value=(undefined===header ? 'enter title' : header.Title))
 
           td 
             //- below is part of rentapform so gets ap_id and rentap {... dateApplied, dateGuested, dateRented, headerName} 
             //- when there's a get for rentapform
             label.smalllabelinput(for='authdate') Applied 
-            input#authdate(type='text' form='rentapform' value=(undefined===rentap? '' : rentap.dateApplied)) 
+            input#authdate(type='text' form='rentapform' value=(undefined===rentap? '' : rentap.ap.dateApplied)) 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') Row: 
             
-            input#rowprint(type='text' form='rentapform' value=(undefined===rowmode? '' : rowmode.row) readonly) 
+            input#rowprint(type='text' form='rentapform' value=(undefined===rentap? '' : rentap.rownum) readonly) 
             br 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') ID: 
-            input#rentapID(type='text' id=''  form='rentapform' value=ap_id readonly) 
+            input#rentapID(type='text' form='rentapform' value=ap_id readonly) 
             
           td 
             label.smalllabelinputGuest(for='guestdate') Guest 
-            - var rentapDateGuested = undefined===rentap? '' : rentap.dateGuested
+            - var rentapDateGuested = undefined===rentap? '' : rentap.ap.dateGuested
             textarea#guestdate(cols='8' rows='2' form='rentapform')= rentapDateGuested
 
           td 
             label.smalllabelinputRented(for='rentdate') Rented 
-            - var rentapDateRented = undefined===rentap? '' : rentap.dateGuested
+            - var rentapDateRented = undefined===rentap? '' : rentap.ap.dateGuested
             textarea#rentdate(cols='8' rows='2' form='rentapform')= rentapDateRented
             //-
             //- above is part of rentapform
@@ -77,14 +75,15 @@ html(lang='en')
             //- onchange... makes hidden input#rentapHeadername update to match whatever is selected
             //- and then submits the header form to update header (which includes input#headername above)
             //- I can't figure out how I did it in the rentap extension though
-            select#changeHeadername(name='selectedHeadername' onchange="changeInputHeadername(event)")
-              each headerName in headerNames
-                option(value=headerName selected=(header.Name === headerName)) headerName
+            if (headerNames)
+              select#changeHeadername(name='selectedHeadername' onchange="changeInputHeadername(event)")
+                each headerName in headerNames
+                  option(value=headerName selected=(header.Name === headerName)) headerName
             button#defaultheaderbutton.inline(title='Set as default header shown on start' formaction=url + "/header/" + header_id + "/default") ->0
 
       //- below script defines changeInputHeadername(event) that is used in select#changeHeadername above to change 
       //- hidden input#rentapHeadername below and update the header
-      script(type='text/javascript') 
+      script(type='text/javascript'). 
         //- e is the onchange event
         function changeInputHeadername(e) { 
           document.getElementById("rentapHeadername").value = e.target.value //this is needed to keep track of which header to use with each rentap
@@ -99,86 +98,86 @@ html(lang='en')
       //- For a new ap, ap_id rentap and rowmode will all be undefined
 
       //- hidden input below is set by changeInputHeadername above when select#changeHeadername is changed
-      input#rentapHeadername(type='hidden' value='');
+      input#rentapHeadername(type='hidden' value='')
       table#rentapbody 
         tr 
           td 
             ul 
-              li.section_header#[strong Personal Information]
+              li.section_header #[strong Personal Information]
 
               li
                 label.personalinfo(for='fullname') Full Name 
-                input#fullname(type='text' value=(undefined===rentap? '' : rentap.FullName))
+                input#fullname(type='text' value=(undefined===rentap? '' : rentap.ap.FullName))
 
               li 
                 label.personalinfo(for='ssnumber') Social Security Number 
-                input#ssnumber(type='text' value=(undefined===rentap? '' : rentap.SSN))
+                input#ssnumber(type='text' value=(undefined===rentap? '' : rentap.ap.SSN))
 
               li 
                 label.personalinfo(for='birthdate') Birth Date 
-                input#birthdate(type='text' value=(undefined===rentap? '' : rentap.BirthDate))
+                input#birthdate(type='text' value=(undefined===rentap? '' : rentap.ap.BirthDate))
 
               li 
                 label.personalinfo(for='maritalstatus') Marital Status 
-                input#maritalstatus(type='text' value=(undefined===rentap? '' : rentap.MaritalStatus))
+                input#maritalstatus(type='text' value=(undefined===rentap? '' : rentap.ap.MaritalStatus))
 
               li 
                 label.personalinfol(for='email') Email 
-                input#email(type='text' value=(undefined===rentap? '' : rentap.Email))
+                input#email(type='text' value=(undefined===rentap? '' : rentap.ap.Email))
 
               li 
                 label.personalinfol(for='stateid') State ID# 
-                input#stateid(type='text' value=(undefined===rentap? '' : rentap.StateID))
+                input#stateid(type='text' value=(undefined===rentap? '' : rentap.ap.StateID))
 
               li 
                 label.personalinfol(for='phone1') Phone 1 
-                input#phone1(type='text' value=(undefined===rentap? '' : rentap.Phone1))
+                input#phone1(type='text' value=(undefined===rentap? '' : rentap.ap.Phone1))
 
               li 
-                label.personalinfo(for='phone2')Phone 2 
-                input#phone2(type='text' value=(undefined===rentap? '' : rentap.Phone2))
+                label.personalinfo(for='phone2') Phone 2 
+                input#phone2(type='text' value=(undefined===rentap? '' : rentap.ap.Phone2))
 
               li 
-                - var ca = undefined===rentap ? '' : rentap.CurrentAddress
+                - var ca = undefined===rentap ? '' : rentap.ap.CurrentAddress
                 label#currentaddresslabel(for='currentaddress') #[strong Current Address, City, State, Zip, Dates, Rent, Landlord name and phone number]...  
                 textarea#currentaddress= ca
 
               li 
-                - var pa = undefined===rentap ? '' : rentap.PriorAddresses
+                - var pa = undefined===rentap ? '' : rentap.ap.PriorAddresses
                 label(for='previousaddresses') #[strong Prior Addresses, Cities, States, Zips, Dates, Rents, Landlords]...  
                 textarea#previousaddresses= pa
 
           td 
             ul 
               li 
-                - var po = undefined===rentap ? '' : rentap.ProposedOccupants
+                - var po = undefined===rentap ? '' : rentap.ap.ProposedOccupants
                 label(for='occupants') #[strong Proposed Occupants: self+age, other+age]...  
                 textarea#occupants= po
 
               li 
-                - var pp = undefined===rentap ? '' : rentap.ProposedPets
+                - var pp = undefined===rentap ? '' : rentap.ap.ProposedPets
                 label(for='pets') #[<strong>Proposed Pets] 
                 textarea#pets= pp
 
               li 
-                - var inc = undefined===rentap ? '' : rentap.Income
+                - var inc = undefined===rentap ? '' : rentap.ap.Income
                 label(for='income') #[strong Income &amp Food Stamps] 
                 textarea#income= inc
 
               li
-                - var emp = undefined===rentap ? '' : rentap.Employment
+                - var emp = undefined===rentap ? '' : rentap.ap.Employment
                 label(for='employment') #[strong Employment: address, job, dates, hours, supervisor name and phone number]... 
                 textarea#employment= emp
 
           td
             ul
               li
-                - var ev = undefined===rentap ? '' : rentap.Evictions
+                - var ev = undefined===rentap ? '' : rentap.ap.Evictions
                 label(for='evictions') #[strong Evictions Past 10 Years] 
                 textarea#evictions= ev
 
               li
-                - var fe = undefined===rentap ? '' : rentap.Felonies
+                - var fe = undefined===rentap ? '' : rentap.ap.Felonies
                 label(for='felonies') #[strong Felonies/Drug Convictions] 
                 textarea#felonies= fe
 
@@ -219,6 +218,7 @@ html(lang='en')
       //- based on what the current ap is
       button#searchbutton.inlinebutton(formaction='/show/' + ap_id + '/search' title='Click while empty to clear previous search and list all names.') Search
       //- I think the following will submit this form (form#rentapsearch) when a new name is selected, with selectedAp_id being one of the values submitted
-      select#listsearchmenu.inline(name='selectedAp_id' onchange='rentapsearch.submit()')
-        each Name in Names
-          option(value=Name.ap_id selected=(ap_id === Name.ap_id)) Name.FullName
+      if (Names)
+        select#listsearchmenu.inline(name='selectedAp_id' onchange='rentapsearch.submit()')
+          each Name in Names
+            option(value=Name.ap_id selected=(ap_id === Name.ap_id)) Name.FullName
