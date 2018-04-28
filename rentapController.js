@@ -24,7 +24,6 @@ exports.show_ap = function(ap_form, res) {
     aps.rownum
     ap = aps.aps[aps.rownum]
     res.render('rentap', {mode:aps.mode, rownum:aps.rownum, ap:aps.aps[aps.rownum]})
-    console.log({mode:aps.mode, rownum:aps.rownum, ap:aps.aps[aps.rownum]})
   });
 };
 

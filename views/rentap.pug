@@ -35,29 +35,29 @@ html(lang='en')
             input#rentalcitystzip(type='text' value=(undefined===header ? 'enter city, state, zip' : header.CityStateZip))
 
           td#tdrtitle 
-            input#mode.inlineshort(type='text' form='rentapform' readonly value=(undefined===rentap ? 'new' : rentap.mode)) 
+            input#mode.inlineshort(type='text' form='rentapform' readonly value=(undefined===mode ? 'new' : mode)) 
             input#rtitle(type='text' value=(undefined===header ? 'enter title' : header.Title))
 
           td 
             //- below is part of rentapform so gets ap_id and rentap {... dateApplied, dateGuested, dateRented, headerName} 
             //- when there's a get for rentapform
             label.smalllabelinput(for='authdate') Applied 
-            input#authdate(type='text' form='rentapform' value=(undefined===rentap? '' : rentap.ap.dateApplied)) 
+            input#authdate(type='text' form='rentapform' value=(undefined===ap? '' : ap.dateApplied)) 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') Row: 
             
-            input#rowprint(type='text' form='rentapform' value=(undefined===rentap? '' : rentap.rownum) readonly) 
+            input#rowprint(type='text' form='rentapform' value=(undefined===rownum? '' : rownum) readonly) 
             br 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') ID: 
             input#rentapID(type='text' form='rentapform' value=ap_id readonly) 
             
           td 
             label.smalllabelinputGuest(for='guestdate') Guest 
-            - var rentapDateGuested = undefined===rentap? '' : rentap.ap.dateGuested
+            - var rentapDateGuested = undefined===ap? '' : ap.dateGuested
             textarea#guestdate(cols='8' rows='2' form='rentapform')= rentapDateGuested
 
           td 
             label.smalllabelinputRented(for='rentdate') Rented 
-            - var rentapDateRented = undefined===rentap? '' : rentap.ap.dateGuested
+            - var rentapDateRented = undefined===ap? '' : ap.dateGuested
             textarea#rentdate(cols='8' rows='2' form='rentapform')= rentapDateRented
             //-
             //- above is part of rentapform
@@ -107,77 +107,77 @@ html(lang='en')
 
               li
                 label.personalinfo(for='fullname') Full Name 
-                input#fullname(type='text' value=(undefined===rentap? '' : rentap.ap.FullName))
+                input#fullname(type='text' value=(undefined===ap? '' : ap.FullName))
 
               li 
                 label.personalinfo(for='ssnumber') Social Security Number 
-                input#ssnumber(type='text' value=(undefined===rentap? '' : rentap.ap.SSN))
+                input#ssnumber(type='text' value=(undefined===ap? '' : ap.SSN))
 
               li 
                 label.personalinfo(for='birthdate') Birth Date 
-                input#birthdate(type='text' value=(undefined===rentap? '' : rentap.ap.BirthDate))
+                input#birthdate(type='text' value=(undefined===ap? '' : ap.BirthDate))
 
               li 
                 label.personalinfo(for='maritalstatus') Marital Status 
-                input#maritalstatus(type='text' value=(undefined===rentap? '' : rentap.ap.MaritalStatus))
+                input#maritalstatus(type='text' value=(undefined===ap? '' : ap.MaritalStatus))
 
               li 
                 label.personalinfol(for='email') Email 
-                input#email(type='text' value=(undefined===rentap? '' : rentap.ap.Email))
+                input#email(type='text' value=(undefined===ap? '' : ap.Email))
 
               li 
                 label.personalinfol(for='stateid') State ID# 
-                input#stateid(type='text' value=(undefined===rentap? '' : rentap.ap.StateID))
+                input#stateid(type='text' value=(undefined===ap? '' : ap.StateID))
 
               li 
                 label.personalinfol(for='phone1') Phone 1 
-                input#phone1(type='text' value=(undefined===rentap? '' : rentap.ap.Phone1))
+                input#phone1(type='text' value=(undefined===ap? '' : ap.Phone1))
 
               li 
                 label.personalinfo(for='phone2') Phone 2 
-                input#phone2(type='text' value=(undefined===rentap? '' : rentap.ap.Phone2))
+                input#phone2(type='text' value=(undefined===ap? '' : ap.Phone2))
 
               li 
-                - var ca = undefined===rentap ? '' : rentap.ap.CurrentAddress
+                - var ca = undefined===ap ? '' : ap.CurrentAddress
                 label#currentaddresslabel(for='currentaddress') #[strong Current Address, City, State, Zip, Dates, Rent, Landlord name and phone number]...  
                 textarea#currentaddress= ca
 
               li 
-                - var pa = undefined===rentap ? '' : rentap.ap.PriorAddresses
+                - var pa = undefined===ap ? '' : ap.PriorAddresses
                 label(for='previousaddresses') #[strong Prior Addresses, Cities, States, Zips, Dates, Rents, Landlords]...  
                 textarea#previousaddresses= pa
 
           td 
             ul 
               li 
-                - var po = undefined===rentap ? '' : rentap.ap.ProposedOccupants
+                - var po = undefined===ap ? '' : ap.ProposedOccupants
                 label(for='occupants') #[strong Proposed Occupants: self+age, other+age]...  
                 textarea#occupants= po
 
               li 
-                - var pp = undefined===rentap ? '' : rentap.ap.ProposedPets
+                - var pp = undefined===ap ? '' : ap.ProposedPets
                 label(for='pets') #[<strong>Proposed Pets] 
                 textarea#pets= pp
 
               li 
-                - var inc = undefined===rentap ? '' : rentap.ap.Income
+                - var inc = undefined===ap ? '' : ap.Income
                 label(for='income') #[strong Income &amp Food Stamps] 
                 textarea#income= inc
 
               li
-                - var emp = undefined===rentap ? '' : rentap.ap.Employment
+                - var emp = undefined===ap ? '' : ap.Employment
                 label(for='employment') #[strong Employment: address, job, dates, hours, supervisor name and phone number]... 
                 textarea#employment= emp
 
           td
             ul
               li
-                - var ev = undefined===rentap ? '' : rentap.ap.Evictions
+                - var ev = undefined===ap ? '' : ap.Evictions
                 label(for='evictions') #[strong Evictions Past 10 Years] 
                 textarea#evictions= ev
 
               li
-                - var fe = undefined===rentap ? '' : rentap.ap.Felonies
+                - var fe = undefined===ap ? '' : ap.Felonies
                 label(for='felonies') #[strong Felonies/Drug Convictions] 
                 textarea#felonies= fe
 
