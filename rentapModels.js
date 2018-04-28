@@ -1,5 +1,5 @@
 //getaps is not exported because it is called from modeway when way is -1, 0, or 1, which provides mode ('discarded' or 'edit') to getaps
-getaps = function(ap_id, way, mode) { //returns getaps {aps, rownum, mode} where rownum is the (index in aps where tbl.rowid = ap_id) + way
+getaps = function(ap_id, way, mode, callback) { //callback gets getaps {aps, rownum, mode} where rownum is the (index in aps where tbl.rowid = ap_id) + way
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var getaps;
@@ -13,6 +13,7 @@ getaps = function(ap_id, way, mode) { //returns getaps {aps, rownum, mode} where
         //wrap around from 0 to end of list or from end of list to 0
         if (getaps.rownum < 0) getaps.rownum = getaps.aps.length; 
         if (getaps.rownum > getaps.aps.length) getaps.rownum = 0;
+        callback(getaps);
       });
     else
       db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
@@ -23,10 +24,10 @@ getaps = function(ap_id, way, mode) { //returns getaps {aps, rownum, mode} where
         //wrap around from 0 to end of list or from end of list to 0
         if (getaps.rownum < 0) getaps.rownum = getaps.aps.length; 
         if (getaps.rownum > getaps.aps.length) getaps.rownum = 0;
+        callback(getaps);
       });
   });
   db.close
-  return getaps;
 };
 
 /* get_rowth_ap is not exported because it is called from this.modeway when "way" is greater than 1 
@@ -36,7 +37,7 @@ getaps = function(ap_id, way, mode) { //returns getaps {aps, rownum, mode} where
  * ap_id is tbl.rowid, rownum is an integer (index) for the rowth ap found where rowid is either in or not in trash 
  * For this function, rownum comes from the search form.
 */
-get_rowth_ap = function (ap_id, rownum, mode) {
+get_rowth_ap = function (ap_id, rownum, mode, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var ap;
@@ -45,51 +46,46 @@ get_rowth_ap = function (ap_id, rownum, mode) {
       db.get("SELECT * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid LIMIT 1 OFFSET (?)", rownum-1, function(err, rowth_ap) {
         if (err) console.error(err);
         ap={ap:rowth_ap, rownum:rownum, mode:mode};
+        callback(ap);
       });
     else
       db.get("SELECT * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid LIMIT 1 OFFSET (?)", rownum-1, function(err, rowth_ap) {
         if (err) console.error(err);
         ap={ap:rowth_ap, rownum:rownum, mode:mode};
+        callback(ap);
       });
   });
   db.close
-  return ap;
 }
 
-/* besides providing the mode of an ap, modeway decides between 2 functions (good func/trash func)
- * based on whether or not the mode is discarded or not
- *
- * if ap_id is in trash, mode is 'discarded', else 'edit' (don't need to call on
+/* if ap_id is in trash, mode is 'discarded', else 'edit' (don't need to call on
  * the database to figure out if an ap is 'new') 
  * 
- * get ap,   this.modeway(ap_id, 0)
- * prev ap,  this.modeway(ap_id, -1)
- * next ap,  this.modeway(ap_id, +1)
- * rowth ap, this.modeway(ap_id, rownum+2)
+ * get ap,   this.modeway(ap_id, 0, callback)
+ * prev ap,  this.modeway(ap_id, -1, callback)
+ * next ap,  this.modeway(ap_id, +1, callback)
+ * rowth ap, this.modeway(ap_id, rownum+2, callback)
  *
- * The first 3 above will call ether trash or good and return an object with
- * all the matching apps, the rownum that matches ap_id, and the
- * mode which modeway determined
+ * First 3 call getaps, last calls get_rowth_ap
  *
- * The last one returns the same but calls either get_rowth_goodap or ...trashap
 */
-exports.modeway = function (ap_id, way) {
+exports.modeway = function (ap_id, way, callback) { //callback gets whatever is supplied to it from getaps or get_rowth_ap
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   db.serialize(function() {
     db.get("SELECT CASE WHEN (?) IN (SELECT discardedRow FROM trash) THEN 'discarded' ELSE 'edit' END mode", ap_id, function(err, ap) {
       if (err) console.error(err);
       if (way===-1 || way===0 || way===1) 
-        getaps(ap_id, way, ap.mode);
+        getaps(ap_id, way, ap.mode, callback);
       if (way>1) { //way is 2+rownum to distinguish row 0 or 1 from going to next ap or gettting the mode of current ap
-        get_rowth_ap(ap_id, way-2, ap.mode); //subtract 2 to pass desired rownum
+        get_rowth_ap(ap_id, way-2, ap.mode, callback); //subtract 2 to pass desired rownum
       }
     });
   });
   db.close
 }
 
-exports.goodnames = function() { //for dropdown list of full names to choose an ap from
+exports.goodnames = function(callback) { //for dropdown list of full names to choose an ap from
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var goodnames = [];
@@ -97,13 +93,13 @@ exports.goodnames = function() { //for dropdown list of full names to choose an 
     db.all("SELECT FullName FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash)", function(err, rows) {
       if (err) console.error(err);
       goodnames = rows; //will be null if error
+      callback(goodnames);
     });
   });
   db.close
-  return goodnames;
 };
 
-exports.trashnames = function() { //for dropdown list of full names to choose an ap from
+exports.trashnames = function(callback) { //for dropdown list of full names to choose an ap from
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var trashnames = [];
@@ -111,10 +107,10 @@ exports.trashnames = function() { //for dropdown list of full names to choose an
     db.all("SELECT FullName FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash)", function(err, rows) {
       if (err) console.error(err);
       trashnames = rows; //will be null if error
+      callback(trashnames);
     });
   });
   db.close
-  return trashnames;
 }
 
 exports.rm_ap = function (ap_id) {
@@ -149,7 +145,7 @@ exports.restore_ap = function (ap_id) {
   });
 }
 
-exports.save_new_ap = function (ap) {
+exports.save_new_ap = function (ap, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var ap_id = null;
@@ -158,14 +154,14 @@ exports.save_new_ap = function (ap) {
       function(err) {
         if (err) console.error(err) 
         else ap_id = this.lastID;
+        callback(ap_id);
       }
     ); 
   });
   db.close
-  return ap_id;
 }
 
-exports.save_ap = function (ap_id, ap) {
+exports.save_ap = function (ap_id, ap, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var updated_id = null;
@@ -174,15 +170,15 @@ exports.save_ap = function (ap_id, ap) {
       function(err) {
         if (err) console.error(err) 
         else updated_id = this.lastID;
+        callback(updated_id);
       }
     ); 
   });
   db.close
-  return updated_id;
 }
 //should not have search.goodaps and search.trashaps, just search, which will
 //decide which to search based on ap_id (if in trash or not)
-exports.search_goodaps = function(pattern) {
+exports.search_goodaps = function(pattern, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var matching_goodaps = [];
@@ -191,14 +187,14 @@ exports.search_goodaps = function(pattern) {
       pattern, function(err, rows) {
         if (err) console.error(err);
         matching_goodaps = rows; //will be null if error (or nothing matches, of course)
+        callback(matching_goodaps);
       }
     );
   });
   db.close
-  return matching_goodaps;
 }
 
-exports.search_trashaps = function(pattern) {
+exports.search_trashaps = function(pattern, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var matching_trashaps = [];
@@ -207,14 +203,14 @@ exports.search_trashaps = function(pattern) {
       pattern, function(err, rows) {
         if (err) console.error(err);
         matching_trashaps = rows; //will be null if error (or nothing matches, of course)
+        callback(matching_trashaps);
       }
     );
   });
   db.close
-  return matching_trashaps;
 }
 
-exports.search_allaps = function(pattern) {
+exports.search_allaps = function(pattern, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var matching_allaps = [];
@@ -223,14 +219,14 @@ exports.search_allaps = function(pattern) {
       pattern, function(err, rows) {
         if (err) console.error(err);
         matching_allaps = rows; //will be null if error (or nothing matches, of course)
+        callback(matching_allaps);
       }
     );
   });
   db.close
-  return matching_allaps;
 }
 
-exports.search_column = function(pattern) {
+exports.search_column = function(pattern, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var rows_with_matching_field = [];
@@ -239,9 +235,14 @@ exports.search_column = function(pattern) {
       pattern, function(err, rows) {
         if (err) console.error(err);
         rows_with_matching_field = rows; //will be null if error (or nothing matches, of course)
+        callback(rows_with_matching_field);
       }
     );
   });
   db.close
-  return rows_with_matching_field;
 }
+
+test = function (result) {
+  console.log(result);
+}
+
