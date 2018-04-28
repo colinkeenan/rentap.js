@@ -129,14 +129,12 @@ exports.jump_ap = function(search_form, res) {
   //   ap.rownum
   //   ap.ap
   // });
-  // adding 2 makes "way" greater than 1 in all cases which signals
-  // modway to use get_rowth_ap instead of getaps
   res.send('NOT IMPLEMENTED: Jump to row ' + search_form.body.row + ' from ap ' + search_form.params.ap_id)
 };
 
 // HEADERS FORM
 
-//still need to make all the headers methods in models/rentap.js
+//still need to make all the headers methods in rentapModel.js
 
 exports.header_update = function(header_form, res) {
   res.send('NOT IMPLEMENTED: Show Header with name: ' header_form.body.headername 'that goes with Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);

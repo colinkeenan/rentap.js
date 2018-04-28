@@ -75,33 +75,28 @@ exports.get_rowth_ap = function (ap_id, rownum, callback) { //callback gets ap {
   });
 }
 
-exports.goodnames = function(callback) { //for dropdown list of full names to choose an ap from
-  const sqlite3 = require('sqlite3');
-  let db = new sqlite3.Database('./store.db');
-  var goodnames = [];
-  db.serialize(function() {
-    db.all("SELECT FullName FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
-      if (err) console.error(err);
-      goodnames = rows; //will be null if error
-      callback(goodnames);
+exports.names = function(callback) { //for dropdown list of full names to choose an ap from
+  getmode(ap_id, function(mode) {
+    const sqlite3 = require('sqlite3');
+    let db = new sqlite3.Database('./store.db');
+    var names;
+    db.serialize(function() {
+      if (mode==='discarded')
+        db.all("SELECT FullName FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
+          if (err) console.error(err);
+          names = rows; //will be null if error
+          callback(names);
+        });
+      else
+        db.all("SELECT FullName FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
+          if (err) console.error(err);
+          names = rows; //will be null if error
+          callback(names);
+        });
     });
+    db.close
   });
-  db.close
 };
-
-exports.trashnames = function(callback) { //for dropdown list of full names to choose an ap from
-  const sqlite3 = require('sqlite3');
-  let db = new sqlite3.Database('./store.db');
-  var trashnames = [];
-  db.serialize(function() {
-    db.all("SELECT FullName FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
-      if (err) console.error(err);
-      trashnames = rows; //will be null if error
-      callback(trashnames);
-    });
-  });
-  db.close
-}
 
 exports.rm_ap = function (ap_id) {
   const sqlite3 = require('sqlite3');
@@ -166,36 +161,30 @@ exports.save_ap = function (ap_id, ap, callback) {
   });
   db.close
 }
-//should not have search.goodaps and search.trashaps, just search, which will
-//decide which to search based on ap_id (if in trash or not)
-exports.search_goodaps = function(pattern, callback) {
+
+exports.search = function(ap_id, pattern, callback) {
+  getmode(ap_id, function(mode) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var matching_goodaps = [];
   db.serialize(function() {
-    db.all("SELECT * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
-      pattern, function(err, rows) {
-        if (err) console.error(err);
-        matching_goodaps = rows; //will be null if error (or nothing matches, of course)
-        callback(matching_goodaps);
-      }
-    );
-  });
-  db.close
-}
-
-exports.search_trashaps = function(pattern, callback) {
-  const sqlite3 = require('sqlite3');
-  let db = new sqlite3.Database('./store.db');
-  var matching_trashaps = [];
-  db.serialize(function() {
-    db.all("SELECT * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
-      pattern, function(err, rows) {
-        if (err) console.error(err);
-        matching_trashaps = rows; //will be null if error (or nothing matches, of course)
-        callback(matching_trashaps);
-      }
-    );
+    if (mode==='discarded')
+      db.all("SELECT * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
+        pattern, function(err, rows) {
+          if (err) console.error(err);
+          matching_goodaps = rows; //will be null if error (or nothing matches, of course)
+          callback(matching_goodaps);
+        }
+      );
+    else
+      db.all("SELECT * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
+        pattern, function(err, rows) {
+          if (err) console.error(err);
+          matching_goodaps = rows; //will be null if error (or nothing matches, of course)
+          callback(matching_goodaps);
+        }
+      );
+    });
   });
   db.close
 }
@@ -235,4 +224,3 @@ exports.search_column = function(pattern, callback) {
 test = function (result) {
   console.log(result);
 }
-this.get_rowth_ap(5,5,test);
