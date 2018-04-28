@@ -42,7 +42,7 @@ html(lang='en')
             //- below is part of rentapform so gets ap.rowid and rentap {... dateApplied, dateGuested, dateRented, headerName} 
             //- when there's a get for rentapform
             label.smalllabelinput(for='authdate') Applied 
-            input#authdate(type='text' form='rentapform' value=(undefined===ap? '' : ap.dateApplied)) 
+            input#authdate(type='text' form='rentapform' value=(undefined===ap ? '' : ap.dateApplied)) 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') Row: 
             
             input#rowprint(type='text' form='rentapform' value=(undefined===rownum? '' : rownum) readonly) 
@@ -188,13 +188,13 @@ html(lang='en')
                 //- and for those that need it, also overide POST with GET by using formmethod
                 if (mode != 'discarded')
                   button#savebutton.inline Save 
-                  button#newbutton.inline(formmethod=GET formaction='/rentap' style='padding-left:20px') New 
-                  button#discardbutton.inline(formaction='/rentap/discard/' + ap.rowid style='padding-left:20px') Discard
-                  button#trashbutton.inline(formmethod=GET formaction='/rentap/show/' + ap.rowid + '/trash' style='padding-left:20px') Trash
+                  button#newbutton.inline(formmethod=GET formaction='/rentap') New 
+                  button#discardbutton.inline(formmethod=POST formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid)) Discard
+                  button#trashbutton.inline(formmethod=GET formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/trash') Trash
                 else 
-                  button#restorebutton.inline(formaction='/rentap/restore/' + ap.rowid + '/trash' style='padding-left:20px') Restore
-                  button#delrentapbutton.inline(formaction='/rentap/delete/' + ap.rowid + '/trash'  style='padding-left:20px') Delete
-                  button#backbutton.inline(formmethod=GET formaction='/renatp/show/' + ap.rowid style='padding-left:20px') Back 
+                  button#restorebutton.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid) + '/trash') Restore
+                  button#delrentapbutton.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid) + '/trash') Delete
+                  button#backbutton.inline(formmethod=GET formaction='/renatp/show/' + (undefined==ap ? '' : ap.rowid)) Back 
 
     //- decided a third form is needed here for these jump buttons so it will only post the necessary data for the jump
     //- i.e row and pattern (decided not to include jumping to a specific id here because user can just enter that
@@ -204,19 +204,19 @@ html(lang='en')
     //- or if selecting a name from the dropdown list, go straight to the selectedAp_id as the default action
     form#rentapsearch(method=POST action='/rentap/showSelected') 
       //- prev and next don't need to send data from the form so using method GET
-      button#prevbutton.inlinebutton(formmethod=GET formaction='/rentap/show/' + ap.rowid + '/prev') Prev
-      button#nextbutton.inlinebutton(formmethod=GET formaction='/rentap/show/' + ap.rowid + '/next') Next
+      button#prevbutton.inlinebutton(formmethod=GET formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/prev') Prev
+      button#nextbutton.inlinebutton(formmethod=GET formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/next') Next
 
       label(for='row' style='text-align:right; font-weight: normal; margin-right: 1ch; vertical-align: middle') row
       input#row.inline(type='text' style='text-align: right;' value='' title='Jump to 0 to find printable instructions for applicants.')
-      button#jumpbutton.inlinebutton(formaction='/rentap/show/' + ap.rowid + '/jump') Go
+      button#jumpbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/jump') Go
       
       input#pattern(type='text' title='Hint: Use &quot; to search names only. For example, &quot;d, for names starting with D.' value='' )
       //- might need to just stay on the current ap.rowid so the action is /show/:ap.rowid/search
       //- and the pattern to search for is in the posted data (...body.pattern)
       //- this button will assume search is to be limited to goodaps or trashaps
       //- based on what the current ap is
-      button#searchbutton.inlinebutton(formaction='/rentap/show/' + ap.rowid + '/search' title='Click while empty to clear previous search and list all names.') Search
+      button#searchbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/search' title='Click while empty to clear previous search and list all names.') Search
       //- I think the following will submit this form (form#rentapsearch) when a new name is selected, with selectedAp_id being one of the values submitted
       if (Names)
         select#listsearchmenu.inline(name='selectedAp_id' onchange='rentapsearch.submit()')

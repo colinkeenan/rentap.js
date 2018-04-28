@@ -4,7 +4,40 @@ var rentap = require('./rentapModel.js');
 
 exports.show_new_ap = function(ap_form, res) {
   // no rentap method needed
-  res.render('rentap');
+  res.render('rentap', {url:ap_form.originalUrl, mode:'new', rownum: undefined, ap: undefined})
+};
+
+exports.show_ap = function(ap_form, res) {
+  rentap.getaps(ap_form.params.ap_id, 0, function(aps) {
+    res.render('rentap', {url:ap_form.originalUrl, mode:aps.mode, rownum:aps.rownum, ap:aps.aps[aps.rownum]})
+  });
+};
+
+exports.discard_ap = function(ap_form, res) {
+  // rentap.discard_ap(ap_form.params.ap_id)
+  rentap.discard_ap(ap_form.params.ap_id, function(err) {
+    //should do something if err
+    res.render('rentap')
+  });
+};
+
+exports.restore_ap = function(ap_form, res) {
+  // rentap.restore_ap(ap_form.params.ap_id)
+  res.send('NOT IMPLEMENTED: Restore Discarded Application: ' + ap_form.params.ap_id);
+  rentap.restore_ap(ap_form.params.ap_id, function(err) {
+    //should do something if err
+    res.render('rentap')
+  });
+};
+
+exports.rm_ap = function(ap_form, res) {
+  // rentap.rm_ap(ap_form.params.ap_id)
+  res.send('NOT IMPLEMENTED: Delete Application: ' + ap_form.params.ap_id);
+};
+
+exports.show_closest_ap_in_trash = function(ap_form, res) {
+  // rentap. [need to define this method]
+  res.send('NOT IMPLEMENTED: Go to trash from: ' + ap_form.params.ap_id);
 };
 
 exports.save_new_ap = function(ap_form, res) {
@@ -16,36 +49,6 @@ exports.save_new_ap = function(ap_form, res) {
 exports.save_ap = function(ap_form, res) {
   // rentap.save_ap
   res.send('NOT IMPLEMENTED: Save Edited Application:' + ap_form.params.ap_id + 'with values: ' + ap_form.body.fullname + '. . .');
-};
-
-exports.show_ap = function(ap_form, res) {
-  rentap.getaps(ap_form.params.ap_id, 0, function(aps) {
-    aps.mode
-    aps.rownum
-    ap = aps.aps[aps.rownum]
-    res.render('rentap', {url:ap_form.originalUrl, mode:aps.mode, rownum:aps.rownum, ap:aps.aps[aps.rownum]})
-  });
-};
-
-exports.show_closest_ap_in_trash = function(ap_form, res) {
-  // rentap. [need to define this method]
-  res.send('NOT IMPLEMENTED: Go to trash from: ' + ap_form.params.ap_id);
-};
-
-
-exports.discard_ap = function(ap_form, res) {
-  // rentap.discard_ap(ap_form.params.ap_id)
-  res.send('NOT IMPLEMENTED: Discard Application: ' + ap_form.params.ap_id)
-};
-
-exports.rm_ap = function(ap_form, res) {
-  // rentap.rm_ap(ap_form.params.ap_id)
-  res.send('NOT IMPLEMENTED: Delete Application: ' + ap_form.params.ap_id);
-};
-
-exports.restore_ap = function(ap_form, res) {
-  // rentap.restore_ap(ap_form.params.ap_id)
-  res.send('NOT IMPLEMENTED: Restore Discarded Application: ' + ap_form.params.ap_id);
 };
 
 exports.show_goodaps = function(ap_form, res) {
