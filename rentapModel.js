@@ -13,6 +13,10 @@ getmode = function (ap_id, callback) { //callback gets mode
   db.close
 }
 
+// way:
+//0 if want ap_id
+//-1 if want prev ap that is in the same mode as ap_id (in trash if ap_id is, or not in trash if ap_id isn't)
+//1 if want next ap that is in the same mode as ap_id
 exports.getaps = function(ap_id, way, callback) { //callback gets getaps {aps, rownum, mode} where rownum is the (index in aps where tbl.rowid = ap_id) + way
   getmode(ap_id, function(mode) {
     const sqlite3 = require('sqlite3');

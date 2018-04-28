@@ -19,7 +19,7 @@ exports.save_ap = function(ap_form, res) {
 };
 
 exports.show_ap = function(ap_form, res) {
-  // rentap.modeway(ap_form.params.ap_id, 0, function(aps) {
+  // rentap.getaps(ap_form.params.ap_id, 0, function(aps) {
   //   aps.mode
   //   aps.rownum
   //   ap = aps.aps[aps.rownum]
@@ -71,7 +71,7 @@ exports.show_trashnames = function(ap_form, res) {
 // SEARCHES FORM
 
 exports.selected_ap = function(search_form, res) {
-  // rentap.modeway(search_form.body.selectedAp_id, 0, function(ap) {
+  // rentap.getaps(search_form.body.selectedAp_id, 0, function(ap) {
   //   aps.mode
   //   aps.rownum
   //   ap = aps.aps[aps.rownum]
@@ -80,7 +80,7 @@ exports.selected_ap = function(search_form, res) {
 };
 
 exports.show_ap_prev = function(search_form, res) {
-  // rentap.modeway(search_form.params.ap_id, -1, function(ap) {
+  // rentap.getaps(search_form.params.ap_id, -1, function(ap) {
   //   aps.mode
   //   aps.rownum
   //   ap = aps.aps[aps.rownum]
@@ -89,7 +89,7 @@ exports.show_ap_prev = function(search_form, res) {
 };
 
 exports.show_ap_next = function(search_form, res) {
-  // rentap.modeway(search_form.params.ap_id, 1, function(ap) {
+  // rentap.getaps(search_form.params.ap_id, 1, function(ap) {
   //   aps.mode
   //   aps.rownum
   //   ap = aps.aps[aps.rownum]
@@ -124,7 +124,7 @@ exports.search_col = function(search_form, res) {
 // in the view, row is not the same as ap_id because tbl contains all aps, even those in trash but view displays either those rows in trash or not in trash
 // and row is always consecutive without any skips. In other words, there are two row 1's, one in trash, and one out. Many rows are like that.
 exports.jump_ap = function(search_form, res) {
-  // modeway(search_form.params.ap_id, search_form.body.row + 2, function(ap) {
+  // rentap.get_rowth_ap(search_form.params.ap_id, search_form.body.row, function(ap) {
   //   ap.mode
   //   ap.rownum
   //   ap.ap
