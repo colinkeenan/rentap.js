@@ -1,4 +1,4 @@
-var rentap = require('./rentapModels.js');
+var rentap = require('./rentapModel.js');
 
 //RENTAP FORM
 
