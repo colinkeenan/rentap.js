@@ -23,7 +23,7 @@ exports.show_ap = function(ap_form, res) {
     aps.mode
     aps.rownum
     ap = aps.aps[aps.rownum]
-    res.render('rentap', {mode:aps.mode, rownum:aps.rownum, ap:aps.aps[aps.rownum]})
+    res.render('rentap', {url:ap_form.originalUrl, mode:aps.mode, rownum:aps.rownum, ap:aps.aps[aps.rownum]})
   });
 };
 
