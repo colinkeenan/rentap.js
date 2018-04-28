@@ -19,10 +19,11 @@ exports.save_ap = function(ap_form, res) {
 };
 
 exports.show_ap = function(ap_form, res) {
-  // getaps = rentap.modeway(ap_form.params.ap_id, 0)
-  // getaps.mode
-  // getaps.rownum
-  // ap = getaps.aps[getaps.rownum]
+  // rentap.modeway(ap_form.params.ap_id, 0, function(aps) {
+  //   aps.mode
+  //   aps.rownum
+  //   ap = aps.aps[aps.rownum]
+  // });
   res.send('NOT IMPLEMENTED: Display Application: ' + ap_form.params.ap_id);
 };
 
@@ -70,27 +71,30 @@ exports.show_trashnames = function(ap_form, res) {
 // SEARCHES FORM
 
 exports.selected_ap = function(search_form, res) {
-  // getaps = rentap.modeway(search_form.body.selectedAp_id, 0)
-  // getaps.mode
-  // getaps.rownum
-  // ap = getaps.aps[getaps.rownum]
+  // rentap.modeway(search_form.body.selectedAp_id, 0, function(ap) {
+  //   aps.mode
+  //   aps.rownum
+  //   ap = aps.aps[aps.rownum]
+  // });
   res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
 };
 
 exports.show_ap_prev = function(search_form, res) {
-  // getaps = rentap.modeway(ap_id, -1);
-  // getaps.mode
-  // getaps.rownum
-  // ap = getaps.aps[getaps.rownum]
-  res.send('NOT IMPLEMENTED: Display Previous Application ' + rentap.modeway(ap_id, -1) + ' while on: ' + search_form.params.ap_id);
+  // rentap.modeway(search_form.params.ap_id, -1, function(ap) {
+  //   aps.mode
+  //   aps.rownum
+  //   ap = aps.aps[aps.rownum]
+  // });
+  res.send('NOT IMPLEMENTED: Display Previous Application while on: ' + search_form.params.ap_id);
 };
 
 exports.show_ap_next = function(search_form, res) {
-  // getaps = rentap.modeway(ap_id, 1);
-  // getaps.mode
-  // getaps.rownum
-  // ap = getaps.aps[getaps.rownum]
-  res.send('NOT IMPLEMENTED: Display Next Application ' + rentap.modeway(ap_id, 1) + ' while on: ' + search_form.params.ap_id);
+  // rentap.modeway(search_form.params.ap_id, 1, function(ap) {
+  //   aps.mode
+  //   aps.rownum
+  //   ap = aps.aps[aps.rownum]
+  // });
+  res.send('NOT IMPLEMENTED: Display Next Application while on: ' + search_form.params.ap_id);
 };
 
 exports.search_allaps = function(search_form, res) {
@@ -120,12 +124,13 @@ exports.search_col = function(search_form, res) {
 // in the view, row is not the same as ap_id because tbl contains all aps, even those in trash but view displays either those rows in trash or not in trash
 // and row is always consecutive without any skips. In other words, there are two row 1's, one in trash, and one out. Many rows are like that.
 exports.jump_ap = function(search_form, res) {
-  // ap = modeway(search_form.params.ap_id, search_form.body.row + 2)
+  // modeway(search_form.params.ap_id, search_form.body.row + 2, function(ap) {
+  //   ap.mode
+  //   ap.rownum
+  //   ap.ap
+  // });
   // adding 2 makes "way" greater than 1 in all cases which signals
   // modway to use get_rowth_ap instead of getaps
-  // ap.mode
-  // ap.rownum
-  // ap.ap
   res.send('NOT IMPLEMENTED: Jump to row ' + search_form.body.row + ' from ap ' + search_form.params.ap_id)
 };
 
