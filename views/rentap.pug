@@ -103,7 +103,7 @@ html(lang='en')
         tr 
           td 
             ul 
-              li.section_header #[strong Personal Information]
+              li.section_header Personal Information
 
               li
                 label.personalinfo(for='fullname') Full Name 
@@ -122,15 +122,15 @@ html(lang='en')
                 input#maritalstatus(type='text' value=(undefined===ap? '' : ap.MaritalStatus))
 
               li 
-                label.personalinfol(for='email') Email 
+                label.personalinfo(for='email') Email 
                 input#email(type='text' value=(undefined===ap? '' : ap.Email))
 
               li 
-                label.personalinfol(for='stateid') State ID# 
+                label.personalinfo(for='stateid') State ID# 
                 input#stateid(type='text' value=(undefined===ap? '' : ap.StateID))
 
               li 
-                label.personalinfol(for='phone1') Phone 1 
+                label.personalinfo(for='phone1') Phone 1 
                 input#phone1(type='text' value=(undefined===ap? '' : ap.Phone1))
 
               li 
@@ -207,7 +207,7 @@ html(lang='en')
       button#prevbutton.inlinebutton(formmethod=GET formaction='/rentap/show/' + ap.rowid + '/prev') Prev
       button#nextbutton.inlinebutton(formmethod=GET formaction='/rentap/show/' + ap.rowid + '/next') Next
 
-      label(for='row' style='min-width:125px; text-align:right; position:relative; top:+16px;') row
+      label(for='row' style='text-align:right; font-weight: normal; margin-right: 1ch; vertical-align: middle') row
       input#row.inline(type='text' style='text-align: right;' value='' title='Jump to 0 to find printable instructions for applicants.')
       button#jumpbutton.inlinebutton(formaction='/rentap/show/' + ap.rowid + '/jump') Go
       
