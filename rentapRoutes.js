@@ -24,9 +24,9 @@ router.get('/show/:ap_id/switch_mode', rentap_controller.switch_mode); //for Tra
 router.get('/restore/:ap_id', rentap_controller.restore_ap); //restores by removing rowid=ap_id from trash table
 router.get('/delete/:ap_id', rentap_controller.rm_ap); //actually deletes the row from tbl, but only if in trash, then shows next in trash
 
-router.get('/show/:ap_id/jump', rentap_controller.show_ap); //show_ap and hopefully trigger auto submit to post what row to jump to
-router.post('/show/:ap_id/jump', rentap_controller.jump_ap); //for the "Go" button which jumps to the row entered from the one shown (ap_id)
-//It's the same "Go" button for Trash and not trash, so jump_ap decides based on if ap_id is in trash or not
+router.get('*/jump', rentap_controller.show_ap); //show_ap and hopefully trigger auto submit to post what row to jump to
+router.post('*/jump', rentap_controller.show_ap_rownum); //for the "Go" button which jumps to the row entered from the one shown (ap_id)
+//It's the same "Go" button for Trash and not trash, so jump_ap decides based on current mode
 
 router.get('/showSelected', rentap_controller.show_ap); //again, show_ap and trigger auto submit
 router.post('/showSelected', rentap_controller.selected_ap); //for the dropdown list of names

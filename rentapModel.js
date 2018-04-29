@@ -13,43 +13,47 @@ getmode = function (ap_id, callback) { //callback gets mode
   db.close
 }
 
-// way:
-//0 if want ap_id
-//-1 if want prev ap that is in the same mode as ap_id (in trash if ap_id is, or not in trash if ap_id isn't)
-//1 if want next ap that is in the same mode as ap_id
-exports.getaps = function(ap_id, way, callback) { //callback gets getaps {aps, rownum, mode} where rownum is the (index in aps where tbl.rowid = ap_id) + way
+/* switch_mode is either true or false 
+ * if true, then instead of returning aps in the same mode as ap_id, it returns aps of the opposite mode,
+ * and the rownum returned is always 0 when switch_mode is true. 
+ *
+ * negative ap_id means set mode to edit and return all goodaps. like true switch_mode, rownum will be 0.
+*/
+exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownum, mode} where rownum is the (index in aps where tbl.rowid = ap_id)
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  var rownum = 0;
+  if (ap_id < 0 ) {
+    db.serialize(function() {
+      db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
+        if (err) console.error(err);
+        callback({aps:aps, rownum:rownum, mode:'edit'});
+      });
+    });
+    db.close
+  } else {
   getmode(ap_id, function(mode) {
-    const sqlite3 = require('sqlite3');
-    let db = new sqlite3.Database('./store.db');
-    var getaps;
+    if (switch_mode) mode = mode==='discarded' ? 'edit' : 'discarded';
     db.serialize(function() {
       if (mode==='discarded')
-        db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
+        db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
           if (err) console.error(err);
-          getaps = {aps:rows, rownum:rows.findIndex(obj => obj.rowid == ap_id), mode:mode};
-          //way should be -1, 0, or 1
-          getaps.rownum = getaps.rownum + way;
-          //wrap around from 0 to end of list or from end of list to 0
-          if (getaps.rownum < 0) getaps.rownum = getaps.aps.length; 
-          if (getaps.rownum > getaps.aps.length) getaps.rownum = 0;
-          callback(getaps);
+          if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid === ap_id);
+          callback({aps:aps, rownum:rownum, mode:mode});
         });
       else
-        db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
+        db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
           if (err) console.error(err);
-          getaps = {aps:rows, rownum:rows.findIndex(obj => obj.rowid == ap_id), mode:mode};
-          //way should be -1, 0, or 1
-          getaps.rownum = getaps.rownum + way;
-          //wrap around from 0 to end of list or from end of list to 0
-          if (getaps.rownum < 0) getaps.rownum = getaps.aps.length; 
-          if (getaps.rownum > getaps.aps.length) getaps.rownum = 0;
-          callback(getaps);
+          if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid === ap_id);
+          callback({aps:aps, rownum:rownum, mode:mode});
         });
     });
     db.close
   });
 };
 
+/* I don't think this one will be needed since getting the "rowth ap" is trivial from rentapController which has apsGbl now
+ *
 // ap_id is tbl.rowid, rownum is an integer (index) for the rowth ap found where rowid is in (or not in) trash 
 // For this function, rownum comes from the search form.
 exports.get_rowth_ap = function (ap_id, rownum, callback) { //callback gets ap {ap, rownum, mode} where ap.ap is the rowth ap found
@@ -74,6 +78,7 @@ exports.get_rowth_ap = function (ap_id, rownum, callback) { //callback gets ap {
     db.close
   });
 }
+*/
 
 exports.names = function(callback) { //for dropdown list of full names to choose an ap from
   getmode(ap_id, function(mode) {

@@ -24,12 +24,12 @@ exports.show_ap_prev = function(search_form, res) {
   if (undefined===apsGbl)
     rentap.getaps(ap_form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.length - 1) : (apsGbl.rownum - 1);
+      apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1);
       res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
     });
   else {
     apsGbl = returned_aps;
-    apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.length - 1) : (apsGbl.rownum - 1);
+    apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1);
     res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
   }
 };
@@ -39,11 +39,33 @@ exports.show_ap_next = function(search_form, res) {
   if (undefined===apsGbl)
     rentap.getaps(ap_form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.rownum = apsGbl.rownum===(apsGbl.length - 1) ? 0 : (apsGbl.rownum + 1);
+      apsGbl.rownum = apsGbl.rownum===(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1);
       res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
     });
   else
     res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+};
+
+// in the view, row is not the same as ap_id because tbl contains all aps, even those in trash but view displays either those rows in trash or not in trash
+// and row is always consecutive without any skips. In other words, there are two row 1's, one in trash, and one out. Many rows are like that.
+exports.show_ap_rownum = function(search_form, res) {
+  if (typeof search_form_body.row === 'number') { //don't do anything if user didn't enter the number of the row to jump to
+    var row_num = search_form_body.row;
+    if (row_num < 0) row_num = 0;
+    //negative ap_id, false means get all aps NOT in trash and set rownum to 0
+    if (undefined === apsGbl) //this should only be true if just opened rentap on new ap, so treat as getting row of ap not in trash
+      rentap.getaps(-1, false, function(returned_aps) {
+        apsGbl = returned_aps;
+        if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1;
+        apsGbl.rownum = row_num;
+        res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+      });
+    else {
+      if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1;
+      apsGbl.rownum = row_num;
+      res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+    }
+  }
 };
 
 exports.discard_ap = function(ap_form, res) {
@@ -78,11 +100,11 @@ exports.switch_mode = function(ap_form, res) {
   //because expecting to change apsGbl by switching to aps of the opposite mode (edit/discarded)
   rentap.getaps(ap_form.params.ap_id, true, function(returned_aps) { //true signals to switch mode
     apsGbl=returned_aps; //apsGbl.aps is now an array of all aps of opposite mode, and aps.rownum is set to 0
-    if (apsGbl.length > 1) {
-      if (ap_form.params.ap_id > apsGbl.aps[apsGbl.length - 1].rowid) //if ap_id bigger than last one, set rownum to last one
-        apsGbl.rownum = apsGbl.length - 1 
+    if (apsGbl.aps.length > 1) {
+      if (ap_form.params.ap_id > apsGbl.aps[apsGbl.aps.length - 1].rowid) //if ap_id bigger than last one, set rownum to last one
+        apsGbl.rownum = apsGbl.aps.length - 1 
       else //ap_id is either less than the 0th rowid, or falls somewhere in the middle of ap_id's, find next higher one
-        for (var i = 0; i < apsGbl.length - 1; i++) 
+        for (var i = 0; i < apsGbl.aps.length; i++) 
           if (ap_form.params.ap_id < apsGbl.aps[i].rowid) apsGbl.rownum = i; //ap_id can't be equal to rowid because of opposite mode
     }
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
@@ -153,16 +175,6 @@ exports.search_col = function(search_form, res) {
   res.send('NOT IMPLEMENTED: Find All Non-Trash Applications that have ' + search_form.body.column + ' that match pattern: ' + search_form.body.pattern + ' for ap_id ' +search_form.params.ap_id);
 };
 
-// in the view, row is not the same as ap_id because tbl contains all aps, even those in trash but view displays either those rows in trash or not in trash
-// and row is always consecutive without any skips. In other words, there are two row 1's, one in trash, and one out. Many rows are like that.
-exports.jump_ap = function(search_form, res) {
-  // rentap.get_rowth_ap(search_form.params.ap_id, search_form.body.row, function(ap) {
-  //   ap.mode
-  //   ap.rownum
-  //   ap.ap
-  // });
-  res.send('NOT IMPLEMENTED: Jump to row ' + search_form.body.row + ' from ap ' + search_form.params.ap_id)
-};
 
 // HEADERS FORM
 

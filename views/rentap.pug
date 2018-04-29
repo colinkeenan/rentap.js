@@ -215,14 +215,14 @@ html(lang='en')
     //- or if selecting a name from the dropdown list, go straight to the selectedAp_id as the default action
     form#rentapsearch(method=GET action='/rentap/showSelected') 
       //- prev and next don't need to send data from the form so using method GET
-      button#prevbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/prev') Prev
-      button#nextbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/next') Next
+      button#prevbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev') Prev
+      button#nextbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next') Next
 
       label(for='row' style='text-align:right; font-weight: normal; margin-right: 1ch; vertical-align: middle') row
-      input#row.inline(type='text' style='text-align: right;' value='' title='Jump to 0 to find printable instructions for applicants.')
-      button#jumpbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/jump') Go
+      input#row.inline(type='text' style='text-align: right;' value='')
+      button#jumpbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/jump') Go
       
-      input#pattern(type='text' title='Hint: Use &quot; to search names only. For example, &quot;d, for names starting with D.' value='' )
+      input#pattern(type='text' value='' )
       //- might need to just stay on the current ap.rowid so the action is /show/:ap.rowid/search
       //- and the pattern to search for is in the posted data (...body.pattern)
       //- this button will assume search is to be limited to goodaps or trashaps
