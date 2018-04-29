@@ -101,11 +101,21 @@ exports.names = function(callback) { //for dropdown list of full names to choose
 exports.discard_ap = function (ap_id, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
+  var getaps;
   db.serialize(function() {
+    //get next_ap to be shown. no need to get the mode because discard can only be called when not in trash
+    db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, rows) {
+      if (err) console.error(err);
+      getaps = {aps:rows, rownum:rows.findIndex(obj => obj.rowid == ap_id), mode:'edit'};
+      getaps.rownum = getaps.rownum + 1; //want next ap
+      //wrap around from 0 to end of list or from end of list to 0
+      if (getaps.rownum < 0) getaps.rownum = getaps.aps.length; 
+      if (getaps.rownum > getaps.aps.length) getaps.rownum = 0;
+    });
     //adding ap_id to trash "discards" the row without actually changing it in tbl
     db.run("INSERT INTO trash (discardedRow) VALUES (?)", ap_id, function(err, row) {
       if (err) console.error(err);
-      callback(err);
+      callback(getaps);
     });
   });
 }

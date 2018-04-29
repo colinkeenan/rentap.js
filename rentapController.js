@@ -14,10 +14,8 @@ exports.show_ap = function(ap_form, res) {
 };
 
 exports.discard_ap = function(ap_form, res) {
-  // rentap.discard_ap(ap_form.params.ap_id)
-  rentap.discard_ap(ap_form.params.ap_id, function(err) {
-    //should do something if err
-    res.render('rentap')
+  rentap.discard_ap(ap_form.params.ap_id, function(aps) {
+    res.redirect('/rentap/show/' + aps.aps[aps.rownum].rowid);
   });
 };
 
