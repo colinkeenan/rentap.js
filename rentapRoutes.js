@@ -20,9 +20,9 @@ router.post('/show/:ap_id', rentap_controller.save_ap); //if changed and not in 
 router.get('/show/:ap_id/prev', rentap_controller.show_ap_prev); //prev & next skips trash items (or if in trash, skips not trash items)
 router.get('/show/:ap_id/next', rentap_controller.show_ap_next); 
 router.get('/discard/:ap_id', rentap_controller.discard_ap);//just puts the rowid=ap_id in the trash table and shows next good ap
-router.get('/show/:ap_id/trash', rentap_controller.show_closest_ap_in_trash); //find the next highest or lowest ap_id that's in trash and show it
-router.get('/restore/:ap_id/trash', rentap_controller.restore_ap); //restores by removing rowid=ap_id from trash table
-router.get('/delete/:ap_id/trash', rentap_controller.rm_ap); //actually deletes the row from tbl, but only if in trash, then shows next in trash
+router.get('/show/:ap_id/switch_mode', rentap_controller.switch_mode); //for Trash and Back buttons, find the next ap_id in opposite mode
+router.get('/restore/:ap_id', rentap_controller.restore_ap); //restores by removing rowid=ap_id from trash table
+router.get('/delete/:ap_id', rentap_controller.rm_ap); //actually deletes the row from tbl, but only if in trash, then shows next in trash
 
 router.get('/show/:ap_id/jump', rentap_controller.show_ap); //show_ap and hopefully trigger auto submit to post what row to jump to
 router.post('/show/:ap_id/jump', rentap_controller.jump_ap); //for the "Go" button which jumps to the row entered from the one shown (ap_id)

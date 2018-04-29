@@ -1,41 +1,92 @@
 var rentap = require('./rentapModel.js');
-
-//RENTAP FORM
+var apsGbl; 
 
 exports.show_new_ap = function(ap_form, res) {
-  // no rentap method needed
-  res.render('rentap', {url:ap_form.originalUrl, mode:'new', rownum: undefined, ap: undefined})
+  res.render('rentap', {url:ap_form.originalUrl, mode:'new', rownum: undefined, ap: undefined});
 };
 
 exports.show_ap = function(ap_form, res) {
-  rentap.getaps(ap_form.params.ap_id, 0, function(aps) {
-    res.render('rentap', {url:ap_form.originalUrl, mode:aps.mode, rownum:aps.rownum, ap:aps.aps[aps.rownum]})
-  });
+  //due to javascript being async, can't rely on getaps finishing before render,
+  //so doing render in getaps callback if need to getaps
+  //can't just have one render at end
+  if (undefined===apsGbl)
+    //rentap.getaps gets aps of the oppopsite mode as ap_id if 2nd param is true
+    rentap.getaps(ap_form.params.ap_id, false, function(returned_aps) {
+      apsGbl = returned_aps;
+      res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+    });
+  else
+    res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+};
+
+exports.show_ap_prev = function(search_form, res) {
+  //same as show_ap, but just decrement aps.rownum, wrapping around to the last ap if already on 0
+  if (undefined===apsGbl)
+    rentap.getaps(ap_form.params.ap_id, false, function(returned_aps) {
+      apsGbl = returned_aps;
+      apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.length - 1) : (apsGbl.rownum - 1);
+      res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+    });
+  else {
+    apsGbl = returned_aps;
+    apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.length - 1) : (apsGbl.rownum - 1);
+    res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+  }
+};
+
+exports.show_ap_next = function(search_form, res) {
+  //same as show_ap, but just increment aps.rownum, wrapping around to 0 if already on the last ap
+  if (undefined===apsGbl)
+    rentap.getaps(ap_form.params.ap_id, false, function(returned_aps) {
+      apsGbl = returned_aps;
+      apsGbl.rownum = apsGbl.rownum===(apsGbl.length - 1) ? 0 : (apsGbl.rownum + 1);
+      res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+    });
+  else
+    res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
 };
 
 exports.discard_ap = function(ap_form, res) {
-  rentap.discard_ap(ap_form.params.ap_id, function(aps) {
-    res.redirect('/rentap/show/' + aps.aps[aps.rownum].rowid);
+  //always gets apsGbl whether or not it is already defined
+  //because expecting to change apsGbl by putting one in trash
+  rentap.discard_ap(ap_form.params.ap_id, function(returned_aps) {
+    apsGbl = returned_aps;
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
 };
 
 exports.restore_ap = function(ap_form, res) {
-  // rentap.restore_ap(ap_form.params.ap_id)
-  res.send('NOT IMPLEMENTED: Restore Discarded Application: ' + ap_form.params.ap_id);
-  rentap.restore_ap(ap_form.params.ap_id, function(err) {
-    //should do something if err
-    res.render('rentap')
+  //always gets apsGbl whether or not it is already defined
+  //because expecting to change apsGbl by taking one from trash
+  rentap.restore_ap(ap_form.params.ap_id, function(returned_aps) {
+    apsGbl = returned_aps;
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
 };
 
 exports.rm_ap = function(ap_form, res) {
-  // rentap.rm_ap(ap_form.params.ap_id)
-  res.send('NOT IMPLEMENTED: Delete Application: ' + ap_form.params.ap_id);
+  //always gets apsGbl whether or not it is already defined
+  //because expecting to change apsGbl by permanently deleting one
+  rentap.rm_ap(ap_form.params.ap_id, function(returned_aps) {
+    apsGbl = returned_aps;
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  });
 };
 
-exports.show_closest_ap_in_trash = function(ap_form, res) {
-  // rentap. [need to define this method]
-  res.send('NOT IMPLEMENTED: Go to trash from: ' + ap_form.params.ap_id);
+exports.switch_mode = function(ap_form, res) {
+  //always gets apsGbl whether or not it is already defined
+  //because expecting to change apsGbl by switching to aps of the opposite mode (edit/discarded)
+  rentap.getaps(ap_form.params.ap_id, true, function(returned_aps) { //true signals to switch mode
+    apsGbl=returned_aps; //apsGbl.aps is now an array of all aps of opposite mode, and aps.rownum is set to 0
+    if (apsGbl.length > 1) {
+      if (ap_form.params.ap_id > apsGbl.aps[apsGbl.length - 1].rowid) //if ap_id bigger than last one, set rownum to last one
+        apsGbl.rownum = apsGbl.length - 1 
+      else //ap_id is either less than the 0th rowid, or falls somewhere in the middle of ap_id's, find next higher one
+        for (var i = 0; i < apsGbl.length - 1; i++) 
+          if (ap_form.params.ap_id < apsGbl.aps[i].rowid) apsGbl.rownum = i; //ap_id can't be equal to rowid because of opposite mode
+    }
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  });
 };
 
 exports.save_new_ap = function(ap_form, res) {
@@ -69,8 +120,6 @@ exports.show_trashnames = function(ap_form, res) {
   res.send('NOT IMPLEMENTED: Listing of All Trashed Full Names');
 };
 
-// SEARCHES FORM
-
 exports.selected_ap = function(search_form, res) {
   // rentap.getaps(search_form.body.selectedAp_id, 0, function(ap) {
   //   aps.mode
@@ -78,24 +127,6 @@ exports.selected_ap = function(search_form, res) {
   //   ap = aps.aps[aps.rownum]
   // });
   res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
-};
-
-exports.show_ap_prev = function(search_form, res) {
-  // rentap.getaps(search_form.params.ap_id, -1, function(ap) {
-  //   aps.mode
-  //   aps.rownum
-  //   ap = aps.aps[aps.rownum]
-  // });
-  res.send('NOT IMPLEMENTED: Display Previous Application while on: ' + search_form.params.ap_id);
-};
-
-exports.show_ap_next = function(search_form, res) {
-  // rentap.getaps(search_form.params.ap_id, 1, function(ap) {
-  //   aps.mode
-  //   aps.rownum
-  //   ap = aps.aps[aps.rownum]
-  // });
-  res.send('NOT IMPLEMENTED: Display Next Application while on: ' + search_form.params.ap_id);
 };
 
 exports.search_allaps = function(search_form, res) {
