@@ -1,7 +1,7 @@
 // if ap_id is in trash, mode is 'discarded', else 'edit' 
 // (don't need to call on the database to figure out if an ap is 'new') 
 // getmode is not exported, just used as needed by other methods
-getmode = function (ap_id, callback) { //callback gets mode
+var getmode = function (ap_id, callback) { //callback gets mode
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   db.serialize(function() {
@@ -10,8 +10,8 @@ getmode = function (ap_id, callback) { //callback gets mode
       callback(ap.mode);
     });
   });
-  db.close
-}
+  db.close();
+};
 
 /* switch_mode is either true or false 
  * if true, then instead of returning aps in the same mode as ap_id, it returns aps of the opposite mode,
@@ -30,26 +30,27 @@ exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownu
         callback({aps:aps, rownum:rownum, mode:'edit'});
       });
     });
-    db.close
+    db.close();
   } else {
-  getmode(ap_id, function(mode) {
-    if (switch_mode) mode = mode==='discarded' ? 'edit' : 'discarded';
-    db.serialize(function() {
-      if (mode==='discarded')
-        db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
-          if (err) console.error(err);
-          if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid === ap_id);
-          callback({aps:aps, rownum:rownum, mode:mode});
-        });
-      else
-        db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
-          if (err) console.error(err);
-          if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid === ap_id);
-          callback({aps:aps, rownum:rownum, mode:mode});
-        });
+    getmode(ap_id, function(mode) {
+      if (switch_mode) mode = mode==='discarded' ? 'edit' : 'discarded';
+      db.serialize(function() {
+        if (mode==='discarded')
+          db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
+            if (err) console.error(err);
+            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid === ap_id);
+            callback({aps:aps, rownum:rownum, mode:mode});
+          });
+        else
+          db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
+            if (err) console.error(err);
+            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid === ap_id);
+            callback({aps:aps, rownum:rownum, mode:mode});
+          });
+      });
+      db.close();
     });
-    db.close
-  });
+  }
 };
 
 /* I don't think this one will be needed since getting the "rowth ap" is trivial from rentapController which has apsGbl now
@@ -75,12 +76,12 @@ exports.get_rowth_ap = function (ap_id, rownum, callback) { //callback gets ap {
           callback(ap);
         });
     });
-    db.close
+    db.close()
   });
 }
 */
 
-exports.names = function(callback) { //for dropdown list of full names to choose an ap from
+exports.names = function(ap_id, callback) { //for dropdown list of full names to choose an ap from
   getmode(ap_id, function(mode) {
     const sqlite3 = require('sqlite3');
     let db = new sqlite3.Database('./store.db');
@@ -99,7 +100,7 @@ exports.names = function(callback) { //for dropdown list of full names to choose
           callback(names);
         });
     });
-    db.close
+    db.close();
   });
 };
 
@@ -123,7 +124,7 @@ exports.discard_ap = function (ap_id, callback) {
       callback(getaps);
     });
   });
-}
+};
 
 exports.restore_ap = function (ap_id, callback) {
   const sqlite3 = require('sqlite3');
@@ -135,7 +136,7 @@ exports.restore_ap = function (ap_id, callback) {
       callback(err);
     });
   });
-}
+};
 
 exports.rm_ap = function (ap_id, callback) {
   const sqlite3 = require('sqlite3');
@@ -146,7 +147,7 @@ exports.rm_ap = function (ap_id, callback) {
       callback(err);
     });
   });
-}
+};
 
 exports.save_new_ap = function (ap, callback) {
   const sqlite3 = require('sqlite3');
@@ -155,14 +156,14 @@ exports.save_new_ap = function (ap, callback) {
   db.serialize(function() {
     db.run("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", ap.fullname, ap.ssnumber, ap.birthdate, ap.maritalstatus, ap.email, ap.stateid, ap.phone1, ap.phone2, ap.currentaddress, ap.previousaddresses, ap.occupants, ap.pets, ap.income, ap.employment, ap.evictions, ap.felonies, ap.authdate, ap.guestdate, ap.rentdate, ap.rentapHeadername, 
       function(err) {
-        if (err) console.error(err) 
+        if (err) console.error(err); 
         else ap_id = this.lastID;
         callback(ap_id);
       }
     ); 
   });
-  db.close
-}
+  db.close();
+};
 
 exports.save_ap = function (ap_id, ap, callback) {
   const sqlite3 = require('sqlite3');
@@ -171,14 +172,14 @@ exports.save_ap = function (ap_id, ap, callback) {
   db.serialize(function() {
     db.run("UPDATE tbl FullName = (?), SSN = (?), BirthDate = (?), MaritalStatus = (?), Email = (?), StateID = (?), Phone1 = (?), Phone2 = (?), CurrentAddress = (?), PriorAddresses = (?), ProposedOccupants = (?), ProposedPets = (?), Income = (?), Employment = (?), Evictions = (?), Felonies = (?), dateApplied = (?), dateGuested = (?), dateRented = (?), headerName = (?) WHERE rowid = (?)", ap.fullname, ap.ssnumber, ap.birthdate, ap.maritalstatus, ap.email, ap.stateid, ap.phone1, ap.phone2, ap.currentaddress, ap.previousaddresses, ap.occupants, ap.pets, ap.income, ap.employment, ap.evictions, ap.felonies, ap.authdate, ap.guestdate, ap.rentdate, ap.rentapHeadername, ap_id,
       function(err) {
-        if (err) console.error(err) 
+        if (err) console.error(err); 
         else updated_id = this.lastID;
         callback(updated_id);
       }
     ); 
   });
-  db.close
-}
+  db.close();
+};
 
 exports.search = function(ap_id, pattern, callback) {
   getmode(ap_id, function(mode) {
@@ -203,9 +204,9 @@ exports.search = function(ap_id, pattern, callback) {
         }
       );
     });
+    db.close();
   });
-  db.close
-}
+};
 
 exports.search_allaps = function(pattern, callback) {
   const sqlite3 = require('sqlite3');
@@ -220,8 +221,8 @@ exports.search_allaps = function(pattern, callback) {
       }
     );
   });
-  db.close
-}
+  db.close();
+};
 
 exports.search_column = function(pattern, callback) {
   const sqlite3 = require('sqlite3');
@@ -236,9 +237,5 @@ exports.search_column = function(pattern, callback) {
       }
     );
   });
-  db.close
-}
-
-test = function (result) {
-  console.log(result);
-}
+  db.close();
+};
