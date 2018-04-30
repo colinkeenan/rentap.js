@@ -193,7 +193,7 @@ html(lang='en')
                 else 
                   button#restorebutton.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid)) Restore
                   button#delrentapbutton.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid)) Delete
-                  button#backbutton.inline(formaction='/renatp/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Back 
+                  button#backbutton.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Back 
       //- autosubmit for jump, showSelected, header/update, header, header/save, header/delete, header/default
       script.
         if ( 

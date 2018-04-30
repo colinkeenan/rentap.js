@@ -22,28 +22,29 @@ exports.show_ap = function(ap_form, res) {
 exports.show_ap_prev = function(search_form, res) {
   //same as show_ap, but just decrement aps.rownum, wrapping around to the last ap if already on 0
   if (undefined===apsGbl)
-    rentap.getaps(ap_form.params.ap_id, false, function(returned_aps) {
+    rentap.getaps(search_form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1);
-      res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+      apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1); //down one if can, otherwise goto end
+      res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
     });
   else {
-    apsGbl = returned_aps;
     apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1);
-    res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+    res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
   }
 };
 
 exports.show_ap_next = function(search_form, res) {
   //same as show_ap, but just increment aps.rownum, wrapping around to 0 if already on the last ap
   if (undefined===apsGbl)
-    rentap.getaps(ap_form.params.ap_id, false, function(returned_aps) {
+    rentap.getaps(search_form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.rownum = apsGbl.rownum===(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1);
-      res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+      apsGbl.rownum = apsGbl.rownum===(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1); //up one if can, otherwiss goto 0
+      res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
     });
-  else
-    res.render('rentap', {url:ap_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+  else {
+    apsGbl.rownum = apsGbl.rownum===(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1);
+    res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+  }
 };
 
 // in the view, row is not the same as ap_id because tbl contains all aps, even those in trash but view displays either those rows in trash or not in trash
@@ -105,7 +106,10 @@ exports.switch_mode = function(ap_form, res) {
         apsGbl.rownum = apsGbl.aps.length - 1 
       else //ap_id is either less than the 0th rowid, or falls somewhere in the middle of ap_id's, find next higher one
         for (var i = 0; i < apsGbl.aps.length; i++) 
-          if (ap_form.params.ap_id < apsGbl.aps[i].rowid) apsGbl.rownum = i; //ap_id can't be equal to rowid because of opposite mode
+          if (ap_form.params.ap_id < apsGbl.aps[i].rowid) { //ap_id can't be equal to rowid because of opposite mode
+            apsGbl.rownum = i; 
+            break;
+          }
     }
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
