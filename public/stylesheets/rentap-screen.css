@@ -6,12 +6,11 @@ label, .section_header {font: 14px serif; font-weight: bold; display: inline-blo
 input {font:14px serif; width:200px}
 textarea {font:14px serif; width:292px}
 .personalinfo {font-weight: normal; margin-left: 5px; width: 76px; vertical-align:middle}
-.button {max-width: 131px}
 .inline {display: inline-block;}
 .inlineshort {display: inline-block; max-width:80px}
 .inlinebutton {display: inline-block; max-width:60px;}
 .inlinewidebutton {display: inline-block; max-width:120px}
-.smalllabelinput {font:12px sans-serif; position: relative; top: -6px; display:block; width:72px;}
+.smalllabel {font:12px sans-serif; position: relative; top: -6px; display:block; width:72px;}
 #controls {float:left}
 #tdrtitle, #rtitle {font:26px sans-serif; text-align:center; border-width:0px; vertical-align:top; max-width:380px; width:380px; margin:0px; padding:0px;display: inline-block}
 #rentaladdress, #rentalcitystzip {font:12px serif; border-width:0px; vertical-align:top; max-width: 180px; width: 180px; max-height: 18px; margin:0px; padding:0px; display: block}
@@ -19,8 +18,7 @@ textarea {font:14px serif; width:292px}
 #rowprint, #rentapID {width:42px; border-width:0px; position: relative; top: -8px;}
 #row {width:26px; border-width:0px; position: relative; left: -4px;}
 #rownumber, #idnumber {text-align:center;}
-#jumpbutton, #idnumber, #rownumber, #prevbutton, #nextbutton {max-width:40px; position: relative; left: -4px}
-#prevbutton {position: relative; left: -4px}
+#jump, #idnumber, #rownumber, #prev, #next{max-width:40px; position: relative; left: -4px}
 #listsearchmenu {width: 250px}
 #currentaddresslabel {margin-top:16px}
 #currentaddress {height:70px}

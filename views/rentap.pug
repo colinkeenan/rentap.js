@@ -12,13 +12,13 @@ html(lang='en')
     //- 
     //- However, I've discovered buttons (which are of type submit by default) can have
     //- formaction='/path' where the path is specified for that button and that will overide
-    //- the action=''. Same can be done with method, a button can be set to method=GET
+    //- the action=''. Same can be done with method, a button can be set to method='get'
     //- to overide the form method of POST. That's how there will be multiple buttons 
     //- on each form as it was in the rentap firefox extension
 
     //- Unlike rentap firefox extension, trying to break this into 3 forms, header
     //- rentap, and rentapsearch (navigation controls form)
-    form#headerform(method=GET action=url + '/header/update') 
+    form#headerform(method='get' action=url + '/header/update') 
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
       //- headerform expects the following variables from get headername, (header will be undefined for get new header) 
       
@@ -41,7 +41,7 @@ html(lang='en')
           td 
             //- below is part of rentapform so gets ap.rowid and rentap {... dateApplied, dateGuested, dateRented, headerName} 
             //- when there's a get for rentapform
-            label.smalllabelinput(for='authdate') Applied 
+            label.smalllabel(for='authdate') Applied 
             input#authdate(type='text' form='rentapform' value=(undefined===ap ? '' : ap.dateApplied)) 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') Row: 
             
@@ -51,12 +51,12 @@ html(lang='en')
             input#rentapID(type='text' form='rentapform' value=(undefined===ap? '' : ap.rowid) readonly) 
             
           td
-            label.smalllabelinput(for='guestdate') Guest 
+            label.smalllabel(for='guestdate') Guest 
             - var rentapDateGuested = undefined===ap ? '' : ap.dateGuested
             textarea#guestdate(cols='8' rows='2' form='rentapform')= rentapDateGuested
 
           td
-            label.smalllabelinput(for='rentdate') Rented 
+            label.smalllabel(for='rentdate') Rented 
             - var rentapDateRented = undefined===ap? '' : ap.dateRented
             textarea#rentdate(cols='8' rows='2' form='rentapform')= rentapDateRented
             //-
@@ -65,12 +65,15 @@ html(lang='en')
           td#headercontrols 
             //- value of input#headername changes when select#changeHeadername changes
             input#headername.inline(type='text' value=(undefined===header ? '' : header.Name)) 
-            //- res.render in controller will provide url: req.originalUrl along with ap.rowid etc. formaction needs to preserve the current route
+            //- res.render in controller will provide url: req.originalUrl along with header.headerName etc. formaction needs to preserve the current route
             //- in order to keep displaying the same page as user changes header. the buttons just have one character on them (+, ~, -)
-            //- except the default header button has this ->0
-            button#saverheaderbutton.inline(title='Save New Header' formaction=url + "/header") +
-            button#editheaderbutton.inline(title='Save Edited Header' formaction=url + "/header/save") ~
-            button#delrheaderbutton.inline(title='Delete Header' formaction=url + "/header/delete") -
+            //- except the default header button has ->0
+            //- saveheader and editheader both save, but one inserts new and the other updates existing
+            //- they are both post buttons, so will name them both the same (saveHeader) and distinguish by the value of saveHeader
+            //- given by form.body.saveHeader, it will either be 'new' or 'existing'
+            button#saveheader.inline(title='Save New Header' formaction=url name='saveHeader' value='new' formmethod='post') +
+            button#editheader.inline(title='Save Edited Header' formaction=url name='saveHeader' value='existing' formmethod='post') ~
+            button#delheader.inline(title='Delete Header' formaction=url + '/header/delete' + header.headerName) -
             //- seems like this is how to put the dropdown list on the page using Pug
             //- onchange... makes hidden input#rentapHeadername update to match whatever is selected
             //- and then submits the header form to update header (which includes input#headername above)
@@ -79,7 +82,7 @@ html(lang='en')
               select#changeHeadername(name='selectedHeadername' onchange="changeInputHeadername(event)")
                 each headerName in headerNames
                   option(value=headerName selected=(header.Name === headerName)) headerName
-            button#defaultheaderbutton.inline(title='Set as default header shown on start' formaction=url + "/header/" + header_id + "/default") ->0
+            button#defaultheader.inline(title='Set as default header shown on start' formaction=url + '/header/default/' + header.headerName) ->0
 
       //- below script defines changeInputHeadername(event) that is used in select#changeHeadername above to change 
       //- hidden input#rentapHeadername below and update the header
@@ -89,7 +92,7 @@ html(lang='en')
           rentapheader.submit() //- after changing those fields, submit header form so header can be updated to match selected header name
         }
 
-    form#rentapform(method=GET action='') 
+    form#rentapform(method='get' action='') 
       //- this form should receive one rentap from 
       //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
       //- rowmode{row,mode} and the ap.rowid=tbl.rowid of the rentap to display
@@ -186,14 +189,14 @@ html(lang='en')
                 //- for save, just use the curren url for the action, for all the rest, override with formaction path
                 //- and for those that need it, also overide POST with GET by using formmethod
                 if (mode != 'discarded')
-                  button#savebutton.inline Save 
-                  button#newbutton.inline(formaction='/rentap') New 
-                  button#discardbutton.inline(formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid)) Discard
-                  button#trashbutton.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Trash
+                  button#save.inline (formmethod='post') Save 
+                  button#new.inline(formaction='/rentap') New 
+                  button#discard.inline(formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid)) Discard
+                  button#trash.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Trash
                 else 
-                  button#restorebutton.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid)) Restore
-                  button#delrentapbutton.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid)) Delete
-                  button#backbutton.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Back 
+                  button#restore.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid)) Restore
+                  button#delrentap.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid)) Delete
+                  button#back.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Back 
       //- autosubmit for jump, showSelected, header/update, header, header/save, header/delete, header/default
       script.
         if ( 
@@ -209,27 +212,27 @@ html(lang='en')
 
     //- decided a third form is needed here for these jump buttons so it will only post the necessary data for the jump
     //- i.e row and pattern (decided not to include jumping to a specific id here because user can just enter that
-    //- in the url). Even though the result is to display an existing app, still need method=POST to get
-    //- the data to the controller
-    //- after posting a search and getting this page, have to pass Names [{ap.rowid, FullName},...]
-    //- or if selecting a name from the dropdown list, go straight to the selectedAp_id as the default action
-    form#rentapsearch(method=GET action='/rentap/showSelected') 
-      //- prev and next don't need to send data from the form so using method GET
-      button#prevbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev') Prev
-      button#nextbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next') Next
+    //- in the url).
+    form#rentapsearch(method='get' action='') 
+      // #jump (Go), Search, and #listsearchmenu are all 'post' with name 'search'. They will be distinguished by their 
+      // value. The controller will see the search_submit_value = search_form.body.search
+      // If it's 'jump' it was the #jump (Go) button that submitted the form, and it will jump to row search_form.body.row
+      // If it's 'search' then the #search (Search) did the submission and it will search on the pattern search_form.body.pattern
+      // and anything else, it was #listsearchmenu that did the submission with value the ap_id of the selected name from the dropdown list
+      button#prev.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev') Prev
+      button#next.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next') Next
 
       label(for='row' style='text-align:right; font-weight: normal; margin-right: 1ch; vertical-align: middle') row
       input#row.inline(type='text' style='text-align: right;' value='')
-      button#jumpbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/jump') Go
+      button#jump.inlinebutton(name='search' formmethod='post') Go
       
       input#pattern(type='text' value='' )
-      //- might need to just stay on the current ap.rowid so the action is /show/:ap.rowid/search
-      //- and the pattern to search for is in the posted data (...body.pattern)
+      //- the pattern to search for is in the posted data (...body.pattern)
       //- this button will assume search is to be limited to goodaps or trashaps
-      //- based on what the current ap is
-      button#searchbutton.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/search' title='Click while empty to clear previous search and list all names.') Search
+      //- based on what the current ap is (available as search_form.params.ap_id)
+      button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='search' value='search' formmethod='post') Search
       //- I think the following will submit this form (form#rentapsearch) when a new name is selected, with selectedAp_id being one of the values submitted
       if (Names)
-        select#listsearchmenu.inline(name='selectedAp_id' onchange='rentapsearch.submit()')
+        select#listsearchmenu.inline(name='search' onchange='rentapsearch.submit()' formmethod='post')
           each Name in Names
             option(value=Name.ap.rowid selected=(ap.rowid === Name.ap.rowid)) Name.FullName

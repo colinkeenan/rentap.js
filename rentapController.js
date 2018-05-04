@@ -115,56 +115,26 @@ exports.switch_mode = function(ap_form, res) {
   });
 };
 
-exports.save_new_ap = function(ap_form, res) {
-  // rentap.save_new_ap
+exports.save = function(ap_from, res) {
+  // rentap.save
   // ap_form.body {fullname, ssnumber, birthdate, maritalstatus, email, stateid, phone1, phone2, currentaddress, previousaddresses, occupants, pets, income, employment, evictions, felonies, authdate, guestdate, rentdate, rentapHeadername}
-  res.send('NOT IMPLEMENTED: Save New (filled in) Application with values: ' + ap_form.body.fullname + '. . .');
-};
+  res.send('NOT IMPLEMENTED: Save New or Edited (filled in) Application with values: ' + ap_form.body.fullname + '. . .');
+}
 
-exports.save_ap = function(ap_form, res) {
-  // rentap.save_ap
-  res.send('NOT IMPLEMENTED: Save Edited Application:' + ap_form.params.ap_id + 'with values: ' + ap_form.body.fullname + '. . .');
-};
-
-exports.show_goodaps = function(ap_form, res) {
-  // rentap.goodaps()
-  res.send('NOT IMPLEMENTED: Table of All Rental Application Data not in Trash');
-};
-
-exports.show_trashaps = function(ap_form, res) {
-  // rentap.trashaps()
-  res.send('NOT IMPLEMENTED: Table of All Trashed Rental Application Data');
-};
-
-exports.show_goodnames = function(ap_form, res) {
-  // rentap.goodnames()
-  res.send('NOT IMPLEMENTED: Listing of All Full Names not in Trash');
-};
-
-exports.show_trashnames = function(ap_form, res) {
-  // rentap.trashnames()
-  res.send('NOT IMPLEMENTED: Listing of All Trashed Full Names');
-};
-
-exports.selected_ap = function(search_form, res) {
-  // rentap.getaps(search_form.body.selectedAp_id, 0, function(ap) {
-  //   aps.mode
-  //   aps.rownum
-  //   ap = aps.aps[aps.rownum]
-  // });
-  res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
+exports.search = function(search_form, res) {
+  // rentap.search(search_form.body.pattern)
+  // based on whether or not ap_id is in trash, finds rows that match pattern either in trash or not in trash
+  if (search_form.body.search === 'search') { // Search button was clicked
+    res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + search_form.params.pattern + ' for ap_id ' + search_form.params.ap_id);
+  } else { // Name was selected from dropdown list
+    res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
+  }
 };
 
 exports.search_allaps = function(search_form, res) {
   // rentap.serach_allaps(search_form.body.pattern)
   // currently no way to triger this from view
   res.send('NOT IMPLEMENTED: Find All Applications that match pattern: ' + search_form.body.pattern + ' from ap ' + search_from.params.ap_id);
-};
-
-exports.search = function(search_form, res) {
-  // rentap.search(search_form.body.pattern)
-  // based on whether or not ap_id is in trash, finds rows that match pattern either in trash or not in trash
-  res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + search_form.params.pattern + ' for ap_id ' + search_form.params.ap_id);
 };
 
 exports.search_col_allaps = function(search_form, res) {
@@ -193,6 +163,11 @@ exports.save_new_header = function(header_form, res) {
 };
 
 exports.save_header = function(header_form, res) {
+  if (header_form.body.search === 'search') { // Search button was clicked
+    res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + search_form.params.pattern + ' for ap_id ' + search_form.params.ap_id);
+  } else { // Name was selected from dropdown list
+    res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
+  }
   res.send('NOT IMPLEMENTED: Save Header: ' + header_form.body.headername + ' while on Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);
 };
 

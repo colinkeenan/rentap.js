@@ -13,17 +13,11 @@ var getmode = function (ap_id, callback) { //callback gets mode
   db.close();
 };
 
-/* switch_mode is either true or false 
- * if true, then instead of returning aps in the same mode as ap_id, it returns aps of the opposite mode,
- * and the rownum returned is always 0 when switch_mode is true. 
- *
- * negative ap_id means set mode to edit and return all goodaps. like true switch_mode, rownum will be 0.
-*/
 exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownum, mode} where rownum is the (index in aps where tbl.rowid = ap_id)
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var rownum = 0;
-  if (ap_id < 0 ) {
+  if (ap_id < 0 ) { // negative ap_id means set mode to edit and return all goodaps. like true switch_mode, rownum will be 0.
     db.serialize(function() {
       db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
         if (err) console.error(err);
@@ -33,6 +27,7 @@ exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownu
     db.close();
   } else {
     getmode(ap_id, function(mode) {
+     // if switch_mode is true, then instead of returning aps in the same mode as ap_id, return aps of the opposite mode
       if (switch_mode) mode = mode==='discarded' ? 'edit' : 'discarded';
       db.serialize(function() {
         if (mode==='discarded')
@@ -45,6 +40,7 @@ exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownu
           db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
             if (err) console.error(err);
             if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id);
+            //rownum will be 0 if either switch_mode is true or ap_id is negative
             callback({aps:aps, rownum:rownum, mode:mode});
           });
       });
@@ -139,37 +135,37 @@ exports.rm_ap = function (ap_id, callback) {
   });
 };
 
-exports.save_new_ap = function (ap, callback) {
+exports.save = function (ap, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
-  var ap_id = null;
-  db.serialize(function() {
-    db.run("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", ap.fullname, ap.ssnumber, ap.birthdate, ap.maritalstatus, ap.email, ap.stateid, ap.phone1, ap.phone2, ap.currentaddress, ap.previousaddresses, ap.occupants, ap.pets, ap.income, ap.employment, ap.evictions, ap.felonies, ap.authdate, ap.guestdate, ap.rentdate, ap.rentapHeadername, 
-      function(err) {
-        if (err) console.error(err); 
-        else ap_id = this.lastID;
-        callback(ap_id);
-      }
-    ); 
-  });
-  db.close();
-};
-
-exports.save_ap = function (ap_id, ap, callback) {
-  const sqlite3 = require('sqlite3');
-  let db = new sqlite3.Database('./store.db');
-  var updated_id = null;
-  db.serialize(function() {
-    db.run("UPDATE tbl FullName = (?), SSN = (?), BirthDate = (?), MaritalStatus = (?), Email = (?), StateID = (?), Phone1 = (?), Phone2 = (?), CurrentAddress = (?), PriorAddresses = (?), ProposedOccupants = (?), ProposedPets = (?), Income = (?), Employment = (?), Evictions = (?), Felonies = (?), dateApplied = (?), dateGuested = (?), dateRented = (?), headerName = (?) WHERE rowid = (?)", ap.fullname, ap.ssnumber, ap.birthdate, ap.maritalstatus, ap.email, ap.stateid, ap.phone1, ap.phone2, ap.currentaddress, ap.previousaddresses, ap.occupants, ap.pets, ap.income, ap.employment, ap.evictions, ap.felonies, ap.authdate, ap.guestdate, ap.rentdate, ap.rentapHeadername, ap_id,
-      function(err) {
-        if (err) console.error(err); 
-        else updated_id = this.lastID;
-        callback(updated_id);
-      }
-    ); 
-  });
-  db.close();
-};
+  var ap_id;
+  getmode(ap_id, function(mode) {
+    if (mode==='new') {
+      db.serialize(function() {
+        db.run("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", ap.fullname, ap.ssnumber, ap.birthdate, ap.maritalstatus, ap.email, ap.stateid, ap.phone1, ap.phone2, ap.currentaddress, ap.previousaddresses, ap.occupants, ap.pets, ap.income, ap.employment, ap.evictions, ap.felonies, ap.authdate, ap.guestdate, ap.rentdate, ap.rentapHeadername, 
+          function(err) {
+            if (err) console.error(err); 
+            else ap_id = this.lastID;
+            callback(ap_id);
+          }
+        ); 
+      });
+      db.close();
+    } else {
+      var updated_id = null;
+      db.serialize(function() {
+        db.run("UPDATE tbl FullName = (?), SSN = (?), BirthDate = (?), MaritalStatus = (?), Email = (?), StateID = (?), Phone1 = (?), Phone2 = (?), CurrentAddress = (?), PriorAddresses = (?), ProposedOccupants = (?), ProposedPets = (?), Income = (?), Employment = (?), Evictions = (?), Felonies = (?), dateApplied = (?), dateGuested = (?), dateRented = (?), headerName = (?) WHERE rowid = (?)", ap.fullname, ap.ssnumber, ap.birthdate, ap.maritalstatus, ap.email, ap.stateid, ap.phone1, ap.phone2, ap.currentaddress, ap.previousaddresses, ap.occupants, ap.pets, ap.income, ap.employment, ap.evictions, ap.felonies, ap.authdate, ap.guestdate, ap.rentdate, ap.rentapHeadername, ap_id,
+          function(err) {
+            if (err) console.error(err); 
+            else updated_id = this.lastID;
+            callback(updated_id);
+          }
+        ); 
+      });
+      db.close();
+    }
+  }
+}
 
 exports.search = function(ap_id, pattern, callback) {
   getmode(ap_id, function(mode) {
