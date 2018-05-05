@@ -164,7 +164,7 @@ exports.save = function (ap, callback) {
       });
       db.close();
     }
-  }
+  });
 }
 
 exports.search = function(ap_id, pattern, callback) {

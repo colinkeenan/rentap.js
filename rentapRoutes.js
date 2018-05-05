@@ -20,10 +20,6 @@ router.get('/show/:ap_id/switch_mode', rentap_controller.switch_mode); //for Tra
 router.get('/restore/:ap_id', rentap_controller.restore_ap); //restores by removing rowid=ap_id from trash table
 router.get('/delete/:ap_id', rentap_controller.rm_ap); //actually deletes the row from tbl, but only if in trash, then shows next in trash
 
-// routes for manipulating headers
-router.get('*/header/delete', rentap_controller.show_ap); 
-router.get('*/header/default', rentap_controller.show_ap); 
-
 /* routes for displaying a table of matching aps,
  * or just one column from matching aps*/
 router.get('/goodaps', rentap_controller.show_goodaps); //table of aps not in trash

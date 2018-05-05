@@ -6,6 +6,8 @@ var apsGbl;
 // The post button values and (text on button) are:
 // newheader (+)
 // existingheader (~)
+// deleteheader (-)
+// defaultheader (->0)
 // save (Save)
 // jump (Go)
 // search (Search)
@@ -26,6 +28,13 @@ var save_header = function(form, res) {
   res.send('NOT IMPLEMENTED: Save Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ' + form.originalUrl);
 };
 
+var rm_header = function(form, res) {
+  res.send('NOT IMPLEMENTED: Delete Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
+};
+
+var default_header = function(form, res) {
+  res.send('NOT IMPLEMENTED: Set Default Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
+};
 
 var save = function(ap_from, res) {
   // rentap.save
@@ -57,11 +66,11 @@ var search = function(form, res) {
   res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + form.body.pattern + ' for ap_id ' + form.params.ap_id);
 };
 
-var rentap_header_selected = function(form, res) {
+var header_selected = function(form, res) {
   res.send('NOT IMPLEMENTED: Show header selected from dropdown list of header names. The selected headername is: ' + form.body.button)
 }
 
-var rentap_ap_selected = function(form, res) {
+var ap_selected = function(form, res) {
   res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + form.body.button)
 }
 
@@ -69,6 +78,8 @@ exports.form_submission = function(form, res) {
   switch(form.body.button) {
     case 'newheader': save_new_header(form, res); break;
     case 'existingheader': save_header(form, res); break;
+    case 'deleteheader': rm_header(form, res); break;
+    case 'defaultheader': default_header(form, res); break;
     case 'save': save(form, res); break;
     case 'jump': show_ap_rownum(form, res); break;
     case 'search': search(form, res); break;
@@ -198,13 +209,5 @@ exports.search_col = function(form, res) {
 
 exports.header_show_selected = function(form, res) {
   res.send('NOT IMPLEMENTED: Show Header with name: ' + form.body.headername + 'that goes with Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ');
-};
-
-exports.rm_header = function(form, res) {
-  res.send('NOT IMPLEMENTED: Delete Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
-};
-
-exports.set_default_header = function(form, res) {
-  res.send('NOT IMPLEMENTED: Set Default Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
 };
 

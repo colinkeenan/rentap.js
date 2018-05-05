@@ -56,24 +56,20 @@ html(lang='en')
           td#headercontrols 
             //- value of input#headername changes when select#changeHeadername changes
             input#headername.inline(type='text' value=(undefined===header ? '' : header.Name)) 
-            //- res.render in controller will provide url: req.originalUrl along with header.headerName etc. formaction needs to preserve the current route
-            //- in order to keep displaying the same page as user changes header. the buttons just have one character on them (+, ~, -)
+            //- res.render in controller will provide headerName etc.
+            //- the buttons just have one character on them (+, ~, -)
             //- except the default header button has ->0
             //- saveheader and editheader both save, but one inserts new and the other updates existing
-            //- they are both post buttons, so will name them both the same (saveHeader) and distinguish by the value of saveHeader
-            //- given by form.body.saveHeader, it will either be 'new' or 'existing'
             button#saveheader.inline(title='Save New Header' name='button' value='newheader' formmethod='post') +
             button#editheader.inline(title='Save Edited Header' name='button' value='existingheader' formmethod='post') ~
-            button#delheader.inline(title='Delete Header' formaction=url + '/header/delete/' + header.headerName) -
+            button#delheader.inline(title='Delete Header' name='button' value='deleteheader' formmethod='post') -
             //- seems like this is how to put the dropdown list on the page using Pug
-            //- onchange... makes hidden input#rentapHeadername update to match whatever is selected
-            //- and then submits the header form to update header (which includes input#headername above)
-            //- (I can't figure out how I did it in the rentap extension though)
+            //- onchange='rentap.submit()' submits form to update header (which includes input#headername above)
             if (headerNames)
               select#changeHeadername(name='button' onchange='rentap.submit()' formmethod='post')
                 each headerName in headerNames
                   option(value=headerName selected=(header.Name === headerName)) headerName
-            button#defaultheader.inline(title='Set as default header shown on start' formaction=url + '/header/default/' + header.headerName) ->0
+            button#defaultheader.inline(title='Set as default header shown on start' name='button' value='defaultheader' formmethod='post') ->0
     div
       //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
       //- rowmode{row,mode} and the ap.rowid=tbl.rowid of the rentap to display
@@ -191,6 +187,6 @@ html(lang='en')
       //- which button did the submission according to the value of form.button, but there's not a set value for this on
       //- so controller will assume it's this if nothing else
       if (Names)
-        select#listsearchmenu.inline(name='button' onchange='rentap.submit()')
+        select#listsearchmenu.inline(name='button' onchange='rentap.submit()' formmethod='post')
           each Name in Names
             option(value=Name.ap.rowid selected=(ap.rowid === Name.ap.rowid)) Name.FullName
