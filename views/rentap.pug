@@ -9,7 +9,7 @@ html(lang='en')
   body
 
     //- The form action is the current url by default, and the method is 'get' by default
-    //- I am just using the default for many buttons.
+    //- I am just using the default for most buttons.
     //- 
     //- However, buttons (which are of type submit by default) can have
     //- formaction='/path' and the same can be done with method, 
@@ -19,11 +19,7 @@ html(lang='en')
     //- for all post buttons
     form#rentap 
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
-      //- headerform expects the following variables from get headername, (header will be undefined for get new header) 
-      
       //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], 
-
-      //- where header from headers is chosen by tbl.headerName = headers.Name
       table#rentapheader 
         tr 
           td 
@@ -74,18 +70,15 @@ html(lang='en')
             //- and then submits the header form to update header (which includes input#headername above)
             //- (I can't figure out how I did it in the rentap extension though)
             if (headerNames)
-              select#changeHeadername(name='button' onchange='rentap.submit()')
+              select#changeHeadername(name='button' onchange='rentap.submit()' formmethod='post')
                 each headerName in headerNames
                   option(value=headerName selected=(header.Name === headerName)) headerName
             button#defaultheader.inline(title='Set as default header shown on start' formaction=url + '/header/default/' + header.headerName) ->0
     div
-      //- this form should receive one rentap from 
       //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
       //- rowmode{row,mode} and the ap.rowid=tbl.rowid of the rentap to display
 
       //- For a new ap, ap.rowid rentap and rowmode will all be undefined
-
-      //- hidden input below is set by changeInputHeadername above when select#changeHeadername is changed
       table#rentapbody 
         tr 
           td 
