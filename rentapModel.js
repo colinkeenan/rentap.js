@@ -16,7 +16,7 @@ var getmode = function (ap_id, callback) { //callback gets mode
 exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownum, mode} where rownum is the (index in aps where tbl.rowid = ap_id)
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
-  var rownum = 0;
+  var rownum = 0; // will stay 0 if ap_id is negative, or if switch_mode is true
   if (ap_id < 0 ) { // negative ap_id means set mode to edit and return all goodaps. like true switch_mode, rownum will be 0.
     db.serialize(function() {
       db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
@@ -33,7 +33,7 @@ exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownu
         if (mode==='discarded')
           db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
             if (err) console.error(err);
-            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id);
+            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is the only place rownum gets assigned (switch_mode is false)
             callback({aps:aps, rownum:rownum, mode:mode});
           });
         else

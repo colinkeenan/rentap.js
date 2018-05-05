@@ -1,6 +1,66 @@
 var rentap = require('./rentapModel.js');
 var apsGbl; 
+// all these "exports" methods are for 'get' buttons where rentapRoutes decides which method to use based on the url
+// except for form_submission which uses a switch to decide which var function to run based on the value of form.button
+// because all the submit buttons are named "button", but have distinct values
+// The post button values and (text on button) are:
+// newheader (+)
+// existingheader (~)
+// save (Save)
+// jump (Go)
+// search (Search)
+// any other word (selected header from dropdown)
+// any positive intiger (ap_id that matches selected name from dropdown)
 
+//methods for 'post' buttons
+var save_new_header = function(header_form, res) {
+  res.send('NOT IMPLEMENTED: Save New Header while on Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);
+};
+
+var save_header = function(header_form, res) {
+  if (header_form.body.search === 'search') { // Search button was clicked
+    res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + search_form.params.pattern + ' for ap_id ' + search_form.params.ap_id);
+  } else { // Name was selected from dropdown list
+    res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
+  }
+  res.send('NOT IMPLEMENTED: Save Header: ' + header_form.body.headername + ' while on Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);
+};
+
+var save = function(ap_from, res) {
+  // rentap.save
+  // ap_form.body {fullname, ssnumber, birthdate, maritalstatus, email, stateid, phone1, phone2, currentaddress, previousaddresses, occupants, pets, income, employment, evictions, felonies, authdate, guestdate, rentdate, rentapHeadername}
+  res.send('NOT IMPLEMENTED: Save New or Edited (filled in) Application with values: ' + ap_form.body.fullname + '. . .');
+}
+
+var show_ap_rownum = function(search_form, res) { 
+  if (typeof search_form_body.row === 'number') { //don't do anything if user didn't enter the number of the row to jump to
+    var row_num = search_form_body.row; //row number that user entered
+    if (row_num < 0) row_num = 0; //in case it's negative, make it 0
+    //negative ap_id, false means get all aps NOT in trash and set rownum to 0
+    if (undefined === apsGbl) //this should only be true if just opened rentap on new ap, so treat as getting row of ap not in trash
+      rentap.getaps(-1, false, function(returned_aps) {
+        apsGbl = returned_aps;
+        if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
+        apsGbl.rownum = row_num;
+        res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+      });
+    else {
+      if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
+      apsGbl.rownum = row_num;
+      res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+    }
+  }
+};
+
+var search = function(search_form, res) {
+  res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + search_form.params.pattern + ' for ap_id ' + search_form.params.ap_id);
+};
+
+var rentap_show_selected = function(form, res) {
+  res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
+}
+
+// methods for 'get' buttons
 exports.show_new_ap = function(ap_form, res) {
   res.render('rentap', {url:ap_form.originalUrl, mode:'new', rownum: undefined, ap: undefined});
 };
@@ -44,28 +104,6 @@ exports.show_ap_next = function(search_form, res) {
   else {
     apsGbl.rownum = apsGbl.rownum===(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1);
     res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
-  }
-};
-
-// in the view, row is not the same as ap_id because tbl contains all aps, even those in trash but view displays either those rows in trash or not in trash
-// and row is always consecutive without any skips. In other words, there are two row 1's, one in trash, and one out. Many rows are like that.
-exports.show_ap_rownum = function(search_form, res) {
-  if (typeof search_form_body.row === 'number') { //don't do anything if user didn't enter the number of the row to jump to
-    var row_num = search_form_body.row;
-    if (row_num < 0) row_num = 0;
-    //negative ap_id, false means get all aps NOT in trash and set rownum to 0
-    if (undefined === apsGbl) //this should only be true if just opened rentap on new ap, so treat as getting row of ap not in trash
-      rentap.getaps(-1, false, function(returned_aps) {
-        apsGbl = returned_aps;
-        if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1;
-        apsGbl.rownum = row_num;
-        res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
-      });
-    else {
-      if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1;
-      apsGbl.rownum = row_num;
-      res.render('rentap', {url:search_form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
-    }
   }
 };
 
@@ -115,22 +153,6 @@ exports.switch_mode = function(ap_form, res) {
   });
 };
 
-exports.save = function(ap_from, res) {
-  // rentap.save
-  // ap_form.body {fullname, ssnumber, birthdate, maritalstatus, email, stateid, phone1, phone2, currentaddress, previousaddresses, occupants, pets, income, employment, evictions, felonies, authdate, guestdate, rentdate, rentapHeadername}
-  res.send('NOT IMPLEMENTED: Save New or Edited (filled in) Application with values: ' + ap_form.body.fullname + '. . .');
-}
-
-exports.search = function(search_form, res) {
-  // rentap.search(search_form.body.pattern)
-  // based on whether or not ap_id is in trash, finds rows that match pattern either in trash or not in trash
-  if (search_form.body.search === 'search') { // Search button was clicked
-    res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + search_form.params.pattern + ' for ap_id ' + search_form.params.ap_id);
-  } else { // Name was selected from dropdown list
-    res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
-  }
-};
-
 exports.search_allaps = function(search_form, res) {
   // rentap.serach_allaps(search_form.body.pattern)
   // currently no way to triger this from view
@@ -154,21 +176,8 @@ exports.search_col = function(search_form, res) {
 
 //still need to make all the headers methods in rentapModel.js
 
-exports.header_update = function(header_form, res) {
+exports.header_show_selected = function(header_form, res) {
   res.send('NOT IMPLEMENTED: Show Header with name: ' + header_form.body.headername + 'that goes with Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ');
-};
-
-exports.save_new_header = function(header_form, res) {
-  res.send('NOT IMPLEMENTED: Save New Header while on Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);
-};
-
-exports.save_header = function(header_form, res) {
-  if (header_form.body.search === 'search') { // Search button was clicked
-    res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + search_form.params.pattern + ' for ap_id ' + search_form.params.ap_id);
-  } else { // Name was selected from dropdown list
-    res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + search_form.body.selectedAp_id)
-  }
-  res.send('NOT IMPLEMENTED: Save Header: ' + header_form.body.headername + ' while on Ap' + header_form.params.ap_id + 'with values: ' + header_form.body.ap + '. This url: ' + header_form.originalUrl);
 };
 
 exports.rm_header = function(header_form, res) {

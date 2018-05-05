@@ -11,6 +11,7 @@ textarea {font:14px serif; width:292px}
 .inlinebutton {display: inline-block; max-width:60px;}
 .inlinewidebutton {display: inline-block; max-width:120px}
 .smalllabel {font:12px sans-serif; position: relative; top: -6px; display:block; width:72px;}
+.right {float:right}
 #controls {float:left}
 #tdrtitle, #rtitle {font:26px sans-serif; text-align:center; border-width:0px; vertical-align:top; max-width:380px; width:380px; margin:0px; padding:0px;display: inline-block}
 #rentaladdress, #rentalcitystzip {font:12px serif; border-width:0px; vertical-align:top; max-width: 180px; width: 180px; max-height: 18px; margin:0px; padding:0px; display: block}
@@ -28,4 +29,3 @@ textarea {font:14px serif; width:292px}
 #income {height:76px}
 #employment {height:244px}
 #evictions, #felonies {height:90px}
-#rentapsearch {float:right}
