@@ -106,8 +106,10 @@ exports.show_ap = function(form, res) {
       apsGbl = returned_aps;
       res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
     });
-  else
+  else {
+    apsGbl.rownum = apsGbl.aps.findIndex(ap => ap.rowid == form.params.ap_id);
     res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+  }
 };
 
 exports.show_ap_prev = function(form, res) {
@@ -200,14 +202,5 @@ exports.search_col = function(form, res) {
   // currently no way to triger this from view and there's no field named column
   // rentap.search(form.body.pattern, form.body.column, form.params.ap_id)
   res.send('NOT IMPLEMENTED: Find All Non-Trash Applications that have ' + form.body.column + ' that match pattern: ' + form.body.pattern + ' for ap_id ' +form.params.ap_id);
-};
-
-
-// HEADERS FORM
-
-//still need to make all the headers methods in rentapModel.js
-
-exports.header_show_selected = function(form, res) {
-  res.send('NOT IMPLEMENTED: Show Header with name: ' + form.body.headername + 'that goes with Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ');
 };
 

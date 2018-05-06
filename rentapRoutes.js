@@ -20,11 +20,4 @@ router.get('/show/:ap_id/switch_mode', rentap_controller.switch_mode); //for Tra
 router.get('/restore/:ap_id', rentap_controller.restore_ap); //restores by removing rowid=ap_id from trash table
 router.get('/delete/:ap_id', rentap_controller.rm_ap); //actually deletes the row from tbl, but only if in trash, then shows next in trash
 
-/* routes for displaying a table of matching aps,
- * or just one column from matching aps*/
-router.get('/goodaps', rentap_controller.show_goodaps); //table of aps not in trash
-router.get('/trashaps', rentap_controller.show_trashaps); //table of trashed aps
-router.get('/goodnames', rentap_controller.show_goodnames); //list of names not in trash
-router.get('/trashnames', rentap_controller.show_trashnames); //list of trashed names
-
 module.exports = router;

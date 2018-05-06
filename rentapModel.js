@@ -36,7 +36,7 @@ exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownu
             if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is the only place rownum gets assigned (switch_mode is false)
             callback({aps:aps, rownum:rownum, mode:mode});
           });
-        else
+        else //this is the most common action
           db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
             if (err) console.error(err);
             if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id);

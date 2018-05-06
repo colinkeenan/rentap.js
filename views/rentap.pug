@@ -17,7 +17,7 @@ html(lang='en')
     //- all the get buttons will be distinguished by path (in rentapRoutes), so will use formaction='/path' for all get buttons
     //- all the post buttons will have name 'button' and will be distinguished by value. there will only be one controller method
     //- for all post buttons
-    form#rentap 
+    form#rentap(method='get')
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
       //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], 
       table#rentapheader 
