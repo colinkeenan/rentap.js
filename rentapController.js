@@ -36,7 +36,7 @@ var default_header = function(form, res) {
   res.send('NOT IMPLEMENTED: Set Default Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
 };
 
-var save = function(ap_from, res) {
+var save = function(form, res) {
   // rentap.save
   // form.body {fullname, ssnumber, birthdate, maritalstatus, email, stateid, phone1, phone2, currentaddress, previousaddresses, occupants, pets, income, employment, evictions, felonies, authdate, guestdate, rentdate, rentapHeadername}
   res.send('NOT IMPLEMENTED: Save New or Edited (filled in) Application with values: ' + form.body.fullname + '. . .');
@@ -45,6 +45,7 @@ var save = function(ap_from, res) {
 var show_ap_rownum = function(form, res) { 
   if (typeof form.body.row === 'number') { //don't do anything if user didn't enter the number of the row to jump to
     var row_num = form.body.row; //row number that user entered
+    consol.log(row_num);
     if (row_num < 0) row_num = 0; //in case it's negative, make it 0
     //negative ap_id, false means get all aps NOT in trash and set rownum to 0
     if (undefined === apsGbl) //this should only be true if just opened rentap on new ap, so treat as getting row of ap not in trash

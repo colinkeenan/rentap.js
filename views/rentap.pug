@@ -17,7 +17,7 @@ html(lang='en')
     //- all the get buttons will be distinguished by path (in rentapRoutes), so will use formaction='/path' for all get buttons
     //- all the post buttons will have name 'button' and will be distinguished by value. there will only be one controller method
     //- for all post buttons
-    form#rentap(method='get')
+    form#rentap 
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
       //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], 
       table#rentapheader 
@@ -26,36 +26,36 @@ html(lang='en')
             img(src='/images/icon.png')
 
           td 
-            input#rentaladdress(type='text' value=(undefined===header ? 'enter rental address' : header.StreetAddress)) 
-            input#rentalcitystzip(type='text' value=(undefined===header ? 'enter city, state, zip' : header.CityStateZip))
+            input#rentaladdress(name='rentaladdress' type='text' value=(undefined===header ? 'enter rental address' : header.StreetAddress)) 
+            input#rentalcitystzip(name='' type='text' value=(undefined===header ? 'enter city, state, zip' : header.CityStateZip))
 
           td#tdrtitle 
-            input#mode.inlineshort(type='text' readonly value=(undefined===mode ? 'new' : mode)) 
-            input#rtitle(type='text' value=(undefined===header ? 'enter title' : header.Title))
+            input#mode.inlineshort(name='mode' type='text' readonly value=(undefined===mode ? 'new' : mode)) 
+            input#rtitle(name='' type='text' value=(undefined===header ? 'enter title' : header.Title))
 
           td 
             label.smalllabel(for='authdate') Applied 
-            input#authdate(type='text' value=(undefined===ap ? '' : ap.dateApplied)) 
+            input#authdate(name='authdate' type='text' value=(undefined===ap ? '' : ap.dateApplied)) 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') Row: 
             
-            input#rowprint(type='text' value=(undefined===rownum? '' : rownum) readonly) 
+            input#rowprint(name='rowprint' type='text' value=(undefined===rownum? '' : rownum) readonly) 
             br 
             div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') ID: 
-            input#rentapID(type='text' value=(undefined===ap? '' : ap.rowid) readonly) 
+            input#rentapID(name='rentapID' type='text' value=(undefined===ap? '' : ap.rowid) readonly) 
             
           td
             label.smalllabel(for='guestdate') Guest 
             - var rentapDateGuested = undefined===ap ? '' : ap.dateGuested
-            textarea#guestdate(cols='8' rows='2')= rentapDateGuested
+            textarea#guestdate(name='guestdate' cols='8' rows='2')= rentapDateGuested
 
           td
             label.smalllabel(for='rentdate') Rented 
             - var rentapDateRented = undefined===ap? '' : ap.dateRented
-            textarea#rentdate(cols='8' rows='2')= rentapDateRented
+            textarea#rentdate(name='rentdate' cols='8' rows='2')= rentapDateRented
 
           td#headercontrols 
             //- value of input#headername changes when select#changeHeadername changes
-            input#headername.inline(type='text' value=(undefined===header ? '' : header.Name)) 
+            input#headername.inline(name='headername' type='text' value=(undefined===header ? '' : header.Name)) 
             //- res.render in controller will provide headerName etc.
             //- the buttons just have one character on them (+, ~, -)
             //- except the default header button has ->0
@@ -70,123 +70,123 @@ html(lang='en')
                 each headerName in headerNames
                   option(value=headerName selected=(header.Name === headerName)) headerName
             button#defaultheader.inline(title='Set as default header shown on start' name='button' value='defaultheader' formmethod='post') ->0
-    div
-      //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
-      //- rowmode{row,mode} and the ap.rowid=tbl.rowid of the rentap to display
+      div
+        //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
+        //- rowmode{row,mode} and the ap.rowid=tbl.rowid of the rentap to display
 
-      //- For a new ap, ap.rowid rentap and rowmode will all be undefined
-      table#rentapbody 
-        tr 
-          td 
-            ul 
-              li.section_header Personal Information
+        //- For a new ap, ap.rowid rentap and rowmode will all be undefined
+        table#rentapbody 
+          tr 
+            td 
+              ul 
+                li.section_header Personal Information
 
-              li
-                label.personalinfo(for='fullname') Full Name 
-                input#fullname(type='text' value=(undefined===ap? '' : ap.FullName))
+                li
+                  label.personalinfo(for='fullname') Full Name 
+                  input#fullname(name='fullname' type='text' value=(undefined===ap? '' : ap.FullName))
 
-              li 
-                label.personalinfo(for='ssnumber') Social Security Number 
-                input#ssnumber(type='text' value=(undefined===ap? '' : ap.SSN))
+                li 
+                  label.personalinfo(for='ssnumber') Social Security Number 
+                  input#ssnumber(name='ssnumber' type='text' value=(undefined===ap? '' : ap.SSN))
 
-              li 
-                label.personalinfo(for='birthdate') Birth Date 
-                input#birthdate(type='text' value=(undefined===ap? '' : ap.BirthDate))
+                li 
+                  label.personalinfo(for='birthdate') Birth Date 
+                  input#birthdate(name='birthdate' type='text' value=(undefined===ap? '' : ap.BirthDate))
 
-              li 
-                label.personalinfo(for='maritalstatus') Marital Status 
-                input#maritalstatus(type='text' value=(undefined===ap? '' : ap.MaritalStatus))
+                li 
+                  label.personalinfo(for='maritalstatus') Marital Status 
+                  input#maritalstatus(name='maritalstatus' type='text' value=(undefined===ap? '' : ap.MaritalStatus))
 
-              li 
-                label.personalinfo(for='email') Email 
-                input#email(type='text' value=(undefined===ap? '' : ap.Email))
+                li 
+                  label.personalinfo(for='email') Email 
+                  input#email(name='email' type='text' value=(undefined===ap? '' : ap.Email))
 
-              li 
-                label.personalinfo(for='stateid') State ID# 
-                input#stateid(type='text' value=(undefined===ap? '' : ap.StateID))
+                li 
+                  label.personalinfo(for='stateid') State ID# 
+                  input#stateid(name='stateid' type='text' value=(undefined===ap? '' : ap.StateID))
 
-              li 
-                label.personalinfo(for='phone1') Phone 1 
-                input#phone1(type='text' value=(undefined===ap? '' : ap.Phone1))
+                li 
+                  label.personalinfo(for='phone1') Phone 1 
+                  input#phone1(name='phone1' type='text' value=(undefined===ap? '' : ap.Phone1))
 
-              li 
-                label.personalinfo(for='phone2') Phone 2 
-                input#phone2(type='text' value=(undefined===ap? '' : ap.Phone2))
+                li 
+                  label.personalinfo(for='phone2') Phone 2 
+                  input#phone2(name='phone2' type='text' value=(undefined===ap? '' : ap.Phone2))
 
-              li 
-                - var ca = undefined===ap ? '' : ap.CurrentAddress
-                label#currentaddresslabel(for='currentaddress') #[strong Current Address, City, State, Zip, Dates, Rent, Landlord name and phone number]...  
-                textarea#currentaddress= ca
+                li 
+                  - var ca = undefined===ap ? '' : ap.CurrentAddress
+                  label#currentaddresslabel(for='currentaddress') #[strong Current Address, City, State, Zip, Dates, Rent, Landlord name and phone number]...  
+                  textarea#currentaddress(name='currentaddress')= ca
 
-              li 
-                - var pa = undefined===ap ? '' : ap.PriorAddresses
-                label(for='previousaddresses') #[strong Prior Addresses, Cities, States, Zips, Dates, Rents, Landlords]...  
-                textarea#previousaddresses= pa
+                li 
+                  - var pa = undefined===ap ? '' : ap.PriorAddresses
+                  label(for='previousaddresses') #[strong Prior Addresses, Cities, States, Zips, Dates, Rents, Landlords]...  
+                  textarea#previousaddresses(name='previousaddresses')= pa
 
-          td 
-            ul 
-              li 
-                - var po = undefined===ap ? '' : ap.ProposedOccupants
-                label(for='occupants') #[strong Proposed Occupants: self+age, other+age]...  
-                textarea#occupants= po
+            td 
+              ul 
+                li 
+                  - var po = undefined===ap ? '' : ap.ProposedOccupants
+                  label(for='occupants') #[strong Proposed Occupants: self+age, other+age]...  
+                  textarea#occupants(name='occupants')= po
 
-              li 
-                - var pp = undefined===ap ? '' : ap.ProposedPets
-                label(for='pets') #[<strong>Proposed Pets] 
-                textarea#pets= pp
+                li 
+                  - var pp = undefined===ap ? '' : ap.ProposedPets
+                  label(for='pets') #[<strong>Proposed Pets] 
+                  textarea#pets(name='pets')= pp
 
-              li 
-                - var inc = undefined===ap ? '' : ap.Income
-                label(for='income') #[strong Income &amp Food Stamps] 
-                textarea#income= inc
+                li 
+                  - var inc = undefined===ap ? '' : ap.Income
+                  label(for='income') #[strong Income &amp Food Stamps] 
+                  textarea#income(name='income')= inc
 
-              li
-                - var emp = undefined===ap ? '' : ap.Employment
-                label(for='employment') #[strong Employment: address, job, dates, hours, supervisor name and phone number]... 
-                textarea#employment= emp
+                li
+                  - var emp = undefined===ap ? '' : ap.Employment
+                  label(for='employment') #[strong Employment: address, job, dates, hours, supervisor name and phone number]... 
+                  textarea#employment(name='employment')= emp
 
-          td
-            ul
-              li
-                - var ev = undefined===ap ? '' : ap.Evictions
-                label(for='evictions') #[strong Evictions Past 10 Years] 
-                textarea#evictions= ev
+            td
+              ul
+                li
+                  - var ev = undefined===ap ? '' : ap.Evictions
+                  label(for='evictions') #[strong Evictions Past 10 Years] 
+                  textarea#evictions('name=evictions')= ev
 
-              li
-                - var fe = undefined===ap ? '' : ap.Felonies
-                label(for='felonies') #[strong Felonies/Drug Convictions] 
-                textarea#felonies= fe
+                li
+                  - var fe = undefined===ap ? '' : ap.Felonies
+                  label(for='felonies') #[strong Felonies/Drug Convictions] 
+                  textarea#felonies('name=felonies')= fe
 
-          td#controls 
-            ul 
-              li 
-                if (mode != 'discarded')
-                  button#save.inline(name='button' value='save' formmethod='post') Save 
-                  button#new.inline(formaction='/rentap') New 
-                  button#discard.inline(formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid)) Discard
-                  button#trash.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Trash
-                else 
-                  button#restore.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid)) Restore
-                  button#delrentap.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid)) Delete
-                  button#back.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Back 
+            td#controls 
+              ul 
+                li 
+                  if (mode != 'discarded')
+                    button#save.inline(name='button' value='save' formmethod='post') Save 
+                    button#new.inline(formaction='/rentap') New 
+                    button#discard.inline(formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid)) Discard
+                    button#trash.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Trash
+                  else 
+                    button#restore.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid)) Restore
+                    button#delrentap.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid)) Delete
+                    button#back.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Back 
 
-    div.right
-      button#prev.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev') Prev
-      button#next.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next') Next
+      div.right
+        button#prev.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev') Prev
+        button#next.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next') Next
 
-      label(for='row' style='text-align:right; font-weight: normal; margin-right: 1ch; vertical-align: middle') row
-      input#row.inline(type='text' style='text-align: right;' value='')
-      button#jump.inlinebutton(name='button' value='jump' formmethod='post') Go
-      
-      input#pattern(type='text' value='' )
-      //- the pattern to search for is in the posted data (...body.pattern)
-      //- this button will assume search is to be limited to goodaps or trashaps
-      //- based on what the current ap is (available as search_form.params.ap_id)
-      button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='button' value='search' formmethod='post') Search
-      //- listsearchmenu is not a button, but will act like a submit button when the value changes. The controller distinguishes
-      //- which button did the submission according to the value of form.button, but there's not a set value for this on
-      //- so controller will assume it's this if nothing else
-      if (Names)
-        select#listsearchmenu.inline(name='button' onchange='rentap.submit()' formmethod='post')
-          each Name in Names
-            option(value=Name.ap.rowid selected=(ap.rowid === Name.ap.rowid)) Name.FullName
+        label(for='row' style='text-align:right; font-weight: normal; margin-right: 1ch; vertical-align: middle') row
+        input#row.inline(name='row' type='text' style='text-align: right;' value='')
+        button#jump.inlinebutton(name='button' value='jump' formmethod='post') Go
+        
+        input#pattern(name='pattern' type='text' value='' )
+        //- the pattern to search for is in the posted data (...body.pattern)
+        //- this button will assume search is to be limited to goodaps or trashaps
+        //- based on what the current ap is (available as search_form.params.ap_id)
+        button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='button' value='search' formmethod='post') Search
+        //- listsearchmenu is not a button, but will act like a submit button when the value changes. The controller distinguishes
+        //- which button did the submission according to the value of form.button, but there's not a set value for this on
+        //- so controller will assume it's this if nothing else
+        if (Names)
+          select#listsearchmenu.inline(name='button' onchange='rentap.submit()' formmethod='post')
+            each Name in Names
+              option(value=Name.ap.rowid selected=(ap.rowid === Name.ap.rowid)) Name.FullName

@@ -33,14 +33,13 @@ exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownu
         if (mode==='discarded')
           db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
             if (err) console.error(err);
-            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is the only place rownum gets assigned (switch_mode is false)
+            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned (switch_mode is false)
             callback({aps:aps, rownum:rownum, mode:mode});
           });
-        else //this is the most common action
+        else
           db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
             if (err) console.error(err);
-            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id);
-            //rownum will be 0 if either switch_mode is true or ap_id is negative
+            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned (switch_mode is false)
             callback({aps:aps, rownum:rownum, mode:mode});
           });
       });
