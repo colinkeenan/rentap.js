@@ -73,10 +73,11 @@ var header_selected = function(form, res) {
 }
 
 var ap_selected = function(form, res) {
-  res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + form.body.button)
+  res.redirect('/rentap/show/' + form.body.button);
 }
 
 exports.form_submission = function(form, res) {
+  console.log("Button clicked: ", form.body.button);
   var butt_name = (Array.isArray(form.body.button) ? form.body.button[0] : form.body.button)
   switch(butt_name) {
     case 'newheader': save_new_header(form, res); break;
@@ -87,9 +88,10 @@ exports.form_submission = function(form, res) {
     case 'jump': show_ap_rownum(form, res); break;
     case 'search': search(form, res); break;
     default: {
-      if (Number.isInteger(form.body.button) && form.body.button >= 0)
-        rentap_ap_selected(form, res);
-      else rentap_header_selected;
+      let ap_id = parseInt(form.body.button);
+      if (Number.isInteger(ap_id) && ap_id >= 0)
+        ap_selected(form, res);
+      else header_selected(form,res);
     }
   }
 }

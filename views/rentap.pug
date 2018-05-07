@@ -17,7 +17,7 @@ html(lang='en')
     //- all the get buttons will be distinguished by path (in rentapRoutes), so will use formaction='/path' for all get buttons
     //- all the post buttons will have name 'button' and will be distinguished by value. there will only be one controller method
     //- for all post buttons
-    form#rentap 
+    form#rentap(method='post')
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
       //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], 
       table#rentapheader 
@@ -60,16 +60,16 @@ html(lang='en')
             //- the buttons just have one character on them (+, ~, -)
             //- except the default header button has ->0
             //- saveheader and editheader both save, but one inserts new and the other updates existing
-            button#saveheader.inline(title='Save New Header' name='button' value='newheader' formmethod='post') +
-            button#editheader.inline(title='Save Edited Header' name='button' value='existingheader' formmethod='post') ~
-            button#delheader.inline(title='Delete Header' name='button' value='deleteheader' formmethod='post') -
+            button#saveheader.inline(title='Save New Header' name='button' value='newheader') +
+            button#editheader.inline(title='Save Edited Header' name='button' value='existingheader') ~
+            button#delheader.inline(title='Delete Header' name='button' value='deleteheader') -
+            button#defaultheader.inline(title='Set as default header shown on start' name='button' value='defaultheader') ->0
             //- seems like this is how to put the dropdown list on the page using Pug
             //- onchange='rentap.submit()' submits form to update header (which includes input#headername above)
             if (headerNames)
-              select#changeHeadername(name='button' onchange='rentap.submit()' formmethod='post')
+              select#changeHeadername(name='button' onchange='rentap.submit()')
                 each headerName in headerNames
                   option(value=headerName selected=(header.Name === headerName)) headerName
-            button#defaultheader.inline(title='Set as default header shown on start' name='button' value='defaultheader' formmethod='post') ->0
       div
         //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
         //- rowmode{row,mode} and the ap.rowid=tbl.rowid of the rentap to display
@@ -161,32 +161,32 @@ html(lang='en')
               ul 
                 li 
                   if (mode != 'discarded')
-                    button#save.inline(name='button' value='save' formmethod='post') Save 
-                    button#new.inline(formaction='/rentap') New 
-                    button#discard.inline(formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid)) Discard
-                    button#trash.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Trash
+                    button#save.inline(name='button' value='save') Save 
+                    button#new.inline(formaction='/rentap' formmethod='get') New 
+                    button#discard.inline(formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid) formmethod='get') Discard
+                    button#trash.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') Trash
                   else 
-                    button#restore.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid)) Restore
-                    button#delrentap.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid)) Delete
-                    button#back.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode') Back 
+                    button#restore.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid) formmethod='get') Restore
+                    button#delrentap.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid) formmethod='get') Delete
+                    button#back.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') Back 
 
       div.right
-        button#prev.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev') Prev
-        button#next.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next') Next
+        button#prev.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev' formmethod='get') Prev
+        button#next.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next' formmethod='get') Next
 
         label(for='row' style='text-align:right; font-weight: normal; margin-right: 1ch; vertical-align: middle') row
         input#row.inline(name='row' type='text' style='text-align: right;' value='')
-        button#jump.inlinebutton(name='button' value='jump' formmethod='post') Go
+        button#jump.inlinebutton(name='button' value='jump') Go
         
         input#pattern(name='pattern' type='text' value='' )
         //- the pattern to search for is in the posted data (...body.pattern)
         //- this button will assume search is to be limited to goodaps or trashaps
         //- based on what the current ap is (available as search_form.params.ap_id)
-        button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='button' value='search' formmethod='post') Search
+        button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='button' value='search') Search
         //- listsearchmenu is not a button, but will act like a submit button when the value changes. The controller distinguishes
         //- which button did the submission according to the value of form.button, but there's not a set value for this on
         //- so controller will assume it's this if nothing else
         if (Names)
-          select#listsearchmenu.inline(name='button' onchange='rentap.submit()' formmethod='post')
+          select#listsearchmenu.inline(name='button' onchange='rentap.submit()')
             each Name in Names
               option(value=Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName
