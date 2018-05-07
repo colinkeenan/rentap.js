@@ -20,11 +20,6 @@ var save_new_header = function(form, res) {
 };
 
 var save_header = function(form, res) {
-  if (form.body.search === 'search') { // Search button was clicked
-    res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + form.params.pattern + ' for ap_id ' + form.params.ap_id);
-  } else { // Name was selected from dropdown list
-    res.send('NOT IMPLEMENTED: Show ap selected from dropdown list of names. The selected ap_id is: ' + form.body.selectedAp_id)
-  }
   res.send('NOT IMPLEMENTED: Save Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ' + form.originalUrl);
 };
 
@@ -37,26 +32,35 @@ var default_header = function(form, res) {
 };
 
 var save = function(form, res) {
-  // rentap.save
-  // form.body {fullname, ssnumber, birthdate, maritalstatus, email, stateid, phone1, phone2, currentaddress, previousaddresses, occupants, pets, income, employment, evictions, felonies, authdate, guestdate, rentdate, rentapHeadername}
-  res.send('NOT IMPLEMENTED: Save New or Edited (filled in) Application with values: ' + form.body.fullname + '. . .');
+  rentap.save(form.body, function(returned_ap_id) {
+    rentap.getaps(returned_ap_id, false, function(returned_aps) {
+      apsGbl = returned_aps;
+      res.redirect('/rentap/show/' + returned_ap_id);
+    });
+  });
 }
 
-//before calling show_ap_rownum, verify Number.isInteger(form.body.row) && form.body.row >= 0
 var show_ap_rownum = function(form, res) { 
-  var row_num = form.body.row; //row number that user entered
-  if (undefined === apsGbl) //this should only be true if just opened rentap on new ap, so treat as getting row of ap not in trash
-    //sending negative ap_id and false to getaps below means get all aps NOT in trash and set rownum to 0
-    rentap.getaps(-1, false, function(returned_aps) {
-      apsGbl = returned_aps;
+  let row_num = parseInt(form.body.row); //row number that user entered
+  if (Number.isInteger(row_num) && row_num >= 0) {
+    if (undefined == apsGbl) 
+      //sending negative ap_id and false to getaps below means get all aps NOT in trash and set rownum to 0
+      rentap.getaps(-1, false, function(returned_aps) {
+        apsGbl = returned_aps;
+        if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
+        apsGbl.rownum = row_num;
+        res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+      });
+    else {
       if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
       apsGbl.rownum = row_num;
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-    });
-  else {
-    if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
-    apsGbl.rownum = row_num;
-    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+    }
+  } else {
+    if (undefined == apsGbl)
+      res.redirect('/rentap');
+    else
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   }
 };
 
