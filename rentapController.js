@@ -95,7 +95,9 @@ exports.form_submission = function(form, res) {
 
 // methods for 'get' buttons
 exports.show_new_ap = function(form, res) {
-  res.render('rentap', {url:form.originalUrl, mode:'new', rownum: undefined, ap: undefined});
+  rentap.names(form.params.ap_id, function(returned_names) {
+    res.render('rentap', {url:form.originalUrl, mode:'new', rownum: undefined, ap: undefined, Names:returned_names});
+  });
 };
 
 exports.show_ap = function(form, res) {
@@ -106,11 +108,15 @@ exports.show_ap = function(form, res) {
     //rentap.getaps gets aps of the oppopsite mode as ap_id if 2nd param is true
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+      rentap.names(form.params.ap_id, function(returned_names) {
+        res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names});
+      });
     });
   else {
     apsGbl.rownum = apsGbl.aps.findIndex(ap => ap.rowid == form.params.ap_id);
-    res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+    rentap.names(form.params.ap_id, function(returned_names) {
+      res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names});
+    });
   }
 };
 

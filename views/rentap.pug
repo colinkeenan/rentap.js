@@ -189,4 +189,4 @@ html(lang='en')
         if (Names)
           select#listsearchmenu.inline(name='button' onchange='rentap.submit()' formmethod='post')
             each Name in Names
-              option(value=Name.ap.rowid selected=(ap.rowid === Name.ap.rowid)) Name.FullName
+              option(value=Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName
