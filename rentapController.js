@@ -77,7 +77,6 @@ var ap_selected = function(form, res) {
 }
 
 exports.form_submission = function(form, res) {
-  console.log("Button clicked: ", form.body.button);
   var butt_name = (Array.isArray(form.body.button) ? form.body.button[0] : form.body.button)
   switch(butt_name) {
     case 'newheader': save_new_header(form, res); break;

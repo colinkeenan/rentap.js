@@ -150,12 +150,12 @@ html(lang='en')
                 li
                   - var ev = undefined===ap ? '' : ap.Evictions
                   label(for='evictions') #[strong Evictions Past 10 Years] 
-                  textarea#evictions('name=evictions')= ev
+                  textarea#evictions(name='evictions')= ev
 
                 li
                   - var fe = undefined===ap ? '' : ap.Felonies
                   label(for='felonies') #[strong Felonies/Drug Convictions] 
-                  textarea#felonies('name=felonies')= fe
+                  textarea#felonies(name='felonies')= fe
 
             td#controls 
               ul 
