@@ -148,12 +148,11 @@ exports.save = function (ap, callback) {
     });
     db.close();
   } else {
-    console.log('not new: ', ap.mode);
     db.serialize(function() {
       db.run("UPDATE tbl SET FullName = (?), SSN = (?), BirthDate = (?), MaritalStatus = (?), Email = (?), StateID = (?), Phone1 = (?), Phone2 = (?), CurrentAddress = (?), PriorAddresses = (?), ProposedOccupants = (?), ProposedPets = (?), Income = (?), Employment = (?), Evictions = (?), Felonies = (?), dateApplied = (?), dateGuested = (?), dateRented = (?), headerName = (?) WHERE rowid = (?)", ap.fullname, ap.ssnumber, ap.birthdate, ap.maritalstatus, ap.email, ap.stateid, ap.phone1, ap.phone2, ap.currentaddress, ap.previousaddresses, ap.occupants, ap.pets, ap.income, ap.employment, ap.evictions, ap.felonies, ap.authdate, ap.guestdate, ap.rentdate, ap.rentapHeadername, ap.rentapID,
         function(err) {
           if (err) console.error(err); 
-          callback(this.lastID);
+          callback(ap.rentapID);
         }
       ); 
     });
