@@ -42,24 +42,21 @@ var save = function(form, res) {
   res.send('NOT IMPLEMENTED: Save New or Edited (filled in) Application with values: ' + form.body.fullname + '. . .');
 }
 
+//before calling show_ap_rownum, verify Number.isInteger(form.body.row) && form.body.row >= 0
 var show_ap_rownum = function(form, res) { 
-  if (typeof form.body.row === 'number') { //don't do anything if user didn't enter the number of the row to jump to
-    var row_num = form.body.row; //row number that user entered
-    consol.log(row_num);
-    if (row_num < 0) row_num = 0; //in case it's negative, make it 0
-    //negative ap_id, false means get all aps NOT in trash and set rownum to 0
-    if (undefined === apsGbl) //this should only be true if just opened rentap on new ap, so treat as getting row of ap not in trash
-      rentap.getaps(-1, false, function(returned_aps) {
-        apsGbl = returned_aps;
-        if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
-        apsGbl.rownum = row_num;
-        res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
-      });
-    else {
+  var row_num = form.body.row; //row number that user entered
+  if (undefined === apsGbl) //this should only be true if just opened rentap on new ap, so treat as getting row of ap not in trash
+    //sending negative ap_id and false to getaps below means get all aps NOT in trash and set rownum to 0
+    rentap.getaps(-1, false, function(returned_aps) {
+      apsGbl = returned_aps;
       if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
       apsGbl.rownum = row_num;
-      res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
-    }
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+    });
+  else {
+    if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
+    apsGbl.rownum = row_num;
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   }
 };
 
@@ -114,30 +111,30 @@ exports.show_ap = function(form, res) {
 };
 
 exports.show_ap_prev = function(form, res) {
-  //same as show_ap, but just decrement aps.rownum, wrapping around to the last ap if already on 0
+  //triggers show_ap by redirect, after decrement aps.rownum, wrapping around to the last ap if already on 0
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
       apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1); //down one if can, otherwise goto end
-      res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
     });
   else {
     apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1);
-    res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   }
 };
 
 exports.show_ap_next = function(form, res) {
-  //same as show_ap, but just increment aps.rownum, wrapping around to 0 if already on the last ap
+  //triggers show_ap by redirect, after increment aps.rownum, wrapping around to 0 if already on the last ap
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.rownum = apsGbl.rownum===(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1); //up one if can, otherwiss goto 0
-      res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+      apsGbl.rownum = apsGbl.rownum===(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1); //up one if can, else goto 0
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
     });
   else {
     apsGbl.rownum = apsGbl.rownum===(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1);
-    res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum]});
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   }
 };
 
