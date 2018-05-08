@@ -57,7 +57,7 @@ var show_ap_rownum = function(form, res) {
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
     }
   } else {
-    if (undefined == apsGbl)
+    if (undefined === apsGbl)
       res.redirect('/rentap');
     else
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
@@ -69,17 +69,26 @@ var search = function(form, res) {
 };
 
 var header_selected = function(form, res) {
-  res.send('NOT IMPLEMENTED: Show header selected from dropdown list of header names. The selected headername is: ' + form.body.button)
+  if (undefined === apsGbl || form.body.mode === 'new')
+    res.redirect('/rentap');
+  else
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
 }
 
 var ap_selected = function(form, res) {
-  res.redirect('/rentap/show/' + form.body.button);
+  res.redirect('/rentap/show/' + form.body.button.substring(1, form.body.button.length));
 }
 
 exports.form_submission = function(form, res) {
-  console.log("Button clicked: ", form.body.button);
-  var butt_name = (Array.isArray(form.body.button) ? form.body.button[0] : form.body.button)
-  switch(butt_name) {
+  //I expected a button click to produce a single value for form.body.rentapID, the value assigned to the button.
+  //However, trial and error shows the following pattern of form.body.button values:
+  //Header Selection: [headerName, ap_id]
+  //Name Selection: [headerName, selectedAp_id] (to distinguish from Header Selection, put 'r' in front of selected Ap_id in the form)
+  //Go: [headerName, jump, ap_id]
+
+  //So, this line corrects the value of form.body.button to the expected single value
+  form.body.button = (Array.isArray(form.body.button) ? (form.body.button.length==3 ? form.body.button[1] : (form.body.rentapID!=form.body.button[1] ? form.body.button[1] : form.body.button[0])) : form.body.button)
+  switch(form.body.button) {
     case 'newheader': save_new_header(form, res); break;
     case 'existingheader': save_header(form, res); break;
     case 'deleteheader': rm_header(form, res); break;
@@ -88,8 +97,8 @@ exports.form_submission = function(form, res) {
     case 'jump': show_ap_rownum(form, res); break;
     case 'search': search(form, res); break;
     default: {
-      let ap_id = parseInt(form.body.button);
-      if (Number.isInteger(ap_id) && ap_id >= 0)
+      let ap_id = parseInt(form.body.button.substring(1, form.body.button.length))
+      if (form.body.button.charAt(0)==='r' && Number.isInteger(ap_id) && ap_id >= 0)
         ap_selected(form, res);
       else header_selected(form,res);
     }
@@ -98,8 +107,11 @@ exports.form_submission = function(form, res) {
 
 // methods for 'get' buttons
 exports.show_new_ap = function(form, res) {
-  rentap.names(form.params.ap_id, function(returned_names) {
-    res.render('rentap', {url:form.originalUrl, mode:'new', rownum: undefined, ap: undefined, Names:returned_names});
+  apsGbl = undefined;
+  rentap.headernames(function(returned_headernames) {
+    rentap.names(form.params.ap_id, function(returned_names) {
+      res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headerNames:returned_headernames});
+    });
   });
 };
 
@@ -111,14 +123,18 @@ exports.show_ap = function(form, res) {
     //rentap.getaps gets aps of the oppopsite mode as ap_id if 2nd param is true
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      rentap.names(form.params.ap_id, function(returned_names) {
-        res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names});
+      rentap.headernames(function(returned_headernames) {
+        rentap.names(form.params.ap_id, function(returned_names) {
+          res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headerNames:returned_headernames});
+        });
       });
     });
   else {
     apsGbl.rownum = apsGbl.aps.findIndex(ap => ap.rowid == form.params.ap_id);
-    rentap.names(form.params.ap_id, function(returned_names) {
-      res.render('rentap', {url:form.originalUrl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names});
+    rentap.headernames(function(returned_headernames) {
+      rentap.names(form.params.ap_id, function(returned_names) {
+        res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headerNames:returned_headernames});
+      });
     });
   }
 };
@@ -128,11 +144,11 @@ exports.show_ap_prev = function(form, res) {
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1); //down one if can, otherwise goto end
+      apsGbl.rownum = apsGbl.rownum<=0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1); //down one if can, otherwise goto end
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
     });
   else {
-    apsGbl.rownum = apsGbl.rownum===0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1);
+    apsGbl.rownum = apsGbl.rownum<=0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1);
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   }
 };
@@ -142,11 +158,11 @@ exports.show_ap_next = function(form, res) {
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.rownum = apsGbl.rownum===(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1); //up one if can, else goto 0
+      apsGbl.rownum = apsGbl.rownum>=(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1); //up one if can, else goto 0
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
     });
   else {
-    apsGbl.rownum = apsGbl.rownum===(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1);
+    apsGbl.rownum = apsGbl.rownum>=(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1);
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   }
 };

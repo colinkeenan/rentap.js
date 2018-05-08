@@ -9,14 +9,13 @@ html(lang='en')
   body
 
     //- The form action is the current url by default, and the method is 'get' by default
-    //- I am just using the default for most buttons.
     //- 
     //- However, buttons (which are of type submit by default) can have
     //- formaction='/path' and the same can be done with method, 
     //- formmethod='post'
     //- all the get buttons will be distinguished by path (in rentapRoutes), so will use formaction='/path' for all get buttons
     //- all the post buttons will have name 'button' and will be distinguished by value. there will only be one controller method
-    //- for all post buttons
+    //-  for all post buttons
     form#rentap(method='post')
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
       //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], 
@@ -68,8 +67,8 @@ html(lang='en')
             //- onchange='rentap.submit()' submits form to update header (which includes input#headername above)
             if (headerNames)
               select#changeHeadername(name='button' onchange='rentap.submit()')
-                each headerName in headerNames
-                  option(value=headerName selected=(header.Name === headerName)) headerName
+                each header in headerNames.headers
+                  option(value=header.Name selected=(undefined==ap ? 1 : ap.headerName === header.Name))= header.Name
       div
         //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
         //- rowmode{row,mode} and the ap.rowid=tbl.rowid of the rentap to display
@@ -189,4 +188,4 @@ html(lang='en')
         if (Names)
           select#listsearchmenu.inline(name='button' onchange='rentap.submit()')
             each Name in Names
-              option(value=Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName
+              option(value='r'+Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName

@@ -48,6 +48,30 @@ exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownu
   }
 };
 
+exports.getheaders = function(callback) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  db.serialize(function() {
+    db.all("SELECT * FROM headers ORDER BY name", function(err, headers) {
+      if (err) console.error(err);
+      callback({headers:headers});
+    });
+  });
+  db.close();
+}
+
+exports.headernames = function(callback) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  db.serialize(function() {
+    db.all("SELECT name FROM headers ORDER BY name", function(err, headernames) {
+      if (err) console.error(err);
+      callback({headers:headernames});
+    });
+  });
+  db.close();
+}
+
 exports.names = function(ap_id, callback) { //for dropdown list of full names to choose an ap from
   getmode(ap_id, function(mode) {
     const sqlite3 = require('sqlite3');
