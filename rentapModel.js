@@ -54,19 +54,7 @@ exports.getheaders = function(callback) {
   db.serialize(function() {
     db.all("SELECT * FROM headers ORDER BY name", function(err, headers) {
       if (err) console.error(err);
-      callback({headers:headers});
-    });
-  });
-  db.close();
-}
-
-exports.headernames = function(callback) {
-  const sqlite3 = require('sqlite3');
-  let db = new sqlite3.Database('./store.db');
-  db.serialize(function() {
-    db.all("SELECT name FROM headers ORDER BY name", function(err, headernames) {
-      if (err) console.error(err);
-      callback({headers:headernames});
+      callback(headers);
     });
   });
   db.close();

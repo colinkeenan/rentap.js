@@ -69,7 +69,7 @@ var search = function(form, res) {
 };
 
 var header_selected = function(form, res) {
-  form.body.headerName = form.body.button;
+  form.body.headername = form.body.button;
   if (undefined === apsGbl || form.body.mode === 'new')
     res.redirect('/rentap');
   else
@@ -90,9 +90,7 @@ exports.form_submission = function(form, res) {
 
   //So, this line corrects the value of form.body.button to the expected single value unless it's got less than 3 elements
   //in which case it is passed along to the default part of the switch below to figure out what to do
-  console.log(form.body.button);
   form.body.button = (Array.isArray(form.body.button) ? (form.body.button.length==3 ? (form.body.button[1]=='jump' || form.body.button[1]=='search' ? form.body.button[1] : form.body.button[0]) : form.body.button) : form.body.button); //2nd to last form.body.button is [hederName, ap_id] where one of those changed. last form.body.button is if it was a single value already (not array)
-  console.log(form.body.button);
   switch(form.body.button) {
     case 'newheader': save_new_header(form, res); break;
     case 'existingheader': save_header(form, res); break;
@@ -104,7 +102,7 @@ exports.form_submission = function(form, res) {
     default: {
       //if got this far, it should be a 2 element array, [headerName, ap_id]
       //where one of the two values has changed from what's already on the form
-      if (form.body.headername != form.body.button[0]) {
+      if (apsGbl.aps[apsGbl.rownum].headerName != form.body.button[0]) {
         form.body.button = form.body.button[0]
         header_selected(form,res);
       } else if (form.body.ap_rentapID != form.body.button[1]) {
@@ -119,10 +117,9 @@ exports.form_submission = function(form, res) {
 
 // methods for 'get' buttons
 exports.show_new_ap = function(form, res) {
-  apsGbl = undefined;
-  rentap.headernames(function(returned_headernames) {
+  rentap.getheaders(function(returned_headers) {
     rentap.names(form.params.ap_id, function(returned_names) {
-      res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headerNames:returned_headernames});
+      res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headers:returned_headers, header:returned_headers[0]});
     });
   });
 };
@@ -135,17 +132,19 @@ exports.show_ap = function(form, res) {
     //rentap.getaps gets aps of the oppopsite mode as ap_id if 2nd param is true
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      rentap.headernames(function(returned_headernames) {
+      rentap.getheaders(function(returned_headers) {
         rentap.names(form.params.ap_id, function(returned_names) {
-          res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headerNames:returned_headernames});
+          let i = returned_headers.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
+          res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:returned_headers, header:returned_headers[i]});
         });
       });
     });
   else {
     apsGbl.rownum = apsGbl.aps.findIndex(ap => ap.rowid == form.params.ap_id);
-    rentap.headernames(function(returned_headernames) {
+    rentap.getheaders(function(returned_headers) {
       rentap.names(form.params.ap_id, function(returned_names) {
-        res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headerNames:returned_headernames});
+        let i = returned_headers.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
+        res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:returned_headers, header:returned_headers[i]});
       });
     });
   }

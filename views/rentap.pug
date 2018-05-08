@@ -65,9 +65,9 @@ html(lang='en')
             button#defaultheader.inline(title='Set as default header shown on start' name='button' value='defaultheader') ->0
             //- seems like this is how to put the dropdown list on the page using Pug
             //- onchange='rentap.submit()' submits form to update header (which includes input#headername above)
-            if (headerNames)
+            if (headers)
               select#changeHeadername(name='button' onchange='rentap.submit()')
-                each header in headerNames.headers
+                each header in headers
                   option(value=header.Name selected=(undefined==ap ? 1 : ap.headerName === header.Name))= header.Name
       div
         //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
