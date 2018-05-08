@@ -69,6 +69,7 @@ var search = function(form, res) {
 };
 
 var header_selected = function(form, res) {
+  form.body.headerName = form.body.button;
   if (undefined === apsGbl || form.body.mode === 'new')
     res.redirect('/rentap');
   else
@@ -76,18 +77,22 @@ var header_selected = function(form, res) {
 }
 
 var ap_selected = function(form, res) {
-  res.redirect('/rentap/show/' + form.body.button.substring(1, form.body.button.length));
+  res.redirect('/rentap/show/' + form.body.button);
 }
 
 exports.form_submission = function(form, res) {
   //I expected a button click to produce a single value for form.body.rentapID, the value assigned to the button.
   //However, trial and error shows the following pattern of form.body.button values:
-  //Header Selection: [headerName, ap_id]
-  //Name Selection: [headerName, selectedAp_id] (to distinguish from Header Selection, put 'r' in front of selected Ap_id in the form)
+  //Header Selection: [selected_headerName, ap_id] In order to distinguish between Header selection and Name selection, will check for which changed
+  //Name Selection: [headerName, selectedAp_id]
   //Go: [headerName, jump, ap_id]
+  //+ - ! -> [headeraction, headerName, ap_id] where hederaction is one of newheader, existingheader, deleteheader, or defaultheader
 
-  //So, this line corrects the value of form.body.button to the expected single value
-  form.body.button = (Array.isArray(form.body.button) ? (form.body.button.length==3 ? form.body.button[1] : (form.body.rentapID!=form.body.button[1] ? form.body.button[1] : form.body.button[0])) : form.body.button)
+  //So, this line corrects the value of form.body.button to the expected single value unless it's got less than 3 elements
+  //in which case it is passed along to the default part of the switch below to figure out what to do
+  console.log(form.body.button);
+  form.body.button = (Array.isArray(form.body.button) ? (form.body.button.length==3 ? (form.body.button[1]=='jump' || form.body.button[1]=='search' ? form.body.button[1] : form.body.button[0]) : form.body.button) : form.body.button); //2nd to last form.body.button is [hederName, ap_id] where one of those changed. last form.body.button is if it was a single value already (not array)
+  console.log(form.body.button);
   switch(form.body.button) {
     case 'newheader': save_new_header(form, res); break;
     case 'existingheader': save_header(form, res); break;
@@ -97,10 +102,17 @@ exports.form_submission = function(form, res) {
     case 'jump': show_ap_rownum(form, res); break;
     case 'search': search(form, res); break;
     default: {
-      let ap_id = parseInt(form.body.button.substring(1, form.body.button.length))
-      if (form.body.button.charAt(0)==='r' && Number.isInteger(ap_id) && ap_id >= 0)
-        ap_selected(form, res);
-      else header_selected(form,res);
+      //if got this far, it should be a 2 element array, [headerName, ap_id]
+      //where one of the two values has changed from what's already on the form
+      if (form.body.headername != form.body.button[0]) {
+        form.body.button = form.body.button[0]
+        header_selected(form,res);
+      } else if (form.body.ap_rentapID != form.body.button[1]) {
+        form.body.button = form.body.button[1]
+        let ap_id = parseInt(form.body.button);
+        if (Number.isInteger(ap_id) && ap_id >= 0)
+          ap_selected(form, res);
+      } else console.log('Not sure what to do with the submit button that has the following value: ', form.body.button);
     }
   }
 }

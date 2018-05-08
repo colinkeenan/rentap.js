@@ -54,7 +54,7 @@ html(lang='en')
 
           td#headercontrols 
             //- value of input#headername changes when select#changeHeadername changes
-            input#headername.inline(name='headername' type='text' value=(undefined===header ? '' : header.Name)) 
+            input#headername.inline(name='headername' type='text' value=(undefined===ap ? '' : ap.headerName)) 
             //- res.render in controller will provide headerName etc.
             //- the buttons just have one character on them (+, ~, -)
             //- except the default header button has ->0
@@ -188,4 +188,4 @@ html(lang='en')
         if (Names)
           select#listsearchmenu.inline(name='button' onchange='rentap.submit()')
             each Name in Names
-              option(value='r'+Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName
+              option(value=Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName
