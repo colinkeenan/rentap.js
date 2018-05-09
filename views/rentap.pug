@@ -19,7 +19,53 @@ html(lang='en')
     form#rentap(method='post')
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
       //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], 
-      table#rentapheader 
+      table#rentapheader
+        tr
+          td(colspan='2') 
+            input#mode.readonly(name='mode' type='text' value=(undefined===mode ? 'new' : mode) readonly) 
+            if (mode != 'discarded')
+              button#save.inline(name='button' value='save') Save 
+              button#new.inline(formaction='/rentap' formmethod='get') New 
+              button#discard.inline(formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid) formmethod='get') Discard
+              button#trash.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') Trash
+            else 
+              button#restore.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid) formmethod='get') Restore
+              button#delrentap.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid) formmethod='get') Delete
+              button#back.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') Back 
+
+          td
+            if (headers)
+              select#changeHeadername.inline(name='button' onchange='rentap.submit()')
+                each header in headers
+                  option(value=header.Name selected=(undefined==ap ? 1 : ap.headerName === header.Name))= header.Name
+            //- the buttons just have one character on them (+, ~, -)
+            //- except the default header button has ->0
+            //- saveheader and editheader both save, but one inserts new and the other updates existing
+            button#saveheader.inline(title='Save New Header' name='button' value='newheader') +
+            button#editheader.inline(title='Save Edited Header' name='button' value='existingheader') ~
+            button#delheader.inline(title='Delete Header' name='button' value='deleteheader') -
+            button#defaultheader.inline(title='Set as default header shown on start' name='button' value='defaultheader') ->0
+            //- value of input#headername changes when select#changeHeadername changes
+            input#headername(name='headername' type='text' value=(undefined===ap ? '' : ap.headerName)) 
+            
+          td
+            label.sameline_label(for='row') row:
+            input#row.sameline_input(name='row' type='text' value=(undefined==ap ? undefined : ap.rownum))
+            button#jump.inlinebutton(name='button' value='jump') Go
+            button#prev.inlinebutton.right(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev' formmethod='get') Prev
+            button#next.inlinebutton.right(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next' formmethod='get') Next
+
+            input#pattern(name='pattern' type='text' value='')
+            button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='button' value='search') Search
+
+          td(colspan='3')
+            //- listsearchmenu is not a button, but will act like a submit button when the value changes. The controller distinguishes
+            //- which button did the submission according to the value of form.button, but there's not a set value for this on
+            //- so controller will assume it's this if nothing else
+            if (Names)
+              select#listsearchmenu.inline(name='button' onchange='rentap.submit()')
+                each Name in Names
+                  option(value=Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName
         tr 
           td 
             img(src='/images/icon.png')
@@ -28,19 +74,18 @@ html(lang='en')
             input#rentaladdress(name='rentaladdress' type='text' value=(undefined===header ? 'enter rental address' : header.StreetAddress)) 
             input#rentalcitystzip(name='' type='text' value=(undefined===header ? 'enter city, state, zip' : header.CityStateZip))
 
-          td#tdrtitle 
-            input#mode.inlineshort(name='mode' type='text' readonly value=(undefined===mode ? 'new' : mode)) 
-            input#rtitle(name='' type='text' value=(undefined===header ? 'enter title' : header.Title))
+          td(colspan='2')
+            input.title(name='' type='text' value=(undefined===header ? 'enter title' : header.Title))
 
           td 
             label.smalllabel(for='authdate') Applied 
             input#authdate(name='authdate' type='text' value=(undefined===ap ? '' : ap.dateApplied)) 
-            div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') Row: 
-            
-            input#rowprint(name='rowprint' type='text' value=(undefined===rownum? '' : rownum) readonly) 
+
+            label.sameline_label(for='rowprint') Row: 
+            input#rowprint.readonly.sameline_input(name='rowprint' type='text' value=(undefined===rownum? '' : rownum) readonly) 
             br 
-            div(style='font: 12px/14px sans-serif; display:inline; position: relative; top: -10px;') ID: 
-            input#rentapID(name='rentapID' type='text' value=(undefined===ap? '' : ap.rowid) readonly) 
+            label.sameline_label(for='rentapID') ID: 
+            input#rentapID.readonly.sameline_input(name='rentapID' type='text' value=(undefined===ap? '' : ap.rowid) readonly) 
             
           td
             label.smalllabel(for='guestdate') Guest 
@@ -52,24 +97,6 @@ html(lang='en')
             - var rentapDateRented = undefined===ap? '' : ap.dateRented
             textarea#rentdate(name='rentdate' cols='8' rows='2')= rentapDateRented
 
-          td#headercontrols 
-            //- value of input#headername changes when select#changeHeadername changes
-            input#headername.inline(name='headername' type='text' value=(undefined===ap ? '' : ap.headerName)) 
-            //- res.render in controller will provide headerName etc.
-            //- the buttons just have one character on them (+, ~, -)
-            //- except the default header button has ->0
-            //- saveheader and editheader both save, but one inserts new and the other updates existing
-            button#saveheader.inline(title='Save New Header' name='button' value='newheader') +
-            button#editheader.inline(title='Save Edited Header' name='button' value='existingheader') ~
-            button#delheader.inline(title='Delete Header' name='button' value='deleteheader') -
-            button#defaultheader.inline(title='Set as default header shown on start' name='button' value='defaultheader') ->0
-            //- seems like this is how to put the dropdown list on the page using Pug
-            //- onchange='rentap.submit()' submits form to update header (which includes input#headername above)
-            if (headers)
-              select#changeHeadername(name='button' onchange='rentap.submit()')
-                each header in headers
-                  option(value=header.Name selected=(undefined==ap ? 1 : ap.headerName === header.Name))= header.Name
-      div
         //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
         //- rowmode{row,mode} and the ap.rowid=tbl.rowid of the rentap to display
 
@@ -155,37 +182,3 @@ html(lang='en')
                   - var fe = undefined===ap ? '' : ap.Felonies
                   label(for='felonies') #[strong Felonies/Drug Convictions] 
                   textarea#felonies(name='felonies')= fe
-
-            td#controls 
-              ul 
-                li 
-                  if (mode != 'discarded')
-                    button#save.inline(name='button' value='save') Save 
-                    button#new.inline(formaction='/rentap' formmethod='get') New 
-                    button#discard.inline(formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid) formmethod='get') Discard
-                    button#trash.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') Trash
-                  else 
-                    button#restore.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid) formmethod='get') Restore
-                    button#delrentap.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid) formmethod='get') Delete
-                    button#back.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') Back 
-
-      div.right
-        button#prev.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev' formmethod='get') Prev
-        button#next.inlinebutton(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next' formmethod='get') Next
-
-        label(for='row' style='text-align:right; font-weight: normal; margin-right: 1ch; vertical-align: middle') row
-        input#row.inline(name='row' type='text' style='text-align: right;' value='')
-        button#jump.inlinebutton(name='button' value='jump') Go
-        
-        input#pattern(name='pattern' type='text' value='' )
-        //- the pattern to search for is in the posted data (...body.pattern)
-        //- this button will assume search is to be limited to goodaps or trashaps
-        //- based on what the current ap is (available as search_form.params.ap_id)
-        button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='button' value='search') Search
-        //- listsearchmenu is not a button, but will act like a submit button when the value changes. The controller distinguishes
-        //- which button did the submission according to the value of form.button, but there's not a set value for this on
-        //- so controller will assume it's this if nothing else
-        if (Names)
-          select#listsearchmenu.inline(name='button' onchange='rentap.submit()')
-            each Name in Names
-              option(value=Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName
