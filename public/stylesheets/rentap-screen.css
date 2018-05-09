@@ -2,9 +2,9 @@ body {background-color: Gainsboro}
 td {vertical-align:top; padding:1ch;}
 ul {margin-left:0px; padding-left:0px;}
 li {list-style: none;}
-input {font:14px serif; width:22.5ch}
-textarea {font:14px serif; width:32.5ch}
-label, .section_header {font: 14px serif; font-weight: bold; display: block; min-width: 76px; max-width: 276px; vertical-align:bottom; white-space: nowrap; overflow: hidden}
+input {font:14px serif; width:23.5ch}
+textarea {font:14px serif; width:33.5ch}
+label, .section_header {font: 14px serif; font-weight: bold; display: block; max-width: 30ch; vertical-align:bottom; white-space: nowrap; overflow: hidden}
 .title {font:26px sans-serif; text-align:center; vertical-align:top; max-width:25ch; width:25ch; display: inline-block}
 .paddingtop {padding-top:3em}
 .lowpadding {padding:0.2ch}
@@ -19,7 +19,7 @@ label, .section_header {font: 14px serif; font-weight: bold; display: block; min
 #headertable {border:1px solid gray}
 #mode {width:6ch}
 #pattern {width:20ch}
-#rentaladdress, #rentalcitystzip {font:12px serif; vertical-align:top; max-width: 20ch; width: 20ch; max-height: 3em; display: block}
+#rentaladdress, #rentalcitystzip {font:12px serif; vertical-align:top; display: block}
 #authdate, #guestdate, #rentdate {width:10ch; display:block; position: relative; top: -1ex;}
 #rownumber, #idnumber {text-align:center;}
 #listsearchmenu {width: 22ch}
