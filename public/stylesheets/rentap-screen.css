@@ -6,6 +6,7 @@ input {font:14px serif; width:22.5ch}
 textarea {font:14px serif; width:32.5ch}
 label, .section_header {font: 14px serif; font-weight: bold; display: block; min-width: 76px; max-width: 276px; vertical-align:bottom; white-space: nowrap; overflow: hidden}
 .title {font:26px sans-serif; text-align:center; vertical-align:top; max-width:25ch; width:25ch; display: inline-block}
+.paddingtop {padding-top:3em}
 .lowpadding {padding:0.2ch}
 .max25ch {max-width:25ch}
 .right {float: right}
@@ -15,6 +16,7 @@ label, .section_header {font: 14px serif; font-weight: bold; display: block; min
 .inline {display: inline-block;}
 .smalllabel {font:12px sans-serif; position: relative; top: -1ex; display:block;}
 .readonly {border-width:0px; margin:0px; padding:0px; background-color: Gainsboro}
+#headertable {border:1px solid gray}
 #mode {width:6ch}
 #pattern {width:20ch}
 #rentaladdress, #rentalcitystzip {font:12px serif; vertical-align:top; max-width: 20ch; width: 20ch; max-height: 3em; display: block}
