@@ -53,8 +53,9 @@ html(lang='en')
             label.sameline_label(for='row') row:
             input#row.sameline_input(name='row' type='text' value=(undefined==ap ? undefined : ap.rownum))
             button#jump.inlinebutton(name='button' value='jump') Go
-            button#prev.inlinebutton.right(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev' formmethod='get') Prev
+            //prev and next are float right, so have to reverse order (fills from right to left)
             button#next.inlinebutton.right(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next' formmethod='get') Next
+            button#prev.inlinebutton.right(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev' formmethod='get') Prev
 
             input#pattern(name='pattern' type='text' value='')
             button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='button' value='search') Search

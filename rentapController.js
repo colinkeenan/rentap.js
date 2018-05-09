@@ -69,51 +69,68 @@ var search = function(form, res) {
 };
 
 var header_selected = function(form, res) {
-  //this is wrong. need to get apsGbl if needed and then set the new headerName in there
-  form.body.headername = form.body.button;
-  if (undefined === apsGbl || form.body.mode === 'new')
-    res.redirect('/rentap');
-  else
-    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  if (undefined===apsGbl)
+    rentap.getaps(form.params.ap_id, false, function(returned_aps) {
+      apsGbl = returned_aps;
+      apsGbl.aps.headerName = form.body.button;
+      if (form.body.mode === 'new')
+        res.redirect('/rentap');
+      else
+        res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+    });
+  else {
+    apsGbl.aps.headerName = form.body.button;
+    if (form.body.mode === 'new')
+      res.redirect('/rentap');
+    else
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  }
 }
 
 var ap_selected = function(form, res) {
   res.redirect('/rentap/show/' + form.body.button);
 }
 
-exports.form_submission = function(form, res) {
+var handle_form_submission = function(form, res) {
   //I expected a button click to produce a single value for form.body.rentapID, the value assigned to the button.
   //However, trial and error shows the following pattern of form.body.button values:
   //Header Selection: [selected_headerName, ap_id] In order to distinguish between Header selection and Name selection, will check for which changed
   //Name Selection: [headerName, selectedAp_id]
-  //Go: [headerName, jump, ap_id]
-  //+ - ! -> [headeraction, headerName, ap_id] where hederaction is one of newheader, existingheader, deleteheader, or defaultheader
+  //Go Search + - ! -> [headerName, action, ap_id] where action is one of jump, search, newheader, existingheader, deleteheader, or defaultheader
 
-  //So, this line corrects the value of form.body.button to the expected single value unless it's got less than 3 elements
-  //in which case it is passed along to the default part of the switch below to figure out what to do
-  form.body.button = (Array.isArray(form.body.button) ? (form.body.button.length==3 ? (form.body.button[1]=='jump' || form.body.button[1]=='search' ? form.body.button[1] : form.body.button[0]) : form.body.button) : form.body.button); //2nd to last form.body.button is [hederName, ap_id] where one of those changed. last form.body.button is if it was a single value already (not array)
-  switch(form.body.button) {
-    case 'newheader': save_new_header(form, res); break;
-    case 'existingheader': save_header(form, res); break;
-    case 'deleteheader': rm_header(form, res); break;
-    case 'defaultheader': default_header(form, res); break;
-    case 'save': save(form, res); break;
-    case 'jump': show_ap_rownum(form, res); break;
-    case 'search': search(form, res); break;
-    default: {
-      //if got this far, it should be a 2 element array, [headerName, ap_id]
-      //where one of the two values has changed from what's already on the form
-      if (apsGbl.aps[apsGbl.rownum].headerName != form.body.button[0]) {
-        form.body.button = form.body.button[0]
-        header_selected(form,res);
-      } else if (form.body.ap_rentapID != form.body.button[1]) {
-        form.body.button = form.body.button[1]
-        let ap_id = parseInt(form.body.button);
-        if (Number.isInteger(ap_id) && ap_id >= 0)
-          ap_selected(form, res);
-      } else console.log('Not sure what to do with the submit button that has the following value: ', form.body.button);
-    }
+  console.log(form.body.button)
+  //form.body.button must be corrected to a single value which each of the actions will look for
+  //also need a single value for the switch
+  var buttonAction
+  if (!Array.isArray(form.body.button)) buttonAction = form.body.button;
+  else buttonAction = form.body.button.length==3 ? form.body.button[1] : (apsGbl.aps[apsGbl.rownum].headerName != form.body.button[0] ? 'header_selected' : (apsGbl.aps[apsGbl.rownum].rowid != form.body.button[1] ? 'ap_selected' : 'unknown'))
+  console.log('buttonAction: ', buttonAction)
+
+  switch(buttonAction) {
+    case 'newheader': form.body.button = buttonAction; save_new_header(form, res); break;
+    case 'existingheader': form.body.button = buttonAction; save_header(form, res); break;
+    case 'deleteheader': form.body.button = buttonAction; rm_header(form, res); break;
+    case 'defaultheader': form.body.button = buttonAction; default_header(form, res); break;
+    case 'save': form.body.button = buttonAction; save(form, res); break;
+    case 'jump': form.body.button = buttonAction; show_ap_rownum(form, res); break;
+    case 'search': form.body.button = buttonAction; search(form, res); break;
+    case 'header_selected': form.body.button = form.body.button[0]; header_selected(form, res); break;
+    case 'ap_selected': form.body.button = form.body.button[1]; 
+      let ap_id = parseInt(form.body.button);
+      if (Number.isInteger(ap_id) && ap_id >= 0) ap_selected(form, res);
+      else console.log("Thought a new ap was selected, but can't parse this ap_id: ", form.body.button);
+      break;
+    default: console.log('Not sure what to do with the submit button that has the following value: ', form.body.button);
   }
+}
+
+exports.form_submission = function(form, res) {
+  if (undefined===apsGbl)
+    rentap.getaps(form.params.ap_id, false, function(returned_aps) {
+      apsGbl = returned_aps;
+      handle_form_submission(form, res);
+    });
+  else handle_form_submission(form, res);
 }
 
 // methods for 'get' buttons
