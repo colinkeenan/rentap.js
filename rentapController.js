@@ -69,6 +69,7 @@ var search = function(form, res) {
 };
 
 var header_selected = function(form, res) {
+  //this is wrong. need to get apsGbl if needed and then set the new headerName in there
   form.body.headername = form.body.button;
   if (undefined === apsGbl || form.body.mode === 'new')
     res.redirect('/rentap');

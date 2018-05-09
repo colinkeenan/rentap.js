@@ -1,25 +1,32 @@
-.defaultsink, .inlineshort, #controls, #headercontrols, #goforward {display:none}
-#rentapheader {width: 886px; margin:0px}
-#tdrtitle,#rtitle {font:26px sans-serif; font-weight: bold; text-align:center; border-width:0px; vertical-align:top; max-width:380px; width:380px; margin:0px; padding:0px;display: inline-block}
-#rentaladdress, #rentalcitystzip {font:12px serif; font-weight: bold; border-width:0px; vertical-align:top; max-width: 170px; width: 170px; max-height: 18px; margin:0px; padding:0px; display: block}
-#authdate {width:84px; display:block; position: relative; top: -8px;}
-#guestdate, #rentdate {width:84px; display:block; position: relative; top: -8px;}
-#rowprint, #rentapID {width:42px; border-width:0px;position: relative; top: -8px;}
-#rentapbody {margin:0px;}
+#headertable {display:none}
+body {background-color: Gainsboro}
+td {vertical-align:top; padding:1ch;}
 ul {margin-left:0px; padding-left:0px;}
 li {list-style: none;}
-label, .section_header {font: 14px serif; display: inline-block; min-width: 76px; max-width: 276px; vertical-align:bottom; white-space: nowrap; overflow: hidden}
-.personalinfo {margin-left:5px; max-width:76px; vertical-align:middle}
-input {font:14px serif; width:200px}
-textarea {font:13px serif; width:287px}
-td {vertical-align:top; max-width:304px}
+input {font:14px serif; width:22.5ch}
+textarea {font:14px serif; width:32.5ch}
+label, .section_header {font: 14px serif; font-weight: bold; display: block; min-width: 76px; max-width: 276px; vertical-align:bottom; white-space: nowrap; overflow: hidden}
+.title {font:26px sans-serif; text-align:center; vertical-align:top; max-width:25ch; width:25ch; display: inline-block}
+.lowpadding {padding:0.2ch}
+.max25ch {max-width:25ch}
+.right {float: right}
+.sameline_label {display: inline-block; font-weight: normal; min-width: 4ch; max-width: 4ch}
+.sameline_input {display: inline-block; position: relative; text-align: right; width:4ch;}
+.personalinfo {display: inline-block; font-weight: normal; margin-left: 1ch; width: 9ch; vertical-align:middle}
 .inline {display: inline-block;}
-.smalllabelinput {font:12px sans-serif; position: relative; top: -6px; display:block; width:72px;}
-#currentaddresslabel {margin-top:16px}
-#currentaddress {height:70px}
-#previousaddresses {height:140px}
-#occupants {height:50px}
-#pets {height:40px}
-#income {height:76px}
-#employment {height:244px}
-#evictions, #felonies {height:83px}
+.smalllabel {font:12px sans-serif; position: relative; top: -1ex; display:block;}
+.readonly {border-width:0px; margin:0px; padding:0px; background-color: Gainsboro}
+#mode {width:6ch}
+#pattern {width:20ch}
+#rentaladdress, #rentalcitystzip {font:12px serif; vertical-align:top; max-width: 20ch; width: 20ch; max-height: 3em; display: block}
+#authdate, #guestdate, #rentdate {width:10ch; display:block; position: relative; top: -1ex;}
+#rownumber, #idnumber {text-align:center;}
+#listsearchmenu {width: 22ch}
+#currentaddresslabel {margin-top:1ex}
+#currentaddress {height:7em}
+#previousaddresses {height:14em}
+#occupants {height:5em}
+#pets {height:4em}
+#income {height:7em}
+#employment {height:17em}
+#evictions, #felonies {height:17.6em}

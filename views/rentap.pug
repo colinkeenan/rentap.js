@@ -19,9 +19,9 @@ html(lang='en')
     form#rentap(method='post')
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
       //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], 
-      table#rentapheader
+      table#headertable
         tr
-          td(colspan='2') 
+          td.max25ch
             input#mode.readonly(name='mode' type='text' value=(undefined===mode ? 'new' : mode) readonly) 
             if (mode != 'discarded')
               button#save.inline(name='button' value='save') Save 
@@ -33,7 +33,7 @@ html(lang='en')
               button#delrentap.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid) formmethod='get') Delete
               button#back.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') Back 
 
-          td
+          td.max25ch
             if (headers)
               select#changeHeadername.inline(name='button' onchange='rentap.submit()')
                 each header in headers
@@ -48,7 +48,7 @@ html(lang='en')
             //- value of input#headername changes when select#changeHeadername changes
             input#headername(name='headername' type='text' value=(undefined===ap ? '' : ap.headerName)) 
             
-          td
+          td.max25ch
             label.sameline_label(for='row') row:
             input#row.sameline_input(name='row' type='text' value=(undefined==ap ? undefined : ap.rownum))
             button#jump.inlinebutton(name='button' value='jump') Go
@@ -58,7 +58,7 @@ html(lang='en')
             input#pattern(name='pattern' type='text' value='')
             button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='button' value='search') Search
 
-          td(colspan='3')
+          td.max25ch
             //- listsearchmenu is not a button, but will act like a submit button when the value changes. The controller distinguishes
             //- which button did the submission according to the value of form.button, but there's not a set value for this on
             //- so controller will assume it's this if nothing else
@@ -66,18 +66,19 @@ html(lang='en')
               select#listsearchmenu.inline(name='button' onchange='rentap.submit()')
                 each Name in Names
                   option(value=Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName
+      table
         tr 
-          td 
+          td.lowpadding 
             img(src='/images/icon.png')
 
-          td 
+          td.lowpadding  
             input#rentaladdress(name='rentaladdress' type='text' value=(undefined===header ? 'enter rental address' : header.StreetAddress)) 
             input#rentalcitystzip(name='' type='text' value=(undefined===header ? 'enter city, state, zip' : header.CityStateZip))
 
-          td(colspan='2')
+          td.lowpadding 
             input.title(name='' type='text' value=(undefined===header ? 'enter title' : header.Title))
 
-          td 
+          td.lowpadding  
             label.smalllabel(for='authdate') Applied 
             input#authdate(name='authdate' type='text' value=(undefined===ap ? '' : ap.dateApplied)) 
 
@@ -87,15 +88,15 @@ html(lang='en')
             label.sameline_label(for='rentapID') ID: 
             input#rentapID.readonly.sameline_input(name='rentapID' type='text' value=(undefined===ap? '' : ap.rowid) readonly) 
             
-          td
-            label.smalllabel(for='guestdate') Guest 
+          td.lowpadding 
+            label.smalllabel(for='guestdate') Guested 
             - var rentapDateGuested = undefined===ap ? '' : ap.dateGuested
-            textarea#guestdate(name='guestdate' cols='8' rows='2')= rentapDateGuested
+            textarea#guestdate(name='guestdate' cols='8' rows='4')= rentapDateGuested
 
-          td
+          td.lowpadding 
             label.smalllabel(for='rentdate') Rented 
             - var rentapDateRented = undefined===ap? '' : ap.dateRented
-            textarea#rentdate(name='rentdate' cols='8' rows='2')= rentapDateRented
+            textarea#rentdate(name='rentdate' cols='8' rows='4')= rentapDateRented
 
         //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
         //- rowmode{row,mode} and the ap.rowid=tbl.rowid of the rentap to display
