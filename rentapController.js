@@ -15,6 +15,12 @@ var headersGbl;
 // any other word (selected header from dropdown)
 // any positive intiger (ap_id that matches selected name from dropdown)
 
+//due to javascript being async, can't rely on getaps finishing before render,
+//so doing render in getaps callback if need to getaps
+//can't just have one render at end
+//as a result, making a "handle_..." function for each function that would otherwise need to repeat the exact same stuff twice
+//depending on whether or not getaps was needed
+
 //methods for 'post' buttons
 var save_new_header = function(form, res) {
   res.send('NOT IMPLEMENTED: Save New Header while on Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ' + form.originalUrl);
@@ -41,23 +47,23 @@ var save = function(form, res) {
   });
 }
 
+var handle_show_row = function(form, res, row_num) {
+  if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
+  apsGbl.rownum = row_num;
+  res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+}
+
 var show_ap_rownum = function(form, res) { 
   let row_num = parseInt(form.body.row); //row number that user entered
   if (Number.isInteger(row_num) && row_num >= 0) {
     if (undefined == apsGbl) 
-      //sending negative ap_id and false to getaps below means get all aps NOT in trash and set rownum to 0
       rentap.getaps(-1, false, function(returned_aps) {
         apsGbl = returned_aps;
-        if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
-        apsGbl.rownum = row_num;
-        res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+        handle_show_row(form, res, row_num);
       });
-    else {
-      if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
-      apsGbl.rownum = row_num;
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-    }
-  } else {
+    else
+      handle_show_row(form, res, row_num);
+  } else { //if it's not a valid row number, just redisplay the ap already showing
     if (undefined === apsGbl)
       res.redirect('/rentap');
     else
@@ -69,25 +75,23 @@ var search = function(form, res) {
   res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + form.body.pattern + ' for ap_id ' + form.params.ap_id);
 };
 
+var handle_selected_header = function(form, res) {
+  apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
+  if (form.body.mode === 'new')
+    res.redirect('/rentap');
+  else {
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  }
+}
+
 var header_selected = function(form, res) {
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
-      if (form.body.mode === 'new')
-        res.redirect('/rentap');
-      else {
-        res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-      }
+      handle_selected_header(form, res);
     });
-  else {
-    apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
-    if (form.body.mode === 'new')
-      res.redirect('/rentap');
-    else {
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-    }
-  }
+  else 
+    handle_selected_header(form, res);
 }
 
 var ap_selected = function(form, res) {
@@ -95,11 +99,11 @@ var ap_selected = function(form, res) {
 }
 
 var handle_form_submission = function(form, res) {
-  //I expected a button click to produce a single value for form.body.rentapID, the value assigned to the button.
-  //However, trial and error shows the following pattern of form.body.button values:
-  //Header Selection: [selected_headerName, ap_id] In order to distinguish between Header selection and Name selection, will check for which changed
-  //Name Selection: [headerName, selectedAp_id]
-  //Go Search + - ! -> [headerName, action, ap_id] where action is one of jump, search, newheader, existingheader, deleteheader, or defaultheader
+  // I expected a button click to produce a single value for form.body.rentapID, the value assigned to the button.
+  // However, trial and error shows the following pattern of form.body.button values:
+  // Header Selection: [selected_headerName, ap_id] In order to distinguish between Header selection and Name selection, will check for which changed
+  // Name Selection: [headerName, selectedAp_id]
+  // Go Search + - ! -> [headerName, action, ap_id] where action is one of save, jump, search, newheader, existingheader, deleteheader, or defaultheader
 
   //form.body.button must be corrected to a single value which each of the actions will look for
   //also need a single value for the switch
@@ -138,71 +142,76 @@ exports.form_submission = function(form, res) {
 }
 
 // methods for 'get' buttons
+var handle_show_new = function(form, res) {
+  rentap.names(form.params.ap_id, function(returned_names) {
+    res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headers:headersGbl, header: undefined});
+  });
+}
+
 exports.show_new_ap = function(form, res) {
-  if (undefined===headersGbl) {
+  if (undefined===headersGbl) 
     rentap.getheaders(function(returned_headers) {
       headersGbl=returned_headers;
-      rentap.names(form.params.ap_id, function(returned_names) {
-        res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headers:headersGbl, header: undefined});
-      });
+      handle_show_new(form, res);
     });
-  } else {
-    rentap.names(form.params.ap_id, function(returned_names) {
-      res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headers:headersGbl, header: undefined});
-    });
-  }
+  else 
+    handle_show_new(form, res);
 };
 
+var handle_show_ap = function(form, res) {
+  rentap.names(form.params.ap_id, function(returned_names) {
+    let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
+    res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:headersGbl, header:headersGbl[i]});
+  });
+}
+
 exports.show_ap = function(form, res) {
-  //due to javascript being async, can't rely on getaps finishing before render,
-  //so doing render in getaps callback if need to getaps
-  //can't just have one render at end
   if (undefined===headersGbl || undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) { //rentap.getaps gets aps of the oppopsite mode as ap_id if 2nd param is true
-      apsGbl = returned_aps;
+      apsGbl = returned_aps; //rapsGbl.rownum already provided here by the model
       rentap.getheaders(function(returned_headers) {
         headersGbl=returned_headers;
-        rentap.names(form.params.ap_id, function(returned_names) {
-          let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
-          res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:headersGbl, header:headersGbl[i]});
-        });
+        handle_show_ap(form, res);
       });
     });
   else {
+    //need to change the rownum in case form.params.ap_id is different than it was before
+    //rownum is the index of the current absGbl array. rowid and ap_id are indexes of the full tbl in the model, including both goodaps and trashaps
     apsGbl.rownum = apsGbl.aps.findIndex(ap => ap.rowid == form.params.ap_id);
-    rentap.names(form.params.ap_id, function(returned_names) {
-      let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
-      res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:headersGbl, header:headersGbl[i]});
-    });
+    handle_show_ap(form, res);
   }
 };
 
-exports.show_ap_prev = function(form, res) {
+handle_prev_ap = function(form, res) {
   //triggers show_ap by redirect, after decrement aps.rownum, wrapping around to the last ap if already on 0
+  apsGbl.rownum = apsGbl.rownum<=0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1); //down one if can, otherwise goto end
+  res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+}
+
+exports.show_ap_prev = function(form, res) {
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.rownum = apsGbl.rownum<=0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1); //down one if can, otherwise goto end
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+      handle_prev_ap(form, res);
     });
-  else {
-    apsGbl.rownum = apsGbl.rownum<=0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1);
-    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-  }
+  else
+    handle_prev_ap(form, res);
 };
+
+handle_next_ap = function(form, res) {
+  apsGbl.rownum = apsGbl.rownum>=(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1); //up one if can, else goto 0
+  res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+}
 
 exports.show_ap_next = function(form, res) {
   //triggers show_ap by redirect, after increment aps.rownum, wrapping around to 0 if already on the last ap
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.rownum = apsGbl.rownum>=(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1); //up one if can, else goto 0
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+      handle_next_ap(form, res);
     });
-  else {
-    apsGbl.rownum = apsGbl.rownum>=(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1);
-    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-  }
+  else
+    handle_next_ap(form, res);
 };
 
 exports.discard_ap = function(form, res) {
