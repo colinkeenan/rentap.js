@@ -22,7 +22,6 @@ label, .section_header {font: 14px serif; font-weight: bold; display: block; max
 #rentaladdress, #rentalcitystzip {font:12px serif; vertical-align:top; display: block}
 #authdate, #guestdate, #rentdate {width:10ch; display:block; position: relative; top: -1ex;}
 #rownumber, #idnumber {text-align:center;}
-#listsearchmenu {width: 22ch}
 #currentaddresslabel {margin-top:1ex}
 #currentaddress {height:7em}
 #previousaddresses {height:14em}

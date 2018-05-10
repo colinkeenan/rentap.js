@@ -25,7 +25,6 @@ html(lang='en')
           td.max25ch
             input#mode.readonly(name='mode' type='text' value=(undefined===mode ? 'new' : mode) readonly) 
             if (mode != 'discarded')
-              button#save.inline(name='button' value='save') Save 
               button#new.inline(formaction='/rentap' formmethod='get') New 
               button#discard.inline(formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid) formmethod='get') Discard
               button#trash.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') Trash
@@ -36,6 +35,7 @@ html(lang='en')
 
           td.max25ch
             if (headers)
+              headers.push({Name:'Choose Header'})
               select#changeHeadername.inline(name='button' onchange='rentap.submit()')
                 each header in headers
                   option(value=header.Name selected=(undefined==ap ? 1 : ap.headerName === header.Name))= header.Name
@@ -61,13 +61,21 @@ html(lang='en')
             button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='button' value='search') Search
 
           td.max25ch
+            //- moved Save between headers and names (the dropdown lists) so it will show up in the same place as other buttons
+            //- when submitted: [headerName, 'save', ap_id]
+            //- that way, Save will be the same as Jump, Search, etc. When Save was 1st in line in this table, before headers, it was 
+            //- coming first in the array for the form.body.button value.
+            if (mode != 'discarded')
+              button#save.inline(name='button' value='save') Save 
             //- listsearchmenu is not a button, but will act like a submit button when the value changes. The controller distinguishes
             //- which button did the submission according to the value of form.button, but there's not a set value for this on
             //- so controller will assume it's this if nothing else
             if (Names)
+              Names.push({FullName:'Choose Name', rowid:0})
               select#listsearchmenu.inline(name='button' onchange='rentap.submit()')
                 each Name in Names
                   option(value=Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName
+              
       table.paddingtop 
         tr
           td.lowpadding 
@@ -88,7 +96,7 @@ html(lang='en')
             input#rowprint.readonly.sameline_input(name='rowprint' type='text' value=(undefined===rownum? '' : rownum) readonly) 
             br 
             label.sameline_label(for='rentapID') ID: 
-            input#rentapID.readonly.sameline_input(name='rentapID' type='text' value=(undefined===ap? '' : ap.rowid) readonly) 
+            input#rentapID.readonly.sameline_input(name='rentapID' type='text' value=(undefined===ap? 'New' : ap.rowid) readonly) 
             
           td.lowpadding 
             label.smalllabel(for='guestdate') Guested 

@@ -98,13 +98,14 @@ var handle_form_submission = function(form, res) {
   //Name Selection: [headerName, selectedAp_id]
   //Go Search + - ! -> [headerName, action, ap_id] where action is one of jump, search, newheader, existingheader, deleteheader, or defaultheader
 
-  console.log(form.body.button)
   //form.body.button must be corrected to a single value which each of the actions will look for
   //also need a single value for the switch
   var buttonAction
   if (!Array.isArray(form.body.button)) buttonAction = form.body.button;
-  else buttonAction = form.body.button.length==3 ? form.body.button[1] : (apsGbl.aps[apsGbl.rownum].headerName != form.body.button[0] ? 'header_selected' : (apsGbl.aps[apsGbl.rownum].rowid != form.body.button[1] ? 'ap_selected' : 'unknown'))
-  console.log('buttonAction: ', buttonAction)
+  else if (undefined === apsGbl || undefined === apsGbl.aps[apsGbl.rownum]) 
+    buttonAction = form.body.button.length==3 ? form.body.button[1] : ('Choose Header'!=form.body.button[0] ? 'header_selected' : (0!=form.body.button[1] ? 'ap_selected' : 'unknown'));
+  else 
+    buttonAction = form.body.button.length==3 ? form.body.button[1] : (apsGbl.aps[apsGbl.rownum].headerName!=form.body.button[0] && 'Choose Header'!=form.body.button[0] ? 'header_selected' : (apsGbl.aps[apsGbl.rownum].rowid!=form.body.button[1] && 0!=form.body.button[1] ? 'ap_selected' : 'unknown'));
 
   switch(buttonAction) {
     case 'newheader': form.body.button = buttonAction; save_new_header(form, res); break;
