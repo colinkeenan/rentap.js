@@ -35,10 +35,9 @@ html(lang='en')
 
           td.max25ch
             if (headers)
-              headers.push({Name:'Choose Header'})
-              select#changeHeadername.inline(name='button' onchange='rentap.submit()')
+              select.inline(name='button' onchange='rentap.submit()')
                 each header in headers
-                  option(value=header.Name selected=(undefined==ap ? 1 : ap.headerName === header.Name))= header.Name
+                  option(value=header.Name selected=(undefined==ap ? 'Choose Header'==header.Name : ap.headerName === header.Name))= header.Name
             //- the buttons just have one character on them (+, ~, -)
             //- except the default header button has ->0
             //- saveheader and editheader both save, but one inserts new and the other updates existing
@@ -71,10 +70,9 @@ html(lang='en')
             //- which button did the submission according to the value of form.button, but there's not a set value for this on
             //- so controller will assume it's this if nothing else
             if (Names)
-              Names.push({FullName:'Choose Name', rowid:0})
-              select#listsearchmenu.inline(name='button' onchange='rentap.submit()')
+              select.inline(name='button' onchange='rentap.submit()')
                 each Name in Names
-                  option(value=Name.rowid selected=(undefined==ap ? 1 : ap.rowid===Name.rowid))= Name.FullName
+                  option(value=Name.rowid selected=(undefined==ap ? 'Choose Name'==Name.FullName : ap.rowid===Name.rowid))= Name.FullName
               
       table.paddingtop 
         tr

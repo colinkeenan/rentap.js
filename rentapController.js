@@ -75,15 +75,19 @@ var header_selected = function(form, res) {
       apsGbl.aps.headerName = form.body.button;
       if (form.body.mode === 'new')
         res.redirect('/rentap');
-      else
+      else {
+        console.log(apsGbl.aps.headerName);
         res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+      }
     });
   else {
     apsGbl.aps.headerName = form.body.button;
     if (form.body.mode === 'new')
       res.redirect('/rentap');
-    else
+    else {
+      console.log(apsGbl.aps.headerName);
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+    }
   }
 }
 
