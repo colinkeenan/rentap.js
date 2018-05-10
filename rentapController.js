@@ -1,5 +1,6 @@
 var rentap = require('./rentapModel.js');
 var apsGbl; 
+var headersGbl;
 // all these "exports" methods are for 'get' buttons where rentapRoutes decides which method to use based on the url
 // except for form_submission which uses a switch to decide which var function(form.button
 // because all the submit buttons are named "button", but have distinct values
@@ -72,20 +73,18 @@ var header_selected = function(form, res) {
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
-      apsGbl.aps.headerName = form.body.button;
+      apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
       if (form.body.mode === 'new')
         res.redirect('/rentap');
       else {
-        console.log(apsGbl.aps.headerName);
         res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
       }
     });
   else {
-    apsGbl.aps.headerName = form.body.button;
+    apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
     if (form.body.mode === 'new')
       res.redirect('/rentap');
     else {
-      console.log(apsGbl.aps.headerName);
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
     }
   }
@@ -140,35 +139,40 @@ exports.form_submission = function(form, res) {
 
 // methods for 'get' buttons
 exports.show_new_ap = function(form, res) {
-  rentap.getheaders(function(returned_headers) {
-    rentap.names(form.params.ap_id, function(returned_names) {
-      res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headers:returned_headers, header:returned_headers[0]});
+  if (undefined===headersGbl) {
+    rentap.getheaders(function(returned_headers) {
+      headersGbl=returned_headers;
+      rentap.names(form.params.ap_id, function(returned_names) {
+        res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headers:headersGbl, header: undefined});
+      });
     });
-  });
+  } else {
+    rentap.names(form.params.ap_id, function(returned_names) {
+      res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headers:headersGbl, header: undefined});
+    });
+  }
 };
 
 exports.show_ap = function(form, res) {
   //due to javascript being async, can't rely on getaps finishing before render,
   //so doing render in getaps callback if need to getaps
   //can't just have one render at end
-  if (undefined===apsGbl)
-    //rentap.getaps gets aps of the oppopsite mode as ap_id if 2nd param is true
-    rentap.getaps(form.params.ap_id, false, function(returned_aps) {
+  if (undefined===headersGbl || undefined===apsGbl)
+    rentap.getaps(form.params.ap_id, false, function(returned_aps) { //rentap.getaps gets aps of the oppopsite mode as ap_id if 2nd param is true
       apsGbl = returned_aps;
       rentap.getheaders(function(returned_headers) {
+        headersGbl=returned_headers;
         rentap.names(form.params.ap_id, function(returned_names) {
-          let i = returned_headers.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
-          res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:returned_headers, header:returned_headers[i]});
+          let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
+          res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:headersGbl, header:headersGbl[i]});
         });
       });
     });
   else {
     apsGbl.rownum = apsGbl.aps.findIndex(ap => ap.rowid == form.params.ap_id);
-    rentap.getheaders(function(returned_headers) {
-      rentap.names(form.params.ap_id, function(returned_names) {
-        let i = returned_headers.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
-        res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:returned_headers, header:returned_headers[i]});
-      });
+    rentap.names(form.params.ap_id, function(returned_names) {
+      let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
+      res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:headersGbl, header:headersGbl[i]});
     });
   }
 };
