@@ -80,9 +80,9 @@ var header_selected = function(form, res) {
 var ap_selected = function(form, res) {
   res.redirect('/rentap/show/' + form.body.button);
 }
-//
+
 var save_new_header = function(form, res) {
-  let header = { StreetAddress: form.body.rentapstreetaddress, CityStateZip: form.body.rentapcitystzip, Title: form.body.title, Name: form.body.headername };
+  let header = { StreetAddress: form.body.rentaladdress, CityStateZip: form.body.rentalcitystzip, Title: form.body.title, Name: form.body.headername };
   rentap.add_header(header, function(returned_headers) {
     headersGbl = returned_headers;
     if (form.body.mode === 'new') 
@@ -91,7 +91,7 @@ var save_new_header = function(form, res) {
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
 };
-
+//
 var save_header = function(form, res) {
   res.send('NOT IMPLEMENTED: Save Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ' + form.originalUrl);
 };
