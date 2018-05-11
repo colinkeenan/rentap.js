@@ -81,10 +81,10 @@ html(lang='en')
 
           td.lowpadding  
             input#rentaladdress(name='rentaladdress' type='text' value=(!header ? 'enter rental address' : header.StreetAddress)) 
-            input#rentalcitystzip(name='' type='text' value=(!header ? 'enter city, state, zip' : header.CityStateZip))
+            input#rentalcitystzip(name='rentalcitystzip' type='text' value=(!header ? 'enter city, state, zip' : header.CityStateZip))
 
           td.lowpadding 
-            input.title(name='' type='text' value=(!header ? 'enter title' : header.Title))
+            input.title(name='title' type='text' value=(!header ? 'enter title' : header.Title))
 
           td.lowpadding  
             label.smalllabel(for='authdate') Applied 

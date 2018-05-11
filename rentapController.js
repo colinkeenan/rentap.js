@@ -82,7 +82,14 @@ var ap_selected = function(form, res) {
 }
 //
 var save_new_header = function(form, res) {
-  res.send('NOT IMPLEMENTED: Save New Header while on Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ' + form.originalUrl);
+  let header = { StreetAddress: form.body.rentapstreetaddress, CityStateZip: form.body.rentapcitystzip, Title: form.body.title, Name: form.body.headername };
+  rentap.add_header(header, function(returned_headers) {
+    headersGbl = returned_headers;
+    if (form.body.mode === 'new') 
+      res.redirect('/rentap');
+    else 
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  });
 };
 
 var save_header = function(form, res) {
@@ -91,10 +98,6 @@ var save_header = function(form, res) {
 
 var rm_header = function(form, res) {
   res.send('NOT IMPLEMENTED: Delete Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
-};
-
-var default_header = function(form, res) {
-  res.send('NOT IMPLEMENTED: Set Default Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
 };
 
 var search = function(form, res) {
@@ -189,7 +192,7 @@ exports.show_ap = function(form, res) {
   }
 };
 
-handle_prev_ap = function(form, res) {
+var handle_prev_ap = function(form, res) {
   //triggers show_ap by redirect, after decrement aps.rownum, wrapping around to the last ap if already on 0
   apsGbl.rownum = apsGbl.rownum<=0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1); //down one if can, otherwise goto end
   res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
