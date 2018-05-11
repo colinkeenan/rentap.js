@@ -36,8 +36,8 @@ html(lang='en')
           td.max25ch
             if (headers)
               select.inline(name='button' onchange='rentap.submit()')
-                each header in headers
-                  option(value=header.Name selected=(undefined==ap ? 'Choose Header'==header.Name : ap.headerName === header.Name))= header.Name
+                each hdr in headers
+                  option(value=hdr.Name selected=(!header ? (undefined===ap ? 'Choose Header'===hdr.Name : ap.headerName===hdr.Name) : header.Name===hdr.Name))= hdr.Name
             //- the buttons just have one character on them (+, ~, -)
             //- except the default header button has ->0
             //- saveheader and editheader both save, but one inserts new and the other updates existing
@@ -46,7 +46,7 @@ html(lang='en')
             button#delheader.inline(title='Delete Header' name='button' value='deleteheader') -
             button#defaultheader.inline(title='Set as default header shown on start' name='button' value='defaultheader') ->0
             //- value of input#headername changes when select#changeHeadername changes
-            input#headername(name='headername' type='text' value=(undefined===ap ? '' : ap.headerName)) 
+            input#headername(name='headername' type='text' value=(undefined===ap ? (!header ? '' : header.Name) : ap.headerName)) 
             
           td.max25ch
             label.sameline_label(for='row') row:
@@ -80,11 +80,11 @@ html(lang='en')
             img(src='/images/icon.png')
 
           td.lowpadding  
-            input#rentaladdress(name='rentaladdress' type='text' value=(undefined===header ? 'enter rental address' : header.StreetAddress)) 
-            input#rentalcitystzip(name='' type='text' value=(undefined===header ? 'enter city, state, zip' : header.CityStateZip))
+            input#rentaladdress(name='rentaladdress' type='text' value=(!header ? 'enter rental address' : header.StreetAddress)) 
+            input#rentalcitystzip(name='' type='text' value=(!header ? 'enter city, state, zip' : header.CityStateZip))
 
           td.lowpadding 
-            input.title(name='' type='text' value=(undefined===header ? 'enter title' : header.Title))
+            input.title(name='' type='text' value=(!header ? 'enter title' : header.Title))
 
           td.lowpadding  
             label.smalllabel(for='authdate') Applied 

@@ -1,6 +1,7 @@
 var rentap = require('./rentapModel.js');
 var apsGbl; 
 var headersGbl;
+let headerName = null; //this is for display on a new ap. regular headerName is stored with the ap
 // all these "exports" methods are for 'get' buttons where rentapRoutes decides which method to use based on the url
 // except for form_submission which uses a switch to decide which var function(form.button
 // because all the submit buttons are named "button", but have distinct values
@@ -76,12 +77,14 @@ var search = function(form, res) {
 };
 
 var handle_selected_header = function(form, res) {
-  apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
-  if (form.body.mode === 'new')
+  if (undefined===apsGbl.aps[apsGbl.rownum] || form.body.mode === 'new')
+    headerName = form.body.button;
+  else
+    apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
+  if (form.body.mode === 'new') 
     res.redirect('/rentap');
-  else {
+  else 
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-  }
 }
 
 var header_selected = function(form, res) {
@@ -144,7 +147,10 @@ exports.form_submission = function(form, res) {
 // methods for 'get' buttons
 var handle_show_new = function(form, res) {
   rentap.names(form.params.ap_id, function(returned_names) {
-    res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headers:headersGbl, header: undefined});
+    var i;
+    if (headerName)
+      i = headersGbl.findIndex(header => header.Name  == headerName);
+    res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
   });
 }
 
@@ -160,6 +166,7 @@ exports.show_new_ap = function(form, res) {
 
 var handle_show_ap = function(form, res) {
   rentap.names(form.params.ap_id, function(returned_names) {
+    headerName = null;
     let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
     res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:headersGbl, header:headersGbl[i]});
   });
