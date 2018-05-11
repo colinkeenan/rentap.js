@@ -228,24 +228,23 @@ exports.rm_ap = function (ap_id, rownum, callback) {
   });
 };
 
-//methods below here are not ready yet
 exports.search = function(ap_id, pattern, callback) {
   getmode(ap_id, function(mode) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   db.serialize(function() {
     if (mode==='discarded')
-      db.all("SELECT * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
-        pattern, function(err, matching_aps) {
+      db.all("SELECT FullName, rowid FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?) ORDER BY rowid",
+        pattern, function(err, matching_names) {
           if (err) console.error(err);
-          callback(matching_aps);
+          callback(matching_names);
         }
       );
     else
-      db.all("SELECT * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
-        pattern, function(err, matching_aps) {
+      db.all("SELECT FullName, rowid FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?) ORDER BY rowid",
+        pattern, function(err, matching_names) {
           if (err) console.error(err);
-          callback(matching_aps);
+          callback(matching_names);
         }
       );
     });
@@ -253,6 +252,7 @@ exports.search = function(ap_id, pattern, callback) {
   });
 };
 
+//methods below here are not callable from the view yet
 exports.search_allaps = function(pattern, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
@@ -268,7 +268,7 @@ exports.search_allaps = function(pattern, callback) {
   });
   db.close();
 };
-
+//this doesn't do what it says - just copied above - can the column be passed in?
 exports.search_column = function(pattern, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');

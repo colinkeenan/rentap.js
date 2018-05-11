@@ -1,5 +1,6 @@
 var rentap = require('./rentapModel.js');
 var apsGbl; 
+let namesGbl = null;
 var headersGbl;
 let headerName = null; //this is for display on a new ap. regular headerName is stored with the ap
 // all these "exports" methods are for 'get' buttons where rentapRoutes decides which method to use based on the url
@@ -112,9 +113,14 @@ var rm_header = function(form, res) {
   });
 };
 
-//.
-var search = function(form, res) {
-  res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + form.body.pattern + ' for ap_id ' + form.params.ap_id);
+var search = function(form, res) { //the search results will be displayed in the dropdown list of names, but will not affect other navigation buttons
+  rentap.search(form.body.rentapID, '%' + form.body.pattern + '%', function(returned_names) {
+    namesGbl = !Array.isArray(returned_names) || !returned_names.length ? null : returned_names;
+    if (form.body.mode === 'new') 
+      res.redirect('/rentap');
+    else 
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  });
 };
 
 var handle_form_submission = function(form, res) {
@@ -161,11 +167,13 @@ exports.form_submission = function(form, res) {
 
 // methods for 'get' buttons
 var handle_show_new = function(form, res) {
-  rentap.names(form.params.ap_id, function(returned_names) {
-    var i;
-    if (headerName)
-      i = headersGbl.findIndex(header => header.Name  == headerName);
-    res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:returned_names, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
+  if (namesGbl) {
+    let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
+    res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
+  } else rentap.names(form.params.ap_id, function(returned_names) {
+    namesGbl = returned_names;
+    let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
+    res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
   });
 }
 
@@ -180,10 +188,15 @@ exports.show_new_ap = function(form, res) {
 };
 
 var handle_show_ap = function(form, res) {
-  rentap.names(form.params.ap_id, function(returned_names) {
+  if (namesGbl) {
     headerName = null;
     let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
-    res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:returned_names, headers:headersGbl, header:headersGbl[i]});
+    res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
+  } else rentap.names(form.params.ap_id, function(returned_names) {
+    namesGbl = returned_names
+    headerName = null;
+    let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
+    res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   });
 }
 
