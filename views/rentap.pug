@@ -23,38 +23,35 @@ html(lang='en')
       table#headertable
         tr
           td.max25ch
-            input#mode.readonly(name='mode' type='text' value=(undefined===mode ? 'new' : mode) readonly) 
+            input#mode.readonly.newline(name='mode' type='text' value=(undefined===mode ? 'new' : mode) style=('edit'===mode ? "color:green" : ('discarded'===mode ? "color:red" : false)) readonly) 
             if (mode != 'discarded')
               button#new.inline(formaction='/rentap' formmethod='get') New 
-              button#discard.inline(formaction='/rentap/discard/' + (undefined===ap ? '' : ap.rowid) formmethod='get') Discard
-              button#trash.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') Trash
+              button#discard.inline(formaction='/rentap/discard/' + (undefined===ap ? 0 : ap.rowid) formmethod='get') Discard
+              button#trash.inline(formaction='/rentap/show/' + (undefined==ap ? 0 : ap.rowid) + '/switch_mode' formmethod='get') Trash
             else 
               button#restore.inline(formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid) formmethod='get') Restore
               button#delrentap.inline(formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid) formmethod='get') Delete
               button#back.inline(formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') Back 
 
           td.max25ch
+            //- below 'select' is not a button, but will act like a submit button when the value changes. The controller distinguishes
+            //- which button did the submission according to the value of form.button
             if (headers)
               select.inline(name='button' onchange='rentap.submit()')
                 each hdr in headers
                   option(value=hdr.Name selected=(!header ? (undefined===ap ? 'Choose Header'===hdr.Name : ap.headerName===hdr.Name) : header.Name===hdr.Name))= hdr.Name
             //- the buttons just have one character on them (+, ~, -)
-            //- except the default header button has ->0
             //- saveheader and editheader both save, but one inserts new and the other updates existing
-            button#saveheader.inline(title='Save New Header' name='button' value='newheader') +
+            button#delheader.inline.leftgap(title='Delete Header' name='button' value='deleteheader') -
             button#editheader.inline(title='Save Edited Header' name='button' value='existingheader') ~
-            button#delheader.inline(title='Delete Header' name='button' value='deleteheader') -
-            button#defaultheader.inline(title='Set as default header shown on start' name='button' value='defaultheader') ->0
-            //- value of input#headername changes when select#changeHeadername changes
+            button#saveheader.inline(title='Save New Header' name='button' value='newheader') +
+            //- value of input#headername changes when the 'select' menu above changes
             input#headername(name='headername' type='text' value=(undefined===ap ? (!header ? '' : header.Name) : ap.headerName)) 
             
           td.max25ch
             label.sameline_label(for='row') row:
             input#row.sameline_input(name='row' type='text' value=(undefined==ap ? undefined : ap.rownum))
             button#jump.inlinebutton(name='button' value='jump') Go
-            //prev and next are float right, so have to reverse order (fills from right to left)
-            button#next.inlinebutton.right(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next' formmethod='get') Next
-            button#prev.inlinebutton.right(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev' formmethod='get') Prev
 
             input#pattern(name='pattern' type='text' value='')
             button#search.inlinebutton(title='Click while empty to clear previous search and list all names.' name='button' value='search') Search
@@ -66,9 +63,12 @@ html(lang='en')
             //- coming first in the array for the form.body.button value.
             if (mode != 'discarded')
               button#save.inline(name='button' value='save') Save 
-            //- listsearchmenu is not a button, but will act like a submit button when the value changes. The controller distinguishes
-            //- which button did the submission according to the value of form.button, but there's not a set value for this on
-            //- so controller will assume it's this if nothing else
+
+            //- prev and next are float right, so have to reverse order (fills from right to left)
+            button#next.inlinebutton.right(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/next' formmethod='get') Next
+            button#prev.inlinebutton.right(formaction='/rentap/show/' + (undefined==ap ? undefined : ap.rowid) + '/prev' formmethod='get') Prev
+
+            //- like with the select for headers above, this will submit the form when it changes
             if (Names)
               select.inline(name='button' onchange='rentap.submit()')
                 each Name in Names

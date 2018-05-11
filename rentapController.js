@@ -23,22 +23,6 @@ let headerName = null; //this is for display on a new ap. regular headerName is 
 //depending on whether or not getaps was needed
 
 //methods for 'post' buttons
-var save_new_header = function(form, res) {
-  res.send('NOT IMPLEMENTED: Save New Header while on Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ' + form.originalUrl);
-};
-
-var save_header = function(form, res) {
-  res.send('NOT IMPLEMENTED: Save Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ' + form.originalUrl);
-};
-
-var rm_header = function(form, res) {
-  res.send('NOT IMPLEMENTED: Delete Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
-};
-
-var default_header = function(form, res) {
-  res.send('NOT IMPLEMENTED: Set Default Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
-};
-
 var save = function(form, res) {
   rentap.save(form.body, function(returned_ap_id) {
     rentap.getaps(returned_ap_id, false, function(returned_aps) {
@@ -72,10 +56,6 @@ var show_ap_rownum = function(form, res) {
   }
 };
 
-var search = function(form, res) {
-  res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + form.body.pattern + ' for ap_id ' + form.params.ap_id);
-};
-
 var handle_selected_header = function(form, res) {
   if (undefined===apsGbl.aps[apsGbl.rownum] || form.body.mode === 'new')
     headerName = form.body.button;
@@ -100,6 +80,26 @@ var header_selected = function(form, res) {
 var ap_selected = function(form, res) {
   res.redirect('/rentap/show/' + form.body.button);
 }
+//
+var save_new_header = function(form, res) {
+  res.send('NOT IMPLEMENTED: Save New Header while on Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ' + form.originalUrl);
+};
+
+var save_header = function(form, res) {
+  res.send('NOT IMPLEMENTED: Save Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ' + form.originalUrl);
+};
+
+var rm_header = function(form, res) {
+  res.send('NOT IMPLEMENTED: Delete Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
+};
+
+var default_header = function(form, res) {
+  res.send('NOT IMPLEMENTED: Set Default Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
+};
+
+var search = function(form, res) {
+  res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + form.body.pattern + ' for ap_id ' + form.params.ap_id);
+};
 
 var handle_form_submission = function(form, res) {
   // I expected a button click to produce a single value for form.body.rentapID, the value assigned to the button.
@@ -242,8 +242,9 @@ exports.restore_ap = function(form, res) {
 exports.rm_ap = function(form, res) {
   //always gets apsGbl whether or not it is already defined
   //because expecting to change apsGbl by permanently deleting one
-  rentap.rm_ap(form.params.ap_id, function(returned_aps) {
+  rentap.rm_ap(form.params.ap_id, apsGbl.rownum, function(returned_aps) {
     apsGbl = returned_aps;
+    if (apsGbl.rownum >= apsGbl.aps.length) apsGbl.rownum = 0; //wrap around to 0 if it was the last ap that was deleted
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
 };

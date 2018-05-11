@@ -160,18 +160,21 @@ exports.save = function (ap, callback) {
   }
 }
 
-//methods below here are not ready yet
-exports.rm_ap = function (ap_id, callback) {
+exports.rm_ap = function (ap_id, rownum, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   db.serialize(function() { //do not allow an ap to be deleted unless it is in trash
-    db.run("DELETE FROM tbl WHERE rowid = (?) AND rowid IN (SELECT discardedRow FROM trash)", ap_id, function(err, row) {
+    db.run("DELETE FROM tbl WHERE rowid = (?) AND rowid IN (SELECT discardedRow FROM trash)", ap_id, function(err) {
       if (err) console.error(err);
-      callback(err);
+    });
+    db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
+      if (err) console.error(err);
+      callback({aps:aps, rownum:rownum , mode:'discarded'});
     });
   });
 };
 
+//methods below here are not ready yet
 exports.search = function(ap_id, pattern, callback) {
   getmode(ap_id, function(mode) {
   const sqlite3 = require('sqlite3');
@@ -204,7 +207,7 @@ exports.search_allaps = function(pattern, callback) {
     db.all("SELECT * FROM tbl WHERE FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
       pattern, function(err, rows) {
         if (err) console.error(err);
-        matching_allaps = rows; //will be null if error (or nothing matches, of course)
+        matching_allaps = rows;
         callback(matching_allaps);
       }
     );
@@ -220,7 +223,7 @@ exports.search_column = function(pattern, callback) {
     db.all("SELECT * FROM tbl WHERE FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?)",
       pattern, function(err, rows) {
         if (err) console.error(err);
-        rows_with_matching_field = rows; //will be null if error (or nothing matches, of course)
+        rows_with_matching_field = rows;
         callback(rows_with_matching_field);
       }
     );
