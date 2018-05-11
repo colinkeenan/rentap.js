@@ -101,11 +101,18 @@ var update_header = function(form, res) {
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
 };
-//.
+
 var rm_header = function(form, res) {
-  res.send('NOT IMPLEMENTED: Delete Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
+  rentap.rm_header(form.body.headername, function(returned_headers) {
+    headersGbl = returned_headers;
+    if (form.body.mode === 'new') 
+      res.redirect('/rentap');
+    else 
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  });
 };
 
+//.
 var search = function(form, res) {
   res.send('NOT IMPLEMENTED: Find All Applications (ap_id in Trash ? in trash : not in trash) that match pattern: ' + form.body.pattern + ' for ap_id ' + form.params.ap_id);
 };
