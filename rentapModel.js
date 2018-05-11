@@ -79,6 +79,24 @@ exports.add_header = function(hdr, callback) {
   db.close();
 }
 
+exports.update_header = function(hdr, callback) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db');
+  db.serialize(function() {
+    db.run("UPDATE headers SET StreetAddress = (?), CityStateZip = (?), Title = (?) WHERE Name = (?)", hdr.StreetAddress, hdr.CityStateZip, hdr.Title, hdr.Name, 
+      function(err) {
+        if (err) console.error(err);
+      }
+    );
+    db.all("SELECT * FROM headers ORDER BY name", function(err, headers) {
+      if (err) console.error(err);
+      headers.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
+      callback(headers);
+    });
+  });
+  db.close();
+}
+
 exports.names = function(ap_id, callback) { //for dropdown list of full names to choose an ap from
   getmode(ap_id, function(mode) {
     const sqlite3 = require('sqlite3');

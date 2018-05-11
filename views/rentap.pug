@@ -42,11 +42,11 @@ html(lang='en')
                   option(value=hdr.Name selected=(!header ? (undefined===ap ? 'Choose Header'===hdr.Name : ap.headerName===hdr.Name) : header.Name===hdr.Name))= hdr.Name
             //- the buttons just have one character on them (+, ~, -)
             //- saveheader and editheader both save, but one inserts new and the other updates existing
-            button#delheader.inline.leftgap(title='Delete Header' name='button' value='deleteheader') -
-            button#editheader.inline(title='Save Edited Header' name='button' value='existingheader') ~
-            button#saveheader.inline(title='Save New Header' name='button' value='newheader') +
+            button.inline.leftgap(title='Delete Header' name='button' value='deleteheader') -
+            button.inline(title='Save Edited Header' name='button' value='updateheader') ~
+            button.inline(title='Save New Header' name='button' value='addheader') +
             //- value of input#headername changes when the 'select' menu above changes
-            input#headername(name='headername' type='text' value=(undefined===ap ? (!header ? '' : header.Name) : ap.headerName)) 
+            input(name='headername' type='text' value=(undefined===ap ? (!header ? '' : header.Name) : ap.headerName)) 
             
           td.max25ch
             label.sameline_label(for='row') row:

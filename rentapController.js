@@ -6,10 +6,9 @@ let headerName = null; //this is for display on a new ap. regular headerName is 
 // except for form_submission which uses a switch to decide which var function(form.button
 // because all the submit buttons are named "button", but have distinct values
 // The post button values and (text on button) are:
-// newheader (+)
-// existingheader (~)
+// addheader (+)
+// updateheader (~)
 // deleteheader (-)
-// defaultheader (->0)
 // save (Save)
 // jump (Go)
 // search (Search)
@@ -81,7 +80,7 @@ var ap_selected = function(form, res) {
   res.redirect('/rentap/show/' + form.body.button);
 }
 
-var save_new_header = function(form, res) {
+var add_header = function(form, res) {
   let header = { StreetAddress: form.body.rentaladdress, CityStateZip: form.body.rentalcitystzip, Title: form.body.title, Name: form.body.headername };
   rentap.add_header(header, function(returned_headers) {
     headersGbl = returned_headers;
@@ -91,11 +90,18 @@ var save_new_header = function(form, res) {
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
 };
-//
-var save_header = function(form, res) {
-  res.send('NOT IMPLEMENTED: Save Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + 'with values: ' + form.body.ap + '. This url: ' + form.originalUrl);
-};
 
+var update_header = function(form, res) {
+  let header = { StreetAddress: form.body.rentaladdress, CityStateZip: form.body.rentalcitystzip, Title: form.body.title, Name: form.body.headername };
+  rentap.update_header(header, function(returned_headers) {
+    headersGbl = returned_headers;
+    if (form.body.mode === 'new') 
+      res.redirect('/rentap');
+    else 
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  });
+};
+//.
 var rm_header = function(form, res) {
   res.send('NOT IMPLEMENTED: Delete Header: ' + form.body.headername + ' while on Ap' + form.params.ap_id + '. This url: ' + form.originalUrl);
 };
@@ -109,7 +115,7 @@ var handle_form_submission = function(form, res) {
   // However, trial and error shows the following pattern of form.body.button values:
   // Header Selection: [selected_headerName, ap_id] In order to distinguish between Header selection and Name selection, will check for which changed
   // Name Selection: [headerName, selectedAp_id]
-  // Go Search + - ! -> [headerName, action, ap_id] where action is one of save, jump, search, newheader, existingheader, deleteheader, or defaultheader
+  // Go Search + - ! -> [headerName, action, ap_id] where action is one of save, jump, search, addheader, updateheader, deleteheader, or defaultheader
 
   //form.body.button must be corrected to a single value which each of the actions will look for
   //also need a single value for the switch
@@ -121,10 +127,9 @@ var handle_form_submission = function(form, res) {
     buttonAction = form.body.button.length==3 ? form.body.button[1] : (apsGbl.aps[apsGbl.rownum].headerName!=form.body.button[0] && 'Choose Header'!=form.body.button[0] ? 'header_selected' : (apsGbl.aps[apsGbl.rownum].rowid!=form.body.button[1] && 0!=form.body.button[1] ? 'ap_selected' : 'unknown'));
 
   switch(buttonAction) {
-    case 'newheader': form.body.button = buttonAction; save_new_header(form, res); break;
-    case 'existingheader': form.body.button = buttonAction; save_header(form, res); break;
+    case 'addheader': form.body.button = buttonAction; add_header(form, res); break;
+    case 'updateheader': form.body.button = buttonAction; update_header(form, res); break;
     case 'deleteheader': form.body.button = buttonAction; rm_header(form, res); break;
-    case 'defaultheader': form.body.button = buttonAction; default_header(form, res); break;
     case 'save': form.body.button = buttonAction; save(form, res); break;
     case 'jump': form.body.button = buttonAction; show_ap_rownum(form, res); break;
     case 'search': form.body.button = buttonAction; search(form, res); break;
