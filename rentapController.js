@@ -78,8 +78,6 @@ var header_selected = function(form, res) {
 }
 
 var ap_selected = function(form, res) {
-  //once a name has been selected from the dropdown list, remove "Choose Names" or "Choose from Search Results"
-  if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.pop()
   res.redirect('/rentap/show/' + form.body.button);
 }
 
@@ -199,10 +197,13 @@ var handle_show_new = function(form, res) {
   if (!Array.isArray(namesGbl) || !namesGbl.length) 
     rentap.names(form.params.ap_id, function(returned_names) {
       namesGbl = returned_names;
+      //whenever showing a new ap, there's no valid name to be selected automatically so show "Choose Name" (search also puts in a "Choose..." option)
+      if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
       let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
       res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
     }); 
   else {
+    //whenever showing a new ap, there's no valid name to be selected automatically so show "Choose Name" (search also puts in a "Choose..." option)
     if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
     let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
     res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
@@ -220,6 +221,9 @@ exports.show_new_ap = function(form, res) {
 };
 
 var handle_show_ap = function(form, res) {
+  //whenever showing a valid ap (not a new ap), let the select menu show the name selected - remove the "Choose..." option
+  // unless a search was just performed (the number of names is less than the number of aps + 1 where +1 is because of the "Choose" option)
+  if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /) && apsGbl.aps.length + 1 === namesGbl.length) namesGbl.pop()
   if (namesGbl) {
     headerName = null;
     let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
@@ -265,7 +269,7 @@ exports.show_ap_prev = function(form, res) {
     handle_prev_ap(form, res);
 };
 
-handle_next_ap = function(form, res) {
+var handle_next_ap = function(form, res) {
   apsGbl.rownum = apsGbl.rownum>=(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1); //up one if can, else goto 0
   res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
 }
@@ -327,22 +331,3 @@ exports.switch_mode = function(form, res) {
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
 };
-
-exports.search_allaps = function(form, res) {
-  // rentap.serach_allaps(form.body.pattern)
-  // currently no way to triger this from view
-  res.send('NOT IMPLEMENTED: Find All Applications that match pattern: ' + form.body.pattern + ' from ap ' + search_from.params.ap_id);
-};
-
-exports.search_col_allaps = function(form, res) {
-  // currently no way to triger this from view and there's no field named column
-  // rentap.search(form.body.pattern, form.body.column)
-  res.send('NOT IMPLEMENTED: Find All Applications that have ' + form.body.column + ' that match pattern: ' + form.body.pattern);
-};
-
-exports.search_col = function(form, res) {
-  // currently no way to triger this from view and there's no field named column
-  // rentap.search(form.body.pattern, form.body.column, form.params.ap_id)
-  res.send('NOT IMPLEMENTED: Find All Non-Trash Applications that have ' + form.body.column + ' that match pattern: ' + form.body.pattern + ' for ap_id ' +form.params.ap_id);
-};
-

@@ -126,13 +126,11 @@ exports.names = function(ap_id, callback) { //for dropdown list of full names to
       if (mode==='discarded')
         db.all("SELECT FullName, rowid FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, names) {
           if (err) console.error(err);
-          names.push({ FullName: 'Choose Name', rowid: 0 });
           callback(names);
         });
       else
         db.all("SELECT FullName, rowid FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, names) {
           if (err) console.error(err);
-          names.push({ FullName: 'Choose Name', rowid: 0 });
           callback(names);
         });
     });
