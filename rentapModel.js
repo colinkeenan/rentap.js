@@ -231,6 +231,7 @@ exports.rm_ap = function (ap_id, rownum, callback) {
   });
 };
 
+/* searching accross multiple columns doesn't work for some reason. Doing searches using pure javascript in rentapController
 exports.search = function(ap_id, pattern, callback) {
   getmode(ap_id, function(mode) {
   const sqlite3 = require('sqlite3');
@@ -289,3 +290,4 @@ exports.search_column = function(pattern, callback) {
   });
   db.close();
 };
+*/

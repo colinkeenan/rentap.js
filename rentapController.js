@@ -115,15 +115,37 @@ var rm_header = function(form, res) {
   });
 };
 
+var handle_search = function(form, res) {
+  //node-sqlite3 LIKE isn't working across multiple columns for me even with OR so just doing the search here in javascript
+  var regexp = RegExp(form.body.pattern, 'ig');
+  var matching_names = [];
+  var i, key;
+  for (i in apsGbl.aps) {
+    let ap = apsGbl.aps[i];
+    for (key in ap) {
+      //have to reset lastIndex of regexp on each field or else it will continue the search from where it last found something in the previous one 
+      regexp.lastIndex = 0; 
+      if (regexp.test(ap[key])) {
+        matching_names.push({ FullName: ap.FullName, rowid: ap.rowid });
+        break; //move on to next ap as soon as there's a match because don't want to list the same ap more than once in the search results
+      }
+    }
+  }
+  matching_names.push({ FullName: 'Choose from Search Results', rowid: 0 });
+  namesGbl = !Array.isArray(matching_names) || matching_names.length <= 1 ? null : matching_names;
+  if (form.body.mode === 'new') 
+    res.redirect('/rentap');
+  else 
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+}
+
 var search = function(form, res) { //the search results will be displayed in the dropdown list of names, but will not affect other navigation buttons
-  //sqlite search wildcards are just % (like .*) and _ (like .)
-  rentap.search(form.body.rentapID, '%' + form.body.pattern + '%', function(returned_names) {
-    namesGbl = !Array.isArray(returned_names) || returned_names.length <= 1 ? null : returned_names;
-    if (form.body.mode === 'new') 
-      res.redirect('/rentap');
-    else 
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-  });
+  if (undefined===apsGbl) 
+    rentap.getaps(form.body.rentapID, false, function(returned_aps) { 
+      apsGbl = returned_aps;
+      handle_search(form, res); 
+    });
+  else handle_search(form, res); 
 };
 
 var handle_form_submission = function(form, res) {
