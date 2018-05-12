@@ -72,7 +72,7 @@ html(lang='en')
             if (Names)
               select.inline(name='button' onchange='rentap.submit()')
                 each Name in Names
-                  option(value=Name.rowid selected=(undefined==ap ? 'Choose Name'==Name.FullName : ap.rowid===Name.rowid))= Name.FullName
+                  option(value=Name.rowid selected=(Names[Names.length - 1].FullName.match(/^Choose /) ? Name.FullName.match(/^Choose /) : ap.rowid===Name.rowid))= Name.FullName
               
       table.paddingtop 
         tr

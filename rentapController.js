@@ -78,6 +78,8 @@ var header_selected = function(form, res) {
 }
 
 var ap_selected = function(form, res) {
+  //once a name has been selected from the dropdown list, remove "Choose Names" or "Choose from Search Results"
+  if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.pop()
   res.redirect('/rentap/show/' + form.body.button);
 }
 
@@ -114,8 +116,9 @@ var rm_header = function(form, res) {
 };
 
 var search = function(form, res) { //the search results will be displayed in the dropdown list of names, but will not affect other navigation buttons
+  //sqlite search wildcards are just % (like .*) and _ (like .)
   rentap.search(form.body.rentapID, '%' + form.body.pattern + '%', function(returned_names) {
-    namesGbl = !Array.isArray(returned_names) || !returned_names.length ? null : returned_names;
+    namesGbl = !Array.isArray(returned_names) || returned_names.length <= 1 ? null : returned_names;
     if (form.body.mode === 'new') 
       res.redirect('/rentap');
     else 
@@ -153,6 +156,10 @@ var handle_form_submission = function(form, res) {
       else console.log("Thought a new ap was selected, but can't parse this ap_id: ", form.body.button);
       break;
     default: console.log('Not sure what to do with the submit button that has the following value: ', form.body.button);
+      if (form.body.mode === 'new') 
+        res.redirect('/rentap');
+      else 
+        res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   }
 }
 
@@ -167,14 +174,17 @@ exports.form_submission = function(form, res) {
 
 // methods for 'get' buttons
 var handle_show_new = function(form, res) {
-  if (namesGbl) {
+  if (!Array.isArray(namesGbl) || !namesGbl.length) 
+    rentap.names(form.params.ap_id, function(returned_names) {
+      namesGbl = returned_names;
+      let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
+      res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
+    }); 
+  else {
+    if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
     let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
     res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
-  } else rentap.names(form.params.ap_id, function(returned_names) {
-    namesGbl = returned_names;
-    let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
-    res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
-  });
+  }
 }
 
 exports.show_new_ap = function(form, res) {

@@ -116,6 +116,9 @@ exports.rm_header = function(headername, callback) {
 }
 
 exports.names = function(ap_id, callback) { //for dropdown list of full names to choose an ap from
+  //sometimes ap_id will be undefined, but that's OK because getmode just checks if it's trash, and undefined is not trash, so will
+  //say the mode is edit. that works because want all goodnames when on a new ap (can only click New when on a goodap and 
+  //also, a new ap is shown on first starting so want to be able to select a good name in either case).
   getmode(ap_id, function(mode) {
     const sqlite3 = require('sqlite3');
     let db = new sqlite3.Database('./store.db');
@@ -237,6 +240,7 @@ exports.search = function(ap_id, pattern, callback) {
       db.all("SELECT FullName, rowid FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?) ORDER BY rowid",
         pattern, function(err, matching_names) {
           if (err) console.error(err);
+          matching_names.push({ FullName: 'Choose from Search Results', rowid: 0 });
           callback(matching_names);
         }
       );
@@ -244,6 +248,7 @@ exports.search = function(ap_id, pattern, callback) {
       db.all("SELECT FullName, rowid FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) AND FullName LIKE (?) OR SSN LIKE (?) OR BirthDate LIKE (?) OR MaritalStatus LIKE (?) OR Email LIKE (?) OR StateID LIKE (?) OR Phone1 LIKE (?) OR Phone2 LIKE (?) OR CurrentAddress LIKE (?) OR PriorAddresses LIKE (?) OR ProposedOccupants LIKE (?) OR ProposedPets LIKE (?) OR Income LIKE (?) OR Employment LIKE (?) OR Evictions LIKE (?) OR Felonies LIKE (?) OR dateApplied LIKE (?) OR dateGuested LIKE (?) OR dateRented LIKE (?) ORDER BY rowid",
         pattern, function(err, matching_names) {
           if (err) console.error(err);
+          matching_names.push({ FullName: 'Choose from Search Results', rowid: 0 });
           callback(matching_names);
         }
       );
