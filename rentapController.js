@@ -2,6 +2,7 @@ var rentap = require('./rentapModel.js');
 var apsGbl; 
 let namesGbl = null;
 var headersGbl;
+let headerSelected = false; //keep track if header has been selected on a new ap yet or not. set true when header selected, false when ap is saved.
 let headerName = null; //this is for display on a new ap. regular headerName is stored with the ap
 // all these "exports" methods are for 'get' buttons where rentapRoutes decides which method to use based on the url
 // except for form_submission which uses a switch to decide which var function(form.button
@@ -24,6 +25,9 @@ let headerName = null; //this is for display on a new ap. regular headerName is 
 
 //methods for 'post' buttons
 var save = function(form, res) {
+  //todo: before allowing a save, need to verify there really is a fullName and header
+  headerSelected = true; 
+  if (headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
   rentap.save(form.body, function(returned_ap_id) {
     rentap.getaps(returned_ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
@@ -61,13 +65,15 @@ var handle_selected_header = function(form, res) {
     headerName = form.body.button;
   else
     apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
-  if (form.body.mode === 'new') 
+  if (form.body.mode === 'new') {
     res.redirect('/rentap');
-  else 
+  } else {
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  }
 }
 
 var header_selected = function(form, res) {
+  headerSelected = true; //gets set true here, and false in save
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
@@ -214,13 +220,23 @@ exports.show_new_ap = function(form, res) {
   if (undefined===headersGbl) 
     rentap.getheaders(function(returned_headers) {
       headersGbl=returned_headers;
+      //showing headers for first time on a new ap, so put the "Choose" option on
+      headerSelected = false;
+      headersGbl.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
       handle_show_new(form, res);
     });
-  else 
+  else {
+    if (!headerSelected && !headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) 
+      headersGbl.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
     handle_show_new(form, res);
+  }
 };
 
 var handle_show_ap = function(form, res) {
+  //all existing aps should have a header, so headerSelected is true, but setting to false because headerSelected is for new aps, it's ignored for existing aps
+  //need headerSelected to be false the next time "New" button is clicked
+  headerSelected = false;
+  if (headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
   //whenever showing a valid ap (not a new ap), let the select menu show the name selected - remove the "Choose..." option
   // unless a search was just performed (the number of names is less than the number of aps + 1 where +1 is because of the "Choose" option)
   if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /) && apsGbl.aps.length + 1 === namesGbl.length) namesGbl.pop()

@@ -54,7 +54,6 @@ exports.getheaders = function(callback) {
   db.serialize(function() {
     db.all("SELECT * FROM headers ORDER BY name", function(err, headers) {
       if (err) console.error(err);
-      headers.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
       callback(headers);
     });
   });
