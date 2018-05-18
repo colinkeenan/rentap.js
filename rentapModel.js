@@ -221,6 +221,10 @@ exports.rm_ap = function (ap_id, rownum, callback) {
     db.run("DELETE FROM tbl WHERE rowid = (?) AND rowid IN (SELECT discardedRow FROM trash)", ap_id, function(err) {
       if (err) console.error(err);
     });
+    //also delete from trash so a future ap with same ap_id doesn't end up in trash on creation
+    db.run("DELETE FROM trash WHERE discardedRow = (?)", ap_id, function(err) { 
+      if (err) console.error(err);
+    });
     db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
       if (err) console.error(err);
       callback({aps:aps, rownum:rownum , mode:'discarded'});

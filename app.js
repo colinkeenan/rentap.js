@@ -1,8 +1,9 @@
 var express = require('express');
 var indexRouter = require('./index');
-var rentapRouter = require('./rentapRoutes.js');
+var rentapRouter = require('./rentapRoutes');
 
 var app = express();
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

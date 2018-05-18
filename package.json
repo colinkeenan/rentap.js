@@ -14,8 +14,10 @@
   },
   "repository": "github:colinkeenan/rentap.js",
   "homepage": "https://github.com/colinkeenan/rentap.js#readme",
-  "bugs": {"url" : "https://github.com/colinkeenan/rentap.js/issues"
-    , "email" : "colinnkeenan@gmail.com"},
+  "bugs": {
+    "url": "https://github.com/colinkeenan/rentap.js/issues",
+    "email": "colinnkeenan@gmail.com"
+  },
   "author": "Colin N Keenan",
   "license": "GPL-3.0-or-later"
 }
