@@ -1,3 +1,7 @@
+//- The inline SVG images in this file are from those listed here: https://fontawesome.com/icons?d=gallery&s=solid, 
+//- and are Creative Commons licensed: https://creativecommons.org/licenses/by/4.0/
+//- The svg and path information was obtained by running through this tutorial: https://fontawesome.com/how-to-use/server-side-rendering,
+//- inserting the names of icons needed instead of just "home", and then rewriting it in pug syntax.
 html(lang='en')
   head
     title Rental Application
@@ -8,6 +12,12 @@ html(lang='en')
     link(rel='stylesheet' media='print' href='/stylesheets/rentap-screen.css')
     link(rel='stylesheet' media='screen' href='/stylesheets/rentap-screen.css')
   body
+    //- this "jump" form only has one label and input "row" which is inside the main "rentap" form
+    //- When the input changes and the user hits Enter, the form will be submitted
+    //- and the ap on that row will be displayed
+    form#jump(method='post')
+    //- Similar for selectHeader form except it's submitted as soon as the selection is made (no need to hit enter)
+    form#selectHeader(method='post')
     //- The form action is the current url by default, and the method is 'get' by default
     //- 
     //- However, buttons (which are of type submit by default) can have
@@ -16,7 +26,7 @@ html(lang='en')
     //- all the get buttons will be distinguished by path (in rentapRoutes), so will use formaction='/path' for all get buttons
     //- all the post buttons will have name 'button' and will be distinguished by value. there will only be one controller method
     //-  for all post buttons
-    form#rentap(method='post')
+    form#rentap(name='rentap' method='post')
       //- the model has access to headers table as headers[{StreetAddress, CityStateZip, Title, Name}, etc.]
       //- header: {StreetAddress, CityStateZip, Title, Name}, headerNames[name1,...], 
       table#headertable
@@ -35,11 +45,11 @@ html(lang='en')
                   path(fill="currentColor" d="M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm416 56v324c0 26.5-21.5 48-48 48H80c-26.5 0-48-21.5-48-48V140c0-6.6 5.4-12 12-12h360c6.6 0 12 5.4 12 12zm-272 68c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208z")
             else 
               button#restore.inline(title='Restore' formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid) formmethod='get') 
-                svg(aria-hidden="true" data-prefix="fas" data-icon="plus-square" class="svg-inline--fa fa-plus-square fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                  path(fill="currentColor" d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-32 252c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92H92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z")
+                svg(aria-hidden="true" data-prefix="fas" data-icon="plus" class="svg-inline--fa fa-plus fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                  path(fill="currentColor" d="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z")
               button#delrentap.inline(title='Delete' formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid) formmethod='get') 
-                svg(aria-hidden="true" data-prefix="fas" data-icon="minus-square" class="svg-inline--fa fa-minus-square fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                  path(fill="currentColor" d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zM92 296c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h264c6.6 0 12 5.4 12 12v56c0 6.6-5.4 12-12 12H92z")
+                svg(aria-hidden="true" data-prefix="fas" data-icon="minus" class="svg-inline--fa fa-minus fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                  path(fill="currentColor" d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z")
               button#back.inline(title='Leave Trash' formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') 
                 svg(aria-hidden="true" data-prefix="fas" data-icon="sign-out-alt" class="svg-inline--fa fa-sign-out-alt fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
                   path(fill="currentColor" d="M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z")
@@ -48,7 +58,7 @@ html(lang='en')
             //- below 'select' is not a button, but will act like a submit button when the value changes. The controller distinguishes
             //- which button did the submission according to the value of form.button
             if (headers)
-              select.inline(name='button' onchange='rentap.submit()')
+              select.inline(name='button' form='selectHeader' onchange='submit()')
                 each hdr in headers
                   option(value=hdr.Name selected=(!header ? (undefined===ap ? 'Choose Header'===hdr.Name : ap.headerName===hdr.Name) : header.Name===hdr.Name))= hdr.Name
             //- the buttons just have one character on them (+, ~, -)
@@ -60,10 +70,6 @@ html(lang='en')
             input(name='headername' type='text' value=(undefined===ap ? (!header ? '' : header.Name) : ap.headerName)) 
             
           td.max25ch
-            label.sameline_label(for='row') row:
-            input#row.sameline_input(name='row' type='text' value=(undefined==ap ? undefined : ap.rownum))
-            button#jump.inlinebutton(name='button' value='jump') Go
-
             input#pattern(name='pattern' type='text' value='')
             button#search.inlinebutton(title='Search. Click while empty to clear previous search and list all names.' name='button' value='search')
               svg(aria-hidden="true" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
@@ -85,9 +91,12 @@ html(lang='en')
                 svg(aria-hidden="true" data-prefix="fas" data-icon="download" class="svg-inline--fa fa-download fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
                   path(fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z")
 
+            label.sameline_label.leftgap row:
+            input#row.sameline_input(name='button' type='text' form='jump' value=(undefined===rownum? '' : rownum))
+
             //- like with the select for headers above, this will submit the form when it changes
             if (Names)
-              select.inline(name='button' onchange='rentap.submit()')
+              select.inline(name='button' onchange='submit()')
                 each Name in Names
                   option(value=Name.rowid selected=(Names[Names.length - 1].FullName.match(/^Choose /) ? Name.FullName.match(/^Choose /) : ap.rowid===Name.rowid))= Name.FullName
               

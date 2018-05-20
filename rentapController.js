@@ -36,23 +36,23 @@ var save = function(form, res) {
   });
 }
 
-var handle_show_row = function(form, res, row_num) {
+var handle_show_row = function(row_num, res) {
   if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
   apsGbl.rownum = row_num;
   res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
 }
 
-var show_ap_rownum = function(form, res) { 
-  let row_num = parseInt(form.body.row); //row number that user entered
-  if (Number.isInteger(row_num) && row_num >= 0) {
+var show_ap_rownum = function(row_num, res) { 
+  if (row_num >= 0) {
     if (undefined == apsGbl) 
       rentap.getaps(-1, false, function(returned_aps) {
         apsGbl = returned_aps;
-        handle_show_row(form, res, row_num);
+        handle_show_row(row_num, res);
       });
     else
-      handle_show_row(form, res, row_num);
+      handle_show_row(row_num, res);
   } else { //if it's not a valid row number, just redisplay the ap already showing
+    console.error("Can't parse row number: ", row_num);
     if (undefined === apsGbl)
       res.redirect('/rentap');
     else
@@ -61,13 +61,11 @@ var show_ap_rownum = function(form, res) {
 };
 
 var handle_selected_header = function(form, res) {
-  if (undefined===apsGbl.aps[apsGbl.rownum] || form.body.mode === 'new')
+  if (undefined===apsGbl.aps[apsGbl.rownum]) {
     headerName = form.body.button;
-  else
-    apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
-  if (form.body.mode === 'new') {
     res.redirect('/rentap');
   } else {
+    apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   }
 }
@@ -83,8 +81,9 @@ var header_selected = function(form, res) {
     handle_selected_header(form, res);
 }
 
-var ap_selected = function(form, res) {
-  res.redirect('/rentap/show/' + form.body.button);
+var ap_selected = function(ap_id, res) {
+  if (ap_id > 0) res.redirect('/rentap/show/' + ap_id);
+  else console.error("There are no rental applications with a negative ID");
 }
 
 var add_header = function(form, res) {
@@ -154,34 +153,36 @@ var search = function(form, res) { //the search results will be displayed in the
 
 var handle_form_submission = function(form, res) {
   // I expected a button click to produce a single value for form.body.rentapID, the value assigned to the button.
-  // However, trial and error shows the following pattern of form.body.button values:
-  // Header Selection: [selected_headerName, ap_id] In order to distinguish between Header selection and Name selection, will check for which changed
-  // Name Selection: [headerName, selectedAp_id]
-  // Go Search + - ! -> [headerName, action, ap_id] where action is one of save, jump, search, addheader, updateheader, deleteheader, or defaultheader
+  // However, when everything was on the same form, anything that wasn't a real button but had to use submit() explicitly
+  // was being included in an array of results.
+  // Now have separate forms for selectHeader and jump, but decided to leave the Names dropdown selection menu on the rentap form
+  // because the result is a positive integer, same as the rownumber given by the jump input. In order to tell them apart,
+  // checking form.body.mode, which will be defined on the rentap form, but not on the jump form.
+  // When actual buttons on the rentap form are clicked, the result is an array with the first element being the value of the button
+  // clicked, and the second element being the ap_id value of the Names selection (which was not changed because otherwise it would not be an array)
 
-  //form.body.button must be corrected to a single value which each of the actions will look for
-  //also need a single value for the switch
-  var buttonAction
-  if (!Array.isArray(form.body.button)) buttonAction = form.body.button;
-  else if (undefined === apsGbl || undefined === apsGbl.aps[apsGbl.rownum]) 
-    buttonAction = form.body.button.length==3 ? form.body.button[1] : ('Choose Header'!=form.body.button[0] ? 'header_selected' : (0!=form.body.button[1] ? 'ap_selected' : 'unknown'));
-  else 
-    buttonAction = form.body.button.length==3 ? form.body.button[1] : (apsGbl.aps[apsGbl.rownum].headerName!=form.body.button[0] && 'Choose Header'!=form.body.button[0] ? 'header_selected' : (apsGbl.aps[apsGbl.rownum].rowid!=form.body.button[1] && 0!=form.body.button[1] ? 'ap_selected' : 'unknown'));
+  var buttonAction;
+  if (!Array.isArray(form.body.button)) { //not an array means it's either a row number entered, an ap_id provided from dropdown Names selection, or a header selected
+    let maybe_int = parseInt(form.body.button);
+    if (Number.isInteger(maybe_int)) { //it's an int, so it's either a row number or an ap_id
+      if (undefined===form.body.mode) //there's only one input named row on the jump form, so mode will be undefined in that case
+        show_ap_rownum(maybe_int, res);
+      else ap_selected(maybe_int, res);
+    } else header_selected(form, res);
+    buttonAction = 'done_already';
+  } else {
+    buttonAction = form.body.button[0]; //it's an array so one of the buttons on the rentap form was clicked, and it's value is the 1st (0th) element
+    form.body.button = buttonAction;
+  }
 
   switch(buttonAction) {
-    case 'addheader': form.body.button = buttonAction; add_header(form, res); break;
-    case 'updateheader': form.body.button = buttonAction; update_header(form, res); break;
-    case 'deleteheader': form.body.button = buttonAction; rm_header(form, res); break;
-    case 'save': form.body.button = buttonAction; save(form, res); break;
-    case 'jump': form.body.button = buttonAction; show_ap_rownum(form, res); break;
-    case 'search': form.body.button = buttonAction; search(form, res); break;
-    case 'header_selected': form.body.button = form.body.button[0]; header_selected(form, res); break;
-    case 'ap_selected': form.body.button = form.body.button[1]; 
-      let ap_id = parseInt(form.body.button);
-      if (Number.isInteger(ap_id) && ap_id >= 0) ap_selected(form, res);
-      else console.log("Thought a new ap was selected, but can't parse this ap_id: ", form.body.button);
-      break;
-    default: console.log('Not sure what to do with the submit button that has the following value: ', form.body.button);
+    case 'done_already': break;
+    case 'addheader': add_header(form, res); break;
+    case 'updateheader': update_header(form, res); break;
+    case 'deleteheader': rm_header(form, res); break;
+    case 'save': save(form, res); break;
+    case 'search': search(form, res); break;
+    default: console.error('Not sure what to do with the submit button that has the following value: ', form.body.button);
       if (form.body.mode === 'new') 
         res.redirect('/rentap');
       else 

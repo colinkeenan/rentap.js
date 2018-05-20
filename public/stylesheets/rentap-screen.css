@@ -31,6 +31,11 @@ label, .section_header {font: 14px serif; font-weight: bold; display: block; max
 #income {height:7em}
 #employment {height:17em}
 #evictions, #felonies {height:17.6em}
+/*
+ * Below CSS is the static result generated as part of this tutorial: https://fontawesome.com/how-to-use/server-side-rendering
+ * and is covered by the MIT License: https://opensource.org/licenses/MIT
+ *
+ * */
 svg:not(:root).svg-inline--fa {
   overflow: visible; }
 
