@@ -1,13 +1,13 @@
 // if ap_id is in trash, mode is 'discarded', else 'edit' 
 // (don't need to call on the database to figure out if an ap is 'new') 
 // getmode is not exported, just used as needed by other methods
-var getmode = function (ap_id, callback) { //callback gets mode
+var getmode = function (ap_id, switch_mode, callback) { //callback gets mode of ap_id (or it's opposite if switch_mode)
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   db.serialize(function() {
     db.get("SELECT CASE WHEN (?) IN (SELECT discardedRow FROM trash) THEN 'discarded' ELSE 'edit' END mode", ap_id, function(err, ap) {
       if (err) console.error(err);
-      callback(ap.mode);
+      callback(!switch_mode ? ap.mode : (ap.mode==='discarded' ? 'edit' : 'discarded'));
     });
   });
   db.close();
@@ -17,7 +17,7 @@ exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownu
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   var rownum = 0; // will stay 0 if ap_id is negative, or if switch_mode is true
-  if (ap_id < 0 ) { // negative ap_id means set mode to edit and return all goodaps. like true switch_mode, rownum will be 0.
+  if (ap_id < 0 ) { // negative ap_id means set mode to edit and return all goodaps. rownum will be 0.
     db.serialize(function() {
       db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
         if (err) console.error(err);
@@ -26,20 +26,38 @@ exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownu
     });
     db.close();
   } else {
-    getmode(ap_id, function(mode) {
-     // if switch_mode is true, then instead of returning aps in the same mode as ap_id, return aps of the opposite mode
-      if (switch_mode) mode = mode==='discarded' ? 'edit' : 'discarded';
+    // if switch_mode is true, then instead of returning aps in the same mode as ap_id, return aps of the opposite mode
+    // (the mode switch is taken care of in getmode)
+    getmode(ap_id, switch_mode, function(mode) {
       db.serialize(function() {
-        if (mode==='discarded')
+        if (mode==='discarded') // entering trash
           db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
             if (err) console.error(err);
-            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned (switch_mode is false)
+            if (switch_mode) {
+              // just switched to trash, find next higher ap_id (or wrap to row 0 ap_id)
+              if (ap_id > aps[aps.length - 1].rowid) ap_id = aps[0].rowid;
+              else for (let i = 0; i < aps.length; i++)
+                if (ap_id < aps[i].rowid) {
+                  ap_id = aps[i].rowid;
+                  rownum = i;
+                  break;
+                }
+            } else rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned when not switchmode
             callback({aps:aps, rownum:rownum, mode:mode});
           });
-        else
+        else // leaving trash
           db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
             if (err) console.error(err);
-            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned (switch_mode is false)
+            if (switch_mode) {
+              // just left trash, find next lower ap_id (or wrap to last ap_id)
+              if (ap_id < aps[0].rowid) ap_id = aps[aps.length - 1].rowid;
+              else for (let i = aps.length - 1; i >= 0; i--)
+                if (ap_id > aps[i].rowid) {
+                  ap_id = aps[i].rowid;
+                  rownum = i;
+                  break;
+                }
+            } else rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned when not switchmode
             callback({aps:aps, rownum:rownum, mode:mode});
           });
       });
@@ -118,7 +136,7 @@ exports.names = function(ap_id, callback) { //for dropdown list of full names to
   //sometimes ap_id will be undefined, but that's OK because getmode just checks if it's trash, and undefined is not trash, so will
   //say the mode is edit. that works because want all goodnames when on a new ap (can only click New when on a goodap and 
   //also, a new ap is shown on first starting so want to be able to select a good name in either case).
-  getmode(ap_id, function(mode) {
+  getmode(ap_id, false, function(mode) { // false here means don't switch mode
     const sqlite3 = require('sqlite3');
     let db = new sqlite3.Database('./store.db');
     db.serialize(function() {
@@ -234,7 +252,7 @@ exports.rm_ap = function (ap_id, rownum, callback) {
 
 /* searching accross multiple columns doesn't work for some reason. Doing searches using pure javascript in rentapController
 exports.search = function(ap_id, pattern, callback) {
-  getmode(ap_id, function(mode) {
+  getmode(ap_id, false, function(mode) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   db.serialize(function() {

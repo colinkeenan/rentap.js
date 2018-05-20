@@ -9,8 +9,8 @@ label, .section_header {font-family: "Dejavu Sans"; font: 14px serif; font-weigh
 .paddingtop {padding-top:3em}
 .lowpadding {padding:0.2em}
 .max25ch {max-width:18em}
-.sameline_label {display: inline-block; font-weight: normal; min-width: 2em; max-width: 2em}
-.sameline_input {display: inline-block; position: relative; text-align: right; width:2em;}
+.sameline_label {display: inline-block; font-weight: normal; min-width: 3em; max-width: 3em}
+.sameline_input {display: inline-block; position: relative; text-align: right; width:3em;}
 .personalinfo {display: inline-block; font-weight: normal; margin-left: 1ch; width: 7em; vertical-align:middle}
 .inline {display: inline-block;}
 .newline {display: block}

@@ -315,23 +315,18 @@ exports.rm_ap = function(form, res) {
   });
 };
 
+/* 
+ * The actual mode switching occurs in the model function rentap.getaps
+ */
 exports.switch_mode = function(form, res) {
   //always gets apsGbl and namesGbl whether or not it is already defined
   //because expecting to change apsGbl by switching to aps of the opposite mode (edit/discarded)
   rentap.getaps(form.params.ap_id, true, function(returned_aps) { //true signals to switch mode
-    apsGbl=returned_aps; //apsGbl.aps is now an array of all aps of opposite mode, and aps.rownum is set to 0
+    apsGbl=returned_aps; //apsGbl.aps is now an array of all aps of opposite mode, and aps.rownum is set 
+    //to next or prev ap_id (next if going to trash and prev if leaving trash, so going to and from trash
+    //returns to same ap_id)
     rentap.names(apsGbl.aps[0].rowid, function(returned_names) { //have to update names to match returned_aps
       namesGbl=returned_names;
-      if (apsGbl.aps.length > 1) {
-        if (form.params.ap_id > apsGbl.aps[apsGbl.aps.length - 1].rowid) //if ap_id bigger than last one, set rownum to last one
-          apsGbl.rownum = apsGbl.aps.length - 1 
-        else //ap_id is either less than the 0th rowid, or falls somewhere in the middle of ap_id's, find next higher one
-          for (var i = 0; i < apsGbl.aps.length; i++) 
-            if (form.params.ap_id < apsGbl.aps[i].rowid) { //ap_id can't be equal to rowid because of opposite mode
-              apsGbl.rownum = i; 
-              break;
-            }
-      }
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
     });
   });
