@@ -18,6 +18,7 @@ html(lang='en')
     form#jump(method='post')
     //- Similar for selectHeader form except it's submitted as soon as the selection is made (no need to hit enter)
     form#selectHeader(method='post')
+    form#selectName(method='post')
     //- The form action is the current url by default, and the method is 'get' by default
     //- 
     //- However, buttons (which are of type submit by default) can have
@@ -57,6 +58,7 @@ html(lang='en')
           td.max25ch
             //- below 'select' is not a button, but will act like a submit button when the value changes. The controller distinguishes
             //- which button did the submission according to the value of form.button
+            input#label.invisible.readonly(name='label' type='text' form='selectHeader' value='selectHeader' readonly)
             if (headers)
               select.inline(name='button' form='selectHeader' onchange='submit()')
                 each hdr in headers
@@ -87,16 +89,17 @@ html(lang='en')
             //- that way, Save will be the same as Jump, Search, etc. When Save was 1st in line in this table, before headers, it was 
             //- coming first in the array for the form.body.button value.
             if (mode != 'discarded')
-              button#save.leftgap.inline(title='Save' name='button' value='save')
+              button#save.leftgap.rightgap.inline(title='Save' name='button' value='save')
                 svg(aria-hidden="true" data-prefix="fas" data-icon="download" class="svg-inline--fa fa-download fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
                   path(fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z")
 
-            label.sameline_label.leftgap row:
-            input#row.sameline_input(name='button' type='text' form='jump' value=(undefined===rownum? '' : rownum))
+            input#label.sameline_input.readonly(name='label' type='text' form='jump' value='row:' readonly)
+            input#row.sameline_input(name='button' type='text' form='jump' value=(undefined===rownum? '' : rownum) onchange='submit()')
 
             //- like with the select for headers above, this will submit the form when it changes
+            input#label.invisible.readonly(name='label' type='text' form='selectName' value='selectName' readonly)
             if (Names)
-              select.inline(name='button' onchange='submit()')
+              select.inline(name='button' form='selectName' onchange='submit()')
                 each Name in Names
                   option(value=Name.rowid selected=(Names[Names.length - 1].FullName.match(/^Choose /) ? Name.FullName.match(/^Choose /) : ap.rowid===Name.rowid))= Name.FullName
               

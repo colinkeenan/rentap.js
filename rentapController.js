@@ -152,41 +152,26 @@ var search = function(form, res) { //the search results will be displayed in the
 };
 
 var handle_form_submission = function(form, res) {
-  // I expected a button click to produce a single value for form.body.rentapID, the value assigned to the button.
-  // However, when everything was on the same form, anything that wasn't a real button but had to use submit() explicitly
-  // was being included in an array of results.
-  // Now have separate forms for selectHeader and jump, but decided to leave the Names dropdown selection menu on the rentap form
-  // because the result is a positive integer, same as the rownumber given by the jump input. In order to tell them apart,
-  // checking form.body.mode, which will be defined on the rentap form, but not on the jump form.
-  // When actual buttons on the rentap form are clicked, the result is an array with the first element being the value of the button
-  // clicked, and the second element being the ap_id value of the Names selection (which was not changed because otherwise it would not be an array)
+  //Discovered that putting onchange() inputs or selects on the same form with regular submit buttons creates confusing arrays of submitted
+  //values. Fixed by creating some seperate forms with an invisible or label-like input that identifies the form. The default is for all
+  //the regular submit buttons. Also plan on putting search on a separate form so that can press Enter instead of clicking search button.
 
-  var buttonAction;
-  if (!Array.isArray(form.body.button)) { //not an array means it's either a row number entered, an ap_id provided from dropdown Names selection, or a header selected
-    let maybe_int = parseInt(form.body.button);
-    if (Number.isInteger(maybe_int)) { //it's an int, so it's either a row number or an ap_id
-      if (undefined===form.body.mode) //there's only one input named row on the jump form, so mode will be undefined in that case
-        show_ap_rownum(maybe_int, res);
-      else ap_selected(maybe_int, res);
-    } else header_selected(form, res);
-    buttonAction = 'done_already';
-  } else {
-    buttonAction = form.body.button[0]; //it's an array so one of the buttons on the rentap form was clicked, and it's value is the 1st (0th) element
-    form.body.button = buttonAction;
-  }
-
-  switch(buttonAction) {
-    case 'done_already': break;
-    case 'addheader': add_header(form, res); break;
-    case 'updateheader': update_header(form, res); break;
-    case 'deleteheader': rm_header(form, res); break;
-    case 'save': save(form, res); break;
-    case 'search': search(form, res); break;
-    default: console.error('Not sure what to do with the submit button that has the following value: ', form.body.button);
-      if (form.body.mode === 'new') 
-        res.redirect('/rentap');
-      else 
-        res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  switch(form.body.label) {
+    case 'row:': show_ap_rownum(form.body.button, res); break;
+    case 'selectHeader': header_selected(form, res); break;
+    case 'selectName': ap_selected(form.body.button, res); break;
+    default: switch(form.body.button) {
+      case 'addheader': add_header(form, res); break;
+      case 'updateheader': update_header(form, res); break;
+      case 'deleteheader': rm_header(form, res); break;
+      case 'save': save(form, res); break;
+      case 'search': search(form, res); break;
+      default: console.error('Not sure what to do with the submit button that has the following value: ', form.body.button);
+        if (form.body.mode === 'new') 
+          res.redirect('/rentap');
+        else 
+          res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+    }
   }
 }
 
