@@ -83,23 +83,12 @@ var header_selected = function(form, res) {
 
 var ap_selected = function(ap_id, res) {
   if (ap_id > 0) res.redirect('/rentap/show/' + ap_id);
-  else console.error("There are no rental applications with a negative ID");
+  else console.error("There are no rental applications with this ID: ", ap_id);
 }
 
-var add_header = function(form, res) {
+var save_header = function(form, res) {
   let header = { StreetAddress: form.body.rentaladdress, CityStateZip: form.body.rentalcitystzip, Title: form.body.title, Name: form.body.headername };
-  rentap.add_header(header, function(returned_headers) {
-    headersGbl = returned_headers;
-    if (form.body.mode === 'new') 
-      res.redirect('/rentap');
-    else 
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-  });
-};
-
-var update_header = function(form, res) {
-  let header = { StreetAddress: form.body.rentaladdress, CityStateZip: form.body.rentalcitystzip, Title: form.body.title, Name: form.body.headername };
-  rentap.update_header(header, function(returned_headers) {
+  rentap.save_header(header, function(returned_headers) {
     headersGbl = returned_headers;
     if (form.body.mode === 'new') 
       res.redirect('/rentap');
@@ -161,8 +150,7 @@ var handle_form_submission = function(form, res) {
     case 'selectHeader': header_selected(form, res); break;
     case 'selectName': ap_selected(form.body.button, res); break;
     default: switch(form.body.button) {
-      case 'addheader': add_header(form, res); break;
-      case 'updateheader': update_header(form, res); break;
+      case 'saveheader': save_header(form, res); break;
       case 'deleteheader': rm_header(form, res); break;
       case 'save': save(form, res); break;
       case 'search': search(form, res); break;

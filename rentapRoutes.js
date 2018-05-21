@@ -9,8 +9,6 @@ var rentap_controller = require('./rentapController.js');
  * i.e.  app.use('/rentap', rentapRouter); where var rentapRouter = require('./routes/rentap');
  */
 
-/* routes for manipulating 
- * an individual ap */
 router.get('/', rentap_controller.show_new_ap); //home page is just blank ap
 router.get('/show/:ap_id', rentap_controller.show_ap); //show particular ap for viewing/editing/discarding (or deleting/restoring if in trash)
 router.get('/show/:ap_id/prev', rentap_controller.show_ap_prev); //prev & next skips trash items (or if in trash, skips not trash items)

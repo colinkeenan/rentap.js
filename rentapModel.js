@@ -78,37 +78,27 @@ exports.getheaders = function(callback) {
   db.close();
 }
 
-exports.add_header = function(hdr, callback) {
+exports.save_header = function(hdr, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   db.serialize(function() {
-    db.run("INSERT INTO headers (StreetAddress, CityStateZip, Title, Name) VALUES (?,?,?,?)", hdr.StreetAddress, hdr.CityStateZip, hdr.Title, hdr.Name, 
-      function(err) {
-        if (err) console.error(err);
-      }
-    );
-    db.all("SELECT * FROM headers ORDER BY name", function(err, headers) {
-      if (err) console.error(err);
-      headers.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
-      callback(headers);
-    });
-  });
-  db.close();
-}
-
-exports.update_header = function(hdr, callback) {
-  const sqlite3 = require('sqlite3');
-  let db = new sqlite3.Database('./store.db');
-  db.serialize(function() {
-    db.run("UPDATE headers SET StreetAddress = (?), CityStateZip = (?), Title = (?) WHERE Name = (?)", hdr.StreetAddress, hdr.CityStateZip, hdr.Title, hdr.Name, 
-      function(err) {
-        if (err) console.error(err);
-      }
-    );
-    db.all("SELECT * FROM headers ORDER BY name", function(err, headers) {
-      if (err) console.error(err);
-      headers.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
-      callback(headers);
+    db.all("SELECT Name FROM headers WHERE Name = (?)", hdr.Name, function(err, header) {
+      if (err) console.error('SELECT Name FROM headers...', err);
+      let db = new sqlite3.Database('./store.db'); //for some reason, the db is already closed at this point
+      db.serialize(function() {
+        if (header.Name) db.run("UPDATE headers SET StreetAddress = (?), CityStateZip = (?), Title = (?) WHERE Name = (?)", hdr.StreetAddress, hdr.CityStateZip, hdr.Title, hdr.Name, 
+          function(err) { if (err) console.error('UPDATE headers ', err); }
+        );
+        else db.run("INSERT INTO headers (StreetAddress, CityStateZip, Title, Name) VALUES (?,?,?,?)", hdr.StreetAddress, hdr.CityStateZip, hdr.Title, hdr.Name, 
+          function(err) { if (err) console.error('INSERT INTO headers ', err); }
+        );
+        db.all("SELECT * FROM headers ORDER BY name", function(err, headers) {
+          if (err) console.error('SELECT * FROM headers ', err);
+          headers.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
+          callback(headers);
+        });
+      });
+      db.close();
     });
   });
   db.close();
