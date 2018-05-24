@@ -12,7 +12,7 @@ let headerName = null; //this is for display on a new ap. regular headerName is 
 // updateheader (~)
 // deleteheader (-)
 // save (Save)
-// jump (Go)
+// row: 
 // search (Search)
 // any other word (selected header from dropdown)
 // any positive intiger (ap_id that matches selected name from dropdown)
@@ -26,25 +26,26 @@ let headerName = null; //this is for display on a new ap. regular headerName is 
 //methods for 'post' buttons
 var save = function(form, res) {
   //todo: before allowing a save, need to verify there really is a fullName and header
-  headerSelected = true; 
-  if (headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
+  headerSelected = true;
+  if (headersGbl && headersGbl.length && headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
+  if (headerName) apsGbl.aps[apsGbl.rownum].headerName = form.body.headername = headerName;
   rentap.save(form.body, function(returned_ap_id) {
     rentap.getaps(returned_ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
       res.redirect('/rentap/show/' + returned_ap_id);
     });
   });
-}
+};
 
 var handle_show_row = function(row_num, res) {
   if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
   apsGbl.rownum = row_num;
   res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-}
+};
 
 var show_ap_rownum = function(row_num, res) { 
   if (row_num >= 0) {
-    if (undefined == apsGbl) 
+    if (undefined===apsGbl) 
       rentap.getaps(-1, false, function(returned_aps) {
         apsGbl = returned_aps;
         handle_show_row(row_num, res);
@@ -60,47 +61,26 @@ var show_ap_rownum = function(row_num, res) {
   }
 };
 
-var handle_selected_header = function(form, res) {
+var header_selected = function(headername, res) {
+  headerSelected = true; //gets set true here, and false in save
+  headerName = headername;
   if (undefined===apsGbl.aps[apsGbl.rownum]) {
-    headerName = form.body.button;
     res.redirect('/rentap');
   } else {
-    apsGbl.aps[apsGbl.rownum].headerName = form.body.button;
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   }
-}
-
-var header_selected = function(form, res) {
-  headerSelected = true; //gets set true here, and false in save
-  if (undefined===apsGbl)
-    rentap.getaps(form.params.ap_id, false, function(returned_aps) {
-      apsGbl = returned_aps;
-      handle_selected_header(form, res);
-    });
-  else 
-    handle_selected_header(form, res);
-}
+};
 
 var ap_selected = function(ap_id, res) {
   if (ap_id > 0) res.redirect('/rentap/show/' + ap_id);
   else console.error("There are no rental applications with this ID: ", ap_id);
-}
+};
 
 var save_header = function(form, res) {
   let header = { StreetAddress: form.body.rentaladdress, CityStateZip: form.body.rentalcitystzip, Title: form.body.title, Name: form.body.headername };
   rentap.save_header(header, function(returned_headers) {
     headersGbl = returned_headers;
-    if (form.body.mode === 'new') 
-      res.redirect('/rentap');
-    else 
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-  });
-};
-
-var rm_header = function(form, res) {
-  rentap.rm_header(form.body.headername, function(returned_headers) {
-    headersGbl = returned_headers;
-    if (form.body.mode === 'new') 
+    if (undefined===apsGbl || undefined===apsGbl.aps[apsGbl.rownum])
       res.redirect('/rentap');
     else 
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
@@ -109,27 +89,30 @@ var rm_header = function(form, res) {
 
 var handle_search = function(form, res) {
   //node-sqlite3 LIKE isn't working across multiple columns for me even with OR so just doing the search here in javascript
-  var regexp = RegExp(form.body.pattern, 'ig');
-  var matching_names = [];
-  var i, key;
-  for (i in apsGbl.aps) {
-    let ap = apsGbl.aps[i];
-    for (key in ap) {
-      //have to reset lastIndex of regexp on each field or else it will continue the search from where it last found something in the previous one 
-      regexp.lastIndex = 0; 
-      if (regexp.test(ap[key])) {
-        matching_names.push({ FullName: ap.FullName, rowid: ap.rowid });
-        break; //move on to next ap as soon as there's a match because don't want to list the same ap more than once in the search results
+  if (form.body.pattern) {
+    var regexp = RegExp(form.body.pattern, 'ig');
+    var matching_names = [];
+    var i, key;
+    //supposedly, for ... in will include prototype properties and not just the index/key, but in my testing with console.log, there's nothing extra here
+    for (i in apsGbl.aps) {
+      let ap = apsGbl.aps[i];
+      for (key in ap) {
+        //have to reset lastIndex of regexp on each field or else it will continue the search from where it last found something in the previous one 
+        regexp.lastIndex = 0; 
+        if (regexp.test(ap[key])) {
+          matching_names.push({ FullName: ap.FullName, rowid: ap.rowid });
+          break; //move on to next ap as soon as there's a match because don't want to list the same ap more than once in the search results
+        }
       }
     }
-  }
-  matching_names.push({ FullName: 'Choose from Search Results', rowid: 0 });
-  namesGbl = !Array.isArray(matching_names) || matching_names.length <= 1 ? null : matching_names;
-  if (form.body.mode === 'new') 
+    matching_names.push({ FullName: 'Choose from Search Results', rowid: 0 });
+    namesGbl = !Array.isArray(matching_names) || matching_names.length <= 1 ? null : matching_names;
+  } else namesGbl=null; //this will triger reloading all names on redirect below
+  if (undefined===apsGbl.aps[apsGbl.rownum]) 
     res.redirect('/rentap');
   else 
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-}
+};
 
 var search = function(form, res) { //the search results will be displayed in the dropdown list of names, but will not affect other navigation buttons
   if (undefined===apsGbl) 
@@ -141,27 +124,20 @@ var search = function(form, res) { //the search results will be displayed in the
 };
 
 var handle_form_submission = function(form, res) {
-  //Discovered that putting onchange() inputs or selects on the same form with regular submit buttons creates confusing arrays of submitted
-  //values. Fixed by creating some seperate forms with an invisible or label-like input that identifies the form. The default is for all
-  //the regular submit buttons. Also plan on putting search on a separate form so that can press Enter instead of clicking search button.
+  //Discovered that putting onchange() inputs or selects on the same form with regular submit buttons (all named "button") creates confusing arrays 
+  //for the value of form.body.button, making it very difficult to know which actually submitted the form.
+  //Fixed by creating some seperate forms with an invisible/label-like input that identifies the form. Since that worked, eventually
+  //moved all the buttons to their own forms (and changed rm_header to a get just like rm_ap), with Save being the default for the main form
 
   switch(form.body.label) {
+    case 'saveheader': save_header(form, res); break;
+    case 'selectHeader': header_selected(form.body.button, res); break;
+    case 'search': search(form, res); break;
     case 'row:': show_ap_rownum(form.body.button, res); break;
-    case 'selectHeader': header_selected(form, res); break;
     case 'selectName': ap_selected(form.body.button, res); break;
-    default: switch(form.body.button) {
-      case 'saveheader': save_header(form, res); break;
-      case 'deleteheader': rm_header(form, res); break;
-      case 'save': save(form, res); break;
-      case 'search': search(form, res); break;
-      default: console.error('Not sure what to do with the submit button that has the following value: ', form.body.button);
-        if (form.body.mode === 'new') 
-          res.redirect('/rentap');
-        else 
-          res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-    }
+    default: save(form, res);
   }
-}
+};
 
 exports.form_submission = function(form, res) {
   if (undefined===apsGbl)
@@ -170,9 +146,12 @@ exports.form_submission = function(form, res) {
       handle_form_submission(form, res);
     });
   else handle_form_submission(form, res);
-}
+};
 
-// methods for 'get' buttons
+/* 
+ * Get button methods
+ */
+
 var handle_show_new = function(form, res) {
   if (!Array.isArray(namesGbl) || !namesGbl.length) 
     rentap.names(form.params.ap_id, function(returned_names) {
@@ -188,7 +167,7 @@ var handle_show_new = function(form, res) {
     let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
     res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
   }
-}
+};
 
 exports.show_new_ap = function(form, res) {
   if (undefined===headersGbl) 
@@ -209,22 +188,20 @@ exports.show_new_ap = function(form, res) {
 var handle_show_ap = function(form, res) {
   //all existing aps should have a header, so headerSelected is true, but setting to false because headerSelected is for new aps, it's ignored for existing aps
   //need headerSelected to be false the next time "New" button is clicked
+  if (!headerName || !headerSelected) headerName = apsGbl.aps[apsGbl.rownum].headerName;
   headerSelected = false;
   if (headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
   //whenever showing a valid ap (not a new ap), let the select menu show the name selected - remove the "Choose..." option
   // unless a search was just performed (the number of names is less than the number of aps + 1 where +1 is because of the "Choose" option)
-  if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /) && apsGbl.aps.length + 1 === namesGbl.length) namesGbl.pop()
+  if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /) && apsGbl.aps.length + 1 === namesGbl.length) namesGbl.pop();
+  let i = headersGbl.findIndex(header => header.Name  == headerName);
   if (namesGbl) {
-    headerName = null;
-    let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
     res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   } else rentap.names(form.params.ap_id, function(returned_names) {
-    namesGbl = returned_names
-    headerName = null;
-    let i = headersGbl.findIndex(header => header.Name  == apsGbl.aps[apsGbl.rownum].headerName);
+    namesGbl = returned_names;
     res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   });
-}
+};
 
 exports.show_ap = function(form, res) {
   if (undefined===headersGbl || undefined===apsGbl)
@@ -247,7 +224,7 @@ var handle_prev_ap = function(form, res) {
   //triggers show_ap by redirect, after decrement aps.rownum, wrapping around to the last ap if already on 0
   apsGbl.rownum = apsGbl.rownum<=0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1); //down one if can, otherwise goto end
   res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-}
+};
 
 exports.show_ap_prev = function(form, res) {
   if (undefined===apsGbl)
@@ -262,7 +239,7 @@ exports.show_ap_prev = function(form, res) {
 var handle_next_ap = function(form, res) {
   apsGbl.rownum = apsGbl.rownum>=(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1); //up one if can, else goto 0
   res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-}
+};
 
 exports.show_ap_next = function(form, res) {
   //triggers show_ap by redirect, after increment aps.rownum, wrapping around to 0 if already on the last ap
@@ -300,6 +277,16 @@ exports.rm_ap = function(form, res) {
     apsGbl = returned_aps;
     if (apsGbl.rownum >= apsGbl.aps.length) apsGbl.rownum = 0; //wrap around to 0 if it was the last ap that was deleted
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  });
+};
+
+exports.rm_header = function(form, res) {
+  rentap.rm_header(headerName, function(returned_headers) {
+    headersGbl = returned_headers;
+    if (undefined===apsGbl || undefined===apsGbl.aps[apsGbl.rownum])
+      res.redirect('/rentap');
+    else 
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
 };
 

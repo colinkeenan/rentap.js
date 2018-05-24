@@ -16,9 +16,11 @@ html(lang='en')
     //- When the input changes and the user hits Enter, the form will be submitted
     //- and the ap on that row will be displayed
     form#jump(method='post')
-    //- Similar for selectHeader form except it's submitted as soon as the selection is made (no need to hit enter)
+    //- Similar for these forms too
+    form#search(method='post')
     form#selectHeader(method='post')
     form#selectName(method='post')
+    form#saveheader(method='post')
     //- The form action is the current url by default, and the method is 'get' by default
     //- 
     //- However, buttons (which are of type submit by default) can have
@@ -73,18 +75,20 @@ html(lang='en')
                       //- the buttons just have one character on them (+, ~, -)
                       //- saveheader and editheader both save, but one inserts new and the other updates existing
                       =' '
-                      button.inline(title='Delete Header' name='button' value='deleteheader')
+                      button.inline(title='Delete Header' formmethod='get' formaction='/rentap/deleteheader/' + (undefined===ap ? undefined : ap.headerName))
                         svg(aria-hidden="true" data-prefix="fas" data-icon="minus" class="svg-inline--fa fa-minus fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
                           path(fill="currentColor" d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z")
-                      button.inline(title='Save Header' name='button' value='saveheader')
+                      input#label.invisible.readonly(name='label' type='text' form='saveheader' value='saveheader' readonly)
+                      button.inline(title='Save Header' name='button' form='saveheader' value='saveheader')
                         svg(aria-hidden="true" data-prefix="fas" data-icon="download" class="svg-inline--fa fa-download fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
                           path(fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z")
                       //- value of input#headername changes when the 'select' menu above changes
-                      input(name='headername' type='text' value=(undefined===ap ? (!header ? '' : header.Name) : ap.headerName)) 
+                      input(name='headername' type='text' form='saveheader' value=(!header ? '' : header.Name)) 
                       
                     td.max25ch
-                      input#pattern(name='pattern' type='text' value='')
-                      button#search.inlinebutton(title='Search. Click while empty to clear previous search and list all names.' name='button' value='search')
+                      input#label.invisible.readonly(name='label' type='text' form='search' value='search' readonly)
+                      input#pattern(name='pattern' type='text' form='search' value='' onchange='submit()')
+                      button#search.inlinebutton(title='Search. Click while empty to clear previous search and list all names.' name='button' form='search' value='search')
                         svg(aria-hidden="true" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
                           path(fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z")
 
@@ -126,11 +130,11 @@ html(lang='en')
                       img(src='/images/icon.png')
 
                     td.lowpadding  
-                      input#rentaladdress(name='rentaladdress' type='text' value=(!header ? 'enter rental address' : header.StreetAddress)) 
-                      input#rentalcitystzip(name='rentalcitystzip' type='text' value=(!header ? 'enter city, state, zip' : header.CityStateZip))
+                      input#rentaladdress(name='rentaladdress' type='text' form='saveheader' value=(!header ? 'enter rental address' : header.StreetAddress)) 
+                      input#rentalcitystzip(name='rentalcitystzip' type='text' form='saveheader' value=(!header ? 'enter city, state, zip' : header.CityStateZip))
 
                     td.lowpadding 
-                      input.title(name='title' type='text' value=(!header ? 'enter title' : header.Title))
+                      input.title(name='title' type='text' form='saveheader' value=(!header ? 'enter title' : header.Title))
 
                     td.lowpadding  
                       label.smalllabel(for='authdate') Applied 

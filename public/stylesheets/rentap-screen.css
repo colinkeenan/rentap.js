@@ -4,7 +4,7 @@ ul {margin-left:0px; padding-left:0px;}
 li {list-style: none;}
 input {font-family: "Dejavu Sans"; font:14px serif; width:17em;}
 textarea {font-family: "Dejavu Sans"; font:14px serif; width:24.5em}
-label, .section_header {font-family: "Dejavu Sans"; font: 14px serif; font-weight: bold; display: block; max-width: 19em; vertical-align:bottom; white-space: nowrap; overflow: hidden}
+label, .section_header {font-family: "Dejavu Sans"; font: 14px serif; font-weight: bold; display: block; max-width: 24.5em; vertical-align:bottom; white-space: nowrap; overflow: hidden}
 .title {font-family: "Dejavu Sans"; font:26px sans-serif; text-align:center; vertical-align:top; max-width:20em; width:20em; display: inline-block}
 .paddingtop {padding-top:3em}
 .lowpadding {padding:0.2em}

@@ -17,6 +17,7 @@ router.get('/discard/:ap_id', rentap_controller.discard_ap);//just puts the rowi
 router.get('/show/:ap_id/switch_mode', rentap_controller.switch_mode); //for Trash and Back buttons, find the next ap_id in opposite mode
 router.get('/restore/:ap_id', rentap_controller.restore_ap); //restores by removing rowid=ap_id from trash table
 router.get('/delete/:ap_id', rentap_controller.rm_ap); //actually deletes the row from tbl, but only if in trash, then shows next in trash
+router.get('/deleteheader/:headername', rentap_controller.rm_header); //deletes the header
 router.post('*', rentap_controller.form_submission); //although there are many submit buttons, there is only one post method. all the buttons
 //are named 'button', but have distinct values, so the form_submission method switches on the value of 'form.button'
 module.exports = router;
