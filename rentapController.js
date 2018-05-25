@@ -4,6 +4,7 @@ let namesGbl = null;
 var headersGbl;
 let headerSelected = false; //keep track if header has been selected on a new ap yet or not. set true when header selected, false when ap is saved.
 let headerName = null; //this is for display on a new ap. regular headerName is stored with the ap
+let modeGbl = 'new'; //since each post button has it's own form, form.body.mode is not available to any but save, so a global mode is needed.
 // all these "exports" methods are for 'get' buttons where rentapRoutes decides which method to use based on the url
 // except for form_submission which uses a switch to decide which var function(form.button
 // because all the submit buttons are named "button", but have distinct values
@@ -28,14 +29,26 @@ var save = function(form, res) {
   //todo: before allowing a save, need to verify there really is a fullName and header
   headerSelected = true;
   if (headersGbl && headersGbl.length && headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
-  if (headerName) apsGbl.aps[apsGbl.rownum].headerName = form.body.headername = headerName;
+  if (headerName) {
+    form.body.headername = headerName;
+    if (modeGbl!='new' && undefined!=apsGbl && undefined!=apsGbl.aps[apsGbl.rownum])
+      apsGbl.aps[apsGbl.rownum].headerName = headerName;
+  }
   rentap.save(form.body, function(returned_ap_id) {
     rentap.getaps(returned_ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
+      modeGbl = apsGbl.mode;
       res.redirect('/rentap/show/' + returned_ap_id);
     });
   });
 };
+
+var refresh_page = function(res) {
+  if (modeGbl === 'new' || undefined===apsGbl || undefined===apsGbl.aps[apsGbl.rownum])
+    res.redirect('/rentap');
+  else
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+}
 
 var handle_show_row = function(row_num, res) {
   if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
@@ -48,27 +61,21 @@ var show_ap_rownum = function(row_num, res) {
     if (undefined===apsGbl) 
       rentap.getaps(-1, false, function(returned_aps) {
         apsGbl = returned_aps;
+        modeGbl = apsGbl.mode;
         handle_show_row(row_num, res);
       });
     else
       handle_show_row(row_num, res);
   } else { //if it's not a valid row number, just redisplay the ap already showing
     console.error("Can't parse row number: ", row_num);
-    if (undefined === apsGbl)
-      res.redirect('/rentap');
-    else
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+    refresh_page(res);
   }
 };
 
 var header_selected = function(headername, res) {
   headerSelected = true; //gets set true here, and false in save
   headerName = headername;
-  if (undefined===apsGbl.aps[apsGbl.rownum]) {
-    res.redirect('/rentap');
-  } else {
-    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-  }
+  refresh_page(res);
 };
 
 var ap_selected = function(ap_id, res) {
@@ -80,10 +87,7 @@ var save_header = function(form, res) {
   let header = { StreetAddress: form.body.rentaladdress, CityStateZip: form.body.rentalcitystzip, Title: form.body.title, Name: form.body.headername };
   rentap.save_header(header, function(returned_headers) {
     headersGbl = returned_headers;
-    if (undefined===apsGbl || undefined===apsGbl.aps[apsGbl.rownum])
-      res.redirect('/rentap');
-    else 
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+    refresh_page(res);
   });
 };
 
@@ -108,16 +112,14 @@ var handle_search = function(form, res) {
     matching_names.push({ FullName: 'Choose from Search Results', rowid: 0 });
     namesGbl = !Array.isArray(matching_names) || matching_names.length <= 1 ? null : matching_names;
   } else namesGbl=null; //this will triger reloading all names on redirect below
-  if (undefined===apsGbl.aps[apsGbl.rownum]) 
-    res.redirect('/rentap');
-  else 
-    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  refresh_page(res);
 };
 
 var search = function(form, res) { //the search results will be displayed in the dropdown list of names, but will not affect other navigation buttons
   if (undefined===apsGbl) 
     rentap.getaps(form.body.rentapID, false, function(returned_aps) { 
       apsGbl = returned_aps;
+      modeGbl = apsGbl.mode;
       handle_search(form, res); 
     });
   else handle_search(form, res); 
@@ -143,6 +145,7 @@ exports.form_submission = function(form, res) {
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
+      modeGbl = apsGbl.mode;
       handle_form_submission(form, res);
     });
   else handle_form_submission(form, res);
@@ -153,6 +156,7 @@ exports.form_submission = function(form, res) {
  */
 
 var handle_show_new = function(form, res) {
+  modeGbl = 'new';
   if (!Array.isArray(namesGbl) || !namesGbl.length) 
     rentap.names(form.params.ap_id, function(returned_names) {
       namesGbl = returned_names;
@@ -207,6 +211,7 @@ exports.show_ap = function(form, res) {
   if (undefined===headersGbl || undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) { //rentap.getaps gets aps of the oppopsite mode as ap_id if 2nd param is true
       apsGbl = returned_aps; //rapsGbl.rownum already provided here by the model
+      modeGbl = apsGbl.mode;
       rentap.getheaders(function(returned_headers) {
         headersGbl=returned_headers;
         handle_show_ap(form, res);
@@ -230,6 +235,7 @@ exports.show_ap_prev = function(form, res) {
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
+      modeGbl = apsGbl.mode;
       handle_prev_ap(form, res);
     });
   else
@@ -246,6 +252,7 @@ exports.show_ap_next = function(form, res) {
   if (undefined===apsGbl)
     rentap.getaps(form.params.ap_id, false, function(returned_aps) {
       apsGbl = returned_aps;
+      modeGbl = apsGbl.mode;
       handle_next_ap(form, res);
     });
   else
@@ -257,6 +264,7 @@ exports.discard_ap = function(form, res) {
   //because expecting to change apsGbl by putting one in trash
   rentap.discard_ap(form.params.ap_id, function(returned_aps) {
     apsGbl = returned_aps;
+    modeGbl = apsGbl.mode;
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
 };
@@ -266,6 +274,7 @@ exports.restore_ap = function(form, res) {
   //because expecting to change apsGbl by taking one from trash
   rentap.restore_ap(form.params.ap_id, function(returned_aps) {
     apsGbl = returned_aps;
+    modeGbl = apsGbl.mode;
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
 };
@@ -275,6 +284,7 @@ exports.rm_ap = function(form, res) {
   //because expecting to change apsGbl by permanently deleting one
   rentap.rm_ap(form.params.ap_id, apsGbl.rownum, function(returned_aps) {
     apsGbl = returned_aps;
+    modeGbl = apsGbl.mode;
     if (apsGbl.rownum >= apsGbl.aps.length) apsGbl.rownum = 0; //wrap around to 0 if it was the last ap that was deleted
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
   });
@@ -283,10 +293,7 @@ exports.rm_ap = function(form, res) {
 exports.rm_header = function(form, res) {
   rentap.rm_header(headerName, function(returned_headers) {
     headersGbl = returned_headers;
-    if (undefined===apsGbl || undefined===apsGbl.aps[apsGbl.rownum])
-      res.redirect('/rentap');
-    else 
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+    refresh_page(res);
   });
 };
 
@@ -297,7 +304,8 @@ exports.switch_mode = function(form, res) {
   //always gets apsGbl and namesGbl whether or not it is already defined
   //because expecting to change apsGbl by switching to aps of the opposite mode (edit/discarded)
   rentap.getaps(form.params.ap_id, true, function(returned_aps) { //true signals to switch mode
-    apsGbl=returned_aps; //apsGbl.aps is now an array of all aps of opposite mode, and aps.rownum is set 
+    apsGbl = returned_aps; //apsGbl.aps is now an array of all aps of opposite mode, and aps.rownum is set 
+    modeGbl = apsGbl.mode;
     //to next or prev ap_id (next if going to trash and prev if leaving trash, so going to and from trash
     //returns to same ap_id)
     rentap.names(apsGbl.aps[0].rowid, function(returned_names) { //have to update names to match returned_aps

@@ -44,7 +44,7 @@ html(lang='en')
                     td.max25ch
                       input#mode.readonly.newline(name='mode' type='text' value=(undefined===mode ? 'new' : mode) style=('new'===mode ? "color:white" : ('edit'===mode ? "color:green" : ('discarded'===mode ? "color:red" : false))) readonly) 
                       if (mode != 'discarded')
-                        button#new.inline(title='Blank Application' formaction='/rentap' formmethod='get')
+                        button#new.inline(title='New Blank Application' formaction='/rentap' formmethod='get')
                           svg(aria-hidden="true" data-prefix="fas" data-icon="newspaper" class="svg-inline--fa fa-newspaper fa-w-18" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512")
                             path(fill="currentColor" d="M552 64H88c-13.255 0-24 10.745-24 24v8H24c-13.255 0-24 10.745-24 24v272c0 30.928 25.072 56 56 56h472c26.51 0 48-21.49 48-48V88c0-13.255-10.745-24-24-24zM56 400a8 8 0 0 1-8-8V144h16v248a8 8 0 0 1-8 8zm236-16H140c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm208 0H348c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm-208-96H140c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm208 0H348c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm0-96H140c-6.627 0-12-5.373-12-12v-40c0-6.627 5.373-12 12-12h360c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12z")
                         button#discard.inline(title='Discard' formaction='/rentap/discard/' + (undefined===ap ? 0 : ap.rowid) formmethod='get')
@@ -75,7 +75,7 @@ html(lang='en')
                       //- the buttons just have one character on them (+, ~, -)
                       //- saveheader and editheader both save, but one inserts new and the other updates existing
                       =' '
-                      button.inline(title='Delete Header' formmethod='get' formaction='/rentap/deleteheader/' + (undefined===ap ? undefined : ap.headerName))
+                      button.inline(title='Delete Header' formmethod='get' formaction='/rentap/deleteheader/' + (header ? header.Name : ''))
                         svg(aria-hidden="true" data-prefix="fas" data-icon="minus" class="svg-inline--fa fa-minus fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
                           path(fill="currentColor" d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z")
                       input#label.invisible.readonly(name='label' type='text' form='saveheader' value='saveheader' readonly)
@@ -83,7 +83,7 @@ html(lang='en')
                         svg(aria-hidden="true" data-prefix="fas" data-icon="download" class="svg-inline--fa fa-download fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
                           path(fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z")
                       //- value of input#headername changes when the 'select' menu above changes
-                      input(name='headername' type='text' form='saveheader' value=(!header ? '' : header.Name)) 
+                      input(name='headername' type='text' form='saveheader' value=(header ? header.Name : '')) 
                       
                     td.max25ch
                       input#label.invisible.readonly(name='label' type='text' form='search' value='search' readonly)
