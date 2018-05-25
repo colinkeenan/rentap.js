@@ -19,7 +19,6 @@ label, .section_header {font-family: "Dejavu Sans"; font: 14px serif; font-weigh
 .invisible {display:none}
 #headertable {border:1px solid gray; width:100%}
 #mode {width:5em}
-#pattern {width:14em}
 #rentaladdress, #rentalcitystzip {font-family: "Dejavu Sans"; font:12px serif; vertical-align:top; display: block}
 #authdate, #guestdate, #rentdate {width:7em; display:block; position: relative; top: -1ex;}
 #rownumber, #idnumber {text-align:center;}
