@@ -17,6 +17,7 @@ label, .section_header {font-family: "Dejavu Sans"; font: 14px serif; font-weigh
 .smalllabel {font-family: "Dejavu Sans"; font:12px sans-serif; position: relative; top: -1ex; display:block;}
 .readonly {border-width:0px; margin:0px; padding:0px; background-color: Gainsboro}
 .invisible {display:none}
+#error {color: red}
 #headertable {border:1px solid gray; width:100%}
 #mode {width:5em}
 #rentaladdress, #rentalcitystzip {font-family: "Dejavu Sans"; font:12px serif; vertical-align:top; display: block}

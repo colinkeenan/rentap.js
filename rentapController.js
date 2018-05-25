@@ -1,10 +1,13 @@
 var rentap = require('./rentapModel.js');
 var apsGbl; 
-let namesGbl = null;
 var headersGbl;
+let apInvalid = null;
+let namesGbl = null;
 let headerSelected = false; //keep track if header has been selected on a new ap yet or not. set true when header selected, false when ap is saved.
 let headerName = null; //this is for display on a new ap. regular headerName is stored with the ap
-let modeGbl = 'new'; //since each post button has it's own form, form.body.mode is not available to any but save, so a global mode is needed.
+let modeGbl = 'new'; //since each post button has it's own form, form.body.mode is not available to any but save, so a global mode is needed,
+                     //and apsGbl is either undefined or not applicable when the mode is 'new' so can't use apsGbl.mode as the global mode
+let errorGbl = null;
 // all these "exports" methods are for 'get' buttons where rentapRoutes decides which method to use based on the url
 // except for form_submission which uses a switch to decide which var function(form.button
 // because all the submit buttons are named "button", but have distinct values
@@ -25,23 +28,6 @@ let modeGbl = 'new'; //since each post button has it's own form, form.body.mode 
 //depending on whether or not getaps was needed
 
 //methods for 'post' buttons
-var save = function(form, res) {
-  //todo: before allowing a save, need to verify there really is a fullName and header
-  headerSelected = true;
-  if (headersGbl && headersGbl.length && headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
-  if (headerName) {
-    form.body.headername = headerName;
-    if (modeGbl!='new' && undefined!=apsGbl && undefined!=apsGbl.aps[apsGbl.rownum])
-      apsGbl.aps[apsGbl.rownum].headerName = headerName;
-  }
-  rentap.save(form.body, function(returned_ap_id) {
-    rentap.getaps(returned_ap_id, false, function(returned_aps) {
-      apsGbl = returned_aps;
-      modeGbl = apsGbl.mode;
-      res.redirect('/rentap/show/' + returned_ap_id);
-    });
-  });
-};
 
 var refresh_page = function(res) {
   if (modeGbl === 'new' || undefined===apsGbl || undefined===apsGbl.aps[apsGbl.rownum])
@@ -49,6 +35,33 @@ var refresh_page = function(res) {
   else
     res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
 }
+
+var display_error = function(form, res, message) {
+  console.log('error: ', message);
+  errorGbl = message;
+  apInvalid = {FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, SateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:form.body.headername} 
+  refresh_page(res); //makes message available to the view as a variable named 'error'
+}
+
+var save = function(form, res) {
+  if (headersGbl && headersGbl.length && headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
+  if (headerName || form.body.headername) {
+    if (!form.body.headername) form.body.headername = headerName;
+    headerName = form.body.headername;
+    if (form.body.fullname) {
+      if (form.body.authdate) {
+        headerSelected = true;
+        rentap.save(form.body, function(returned_ap_id) {
+          rentap.getaps(returned_ap_id, false, function(returned_aps) {
+            apsGbl = returned_aps;
+            modeGbl = apsGbl.mode;
+            res.redirect('/rentap/show/' + returned_ap_id);
+          });
+        });
+      } else display_error(form, res, 'Fill in the Applied date before saving');
+    } else display_error(form, res, 'Fill in the Full Name before saving');
+  } else display_error(form, res, 'Choose a Header before saving');
+};
 
 var handle_show_row = function(row_num, res) {
   if (row_num > apsGbl.aps.length - 1) row_num = apsGbl.aps.length - 1; //in case user entered too large of a row number, set it to last ap
@@ -163,13 +176,17 @@ var handle_show_new = function(form, res) {
       //whenever showing a new ap, there's no valid name to be selected automatically so show "Choose Name" (search also puts in a "Choose..." option)
       if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
       let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
-      res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
+      res.render('rentap', {error:errorGbl, mode:'new', rownum: undefined, ap: apInvalid, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
+      apInvalid = null;
+      errorGbl = null;
     }); 
   else {
     //whenever showing a new ap, there's no valid name to be selected automatically so show "Choose Name" (search also puts in a "Choose..." option)
     if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
     let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
-    res.render('rentap', {mode:'new', rownum: undefined, ap: undefined, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
+    res.render('rentap', {error:errorGbl, mode:'new', rownum: undefined, ap: apInvalid, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
+    apInvalid = null;
+    errorGbl = null;
   }
 };
 
@@ -200,11 +217,12 @@ var handle_show_ap = function(form, res) {
   if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /) && apsGbl.aps.length + 1 === namesGbl.length) namesGbl.pop();
   let i = headersGbl.findIndex(header => header.Name  == headerName);
   if (namesGbl) {
-    res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
+    res.render('rentap', {error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   } else rentap.names(form.params.ap_id, function(returned_names) {
     namesGbl = returned_names;
-    res.render('rentap', {mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
+    res.render('rentap', {error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   });
+  errorGbl = null;
 };
 
 exports.show_ap = function(form, res) {
