@@ -39,7 +39,7 @@ var refresh_page = function(res) {
 var display_error = function(form, res, message) {
   console.log('error: ', message);
   errorGbl = message;
-  apInvalid = {FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, SateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:form.body.headername} 
+  apInvalid = {FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, StateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:form.body.headername} 
   refresh_page(res); //makes message available to the view as a variable named 'error'
 }
 
@@ -55,6 +55,7 @@ var save = function(form, res) {
           rentap.getaps(returned_ap_id, false, function(returned_aps) {
             apsGbl = returned_aps;
             modeGbl = apsGbl.mode;
+            namesGbl = null; //trigger names to be reloaded in case a new ap was inserted
             res.redirect('/rentap/show/' + returned_ap_id);
           });
         });
