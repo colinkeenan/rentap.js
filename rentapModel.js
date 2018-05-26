@@ -145,28 +145,23 @@ exports.names = function(ap_id, callback) { //for dropdown list of full names to
   });
 };
 
+/*
+ * Decided to stay with the ap when discarding and restoring so it will be easier for the user to confirm what happened
+ * and delete or restore after discarding.
+ */
 exports.discard_ap = function (ap_id, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
-  var next_rownum
   db.serialize(function() {
-    //get rownum (which becomes next_rownum after trashing it). no need to get the mode because discard can only be called when not in trash
-    db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
-      if (err) console.error(err);
-      next_rownum = aps.findIndex(ap => ap.rowid == ap_id);
-      //no need to add 1 to the rownum because will be discarding this ap, moving the next one to the same rownum
-      //wrap around from 0 to end of list or from end of list to 0
-      if (next_rownum < 0) next_rownum = aps.length - 2; //this would only happen if there was an error getting rownum with =>
-      if (next_rownum > aps.length - 2) next_rownum = 0; //the last index will be length-2 instead of length-1 because discarding one
-    });
     //adding ap_id to trash "discards" the row without actually changing it in tbl
     db.run("INSERT INTO trash (discardedRow) VALUES (?)", ap_id, function(err, ap) {
       if (err) console.error(err);
     });
     //update aps now that this ap is in trash
-    db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
+    db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
       if (err) console.error(err);
-      callback({aps:aps, rownum:next_rownum, mode:'edit'});
+      let rownum = aps.findIndex(ap => ap.rowid == ap_id);
+      callback({aps:aps, rownum:rownum, mode:'discarded'});
     });
   });
 };
@@ -175,23 +170,15 @@ exports.restore_ap = function (ap_id, callback) {
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
   db.serialize(function() {
-    //get rownum (which becomes next_rownum after restoring it). no need to get the mode because restore can only be called when in trash
-    db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
-      if (err) console.error(err);
-      next_rownum = aps.findIndex(ap => ap.rowid == ap_id);
-      //no need to add 1 to the rownum because will be restoring this ap, moving the next one to the same rownum
-      //wrap around from 0 to end of list or from end of list to 0
-      if (next_rownum < 0) next_rownum = aps.length - 2; //this would only happen if there was an error getting rownum with =>
-      if (next_rownum > aps.length - 2) next_rownum = 0; //the last index will be length-2 instead of length-1 because discarding one
-    });
     //removing ap_id from trash "restores" the row without actually changing it in tbl
     db.run("DELETE FROM trash WHERE discardedRow = (?)", ap_id, function(err, ap) {
       if (err) console.error(err);
     });
     //update aps now that this ap has been restored
-    db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
+    db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
       if (err) console.error(err);
-      callback({aps:aps, rownum:next_rownum, mode:'discarded'});
+      let rownum = aps.findIndex(ap => ap.rowid == ap_id);
+      callback({aps:aps, rownum:rownum, mode:'edit'});
     });
   });
 };
