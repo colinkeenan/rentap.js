@@ -13,11 +13,13 @@ var getmode = function (ap_id, switch_mode, callback) { //callback gets mode of 
   db.close();
 };
 
-exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownum, mode} where rownum is the (index in aps where tbl.rowid = ap_id)
+let savedRownum = 0; //just for keeping track of what the rownum was when switch to trash
+
+//rownum should be passed as 0 when switch_mode is false because the rownum will be looked up based on ap_id
+exports.getaps = function(ap_id, rownum, switch_mode, callback) { //callback {aps, rownum, mode} where rownum is the (index in aps where tbl.rowid = ap_id)
   const sqlite3 = require('sqlite3');
   let db = new sqlite3.Database('./store.db');
-  var rownum = 0; // will stay 0 if ap_id is negative, or if switch_mode is true
-  if (ap_id < 0 ) { // negative ap_id means set mode to edit and return all goodaps. rownum will be 0.
+  if (ap_id < 0 ) { // negative ap_id means set mode to edit and return all goodaps. 
     db.serialize(function() {
       db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
         if (err) console.error(err);
@@ -27,37 +29,24 @@ exports.getaps = function(ap_id, switch_mode, callback) { //callback {aps, rownu
     db.close();
   } else {
     // if switch_mode is true, then instead of returning aps in the same mode as ap_id, return aps of the opposite mode
-    // (the mode switch is taken care of in getmode)
+    // (getmode takes care of switching the mode)
     getmode(ap_id, switch_mode, function(mode) {
       db.serialize(function() {
-        if (mode==='discarded') // entering trash
+        if (mode==='discarded') // if switch_mode, just entering trash. 
           db.all("SELECT rowid, * FROM tbl WHERE rowid IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
             if (err) console.error(err);
-            if (switch_mode) {
-              // just switched to trash, find next higher ap_id (or wrap to row 0 ap_id)
-              if (ap_id > aps[aps.length - 1].rowid) ap_id = aps[0].rowid;
-              else for (let i = 0; i < aps.length; i++)
-                if (ap_id < aps[i].rowid) {
-                  ap_id = aps[i].rowid;
-                  rownum = i;
-                  break;
-                }
-            } else rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned when not switchmode
+            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned when not switchmode
+            else {
+              savedRownum = rownum; // just entered trash, so save rownum for later display when leave trash
+              rownum = 1; //just display the 1st ap in trash (0th ap in trash is Instructions)
+            }
             callback({aps:aps, rownum:rownum, mode:mode});
           });
-        else // leaving trash
+        else // just leaving trash if switch_mode
           db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
             if (err) console.error(err);
-            if (switch_mode) {
-              // just left trash, find next lower ap_id (or wrap to last ap_id)
-              if (ap_id < aps[0].rowid) ap_id = aps[aps.length - 1].rowid;
-              else for (let i = aps.length - 1; i >= 0; i--)
-                if (ap_id > aps[i].rowid) {
-                  ap_id = aps[i].rowid;
-                  rownum = i;
-                  break;
-                }
-            } else rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned when not switchmode
+            if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned when not switch_mode
+            else rownum = savedRownum; // just left trash so display same ap that entered trash from
             callback({aps:aps, rownum:rownum, mode:mode});
           });
       });

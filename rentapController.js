@@ -52,7 +52,7 @@ var save = function(form, res) {
       if (form.body.authdate) {
         headerSelected = true;
         rentap.save(form.body, function(returned_ap_id) {
-          rentap.getaps(returned_ap_id, false, function(returned_aps) {
+          rentap.getaps(returned_ap_id, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
             apsGbl = returned_aps;
             modeGbl = apsGbl.mode;
             namesGbl = null; //trigger names to be reloaded in case a new ap was inserted
@@ -73,7 +73,7 @@ var handle_show_row = function(row_num, res) {
 var show_ap_rownum = function(row_num, res) { 
   if (row_num >= 0) {
     if (undefined===apsGbl) 
-      rentap.getaps(-1, false, function(returned_aps) {
+      rentap.getaps(-1, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
         apsGbl = returned_aps;
         modeGbl = apsGbl.mode;
         handle_show_row(row_num, res);
@@ -131,7 +131,7 @@ var handle_search = function(form, res) {
 
 var search = function(form, res) { //the search results will be displayed in the dropdown list of names, but will not affect other navigation buttons
   if (undefined===apsGbl) 
-    rentap.getaps(form.body.rentapID, false, function(returned_aps) { 
+    rentap.getaps(form.body.rentapID, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0 
       apsGbl = returned_aps;
       modeGbl = apsGbl.mode;
       handle_search(form, res); 
@@ -157,7 +157,7 @@ var handle_form_submission = function(form, res) {
 
 exports.form_submission = function(form, res) {
   if (undefined===apsGbl)
-    rentap.getaps(form.params.ap_id, false, function(returned_aps) {
+    rentap.getaps(form.params.ap_id, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
       apsGbl = returned_aps;
       modeGbl = apsGbl.mode;
       handle_form_submission(form, res);
@@ -228,7 +228,7 @@ var handle_show_ap = function(form, res) {
 
 exports.show_ap = function(form, res) {
   if (undefined===headersGbl || undefined===apsGbl)
-    rentap.getaps(form.params.ap_id, false, function(returned_aps) { //rentap.getaps gets aps of the oppopsite mode as ap_id if 2nd param is true
+    rentap.getaps(form.params.ap_id, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
       apsGbl = returned_aps; //rapsGbl.rownum already provided here by the model
       modeGbl = apsGbl.mode;
       rentap.getheaders(function(returned_headers) {
@@ -252,7 +252,7 @@ var handle_prev_ap = function(form, res) {
 
 exports.show_ap_prev = function(form, res) {
   if (undefined===apsGbl)
-    rentap.getaps(form.params.ap_id, false, function(returned_aps) {
+    rentap.getaps(form.params.ap_id, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
       apsGbl = returned_aps;
       modeGbl = apsGbl.mode;
       handle_prev_ap(form, res);
@@ -269,7 +269,7 @@ var handle_next_ap = function(form, res) {
 exports.show_ap_next = function(form, res) {
   //triggers show_ap by redirect, after increment aps.rownum, wrapping around to 0 if already on the last ap
   if (undefined===apsGbl)
-    rentap.getaps(form.params.ap_id, false, function(returned_aps) {
+    rentap.getaps(form.params.ap_id, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
       apsGbl = returned_aps;
       modeGbl = apsGbl.mode;
       handle_next_ap(form, res);
@@ -322,11 +322,10 @@ exports.rm_header = function(form, res) {
 exports.switch_mode = function(form, res) {
   //always gets apsGbl and namesGbl whether or not it is already defined
   //because expecting to change apsGbl by switching to aps of the opposite mode (edit/discarded)
-  rentap.getaps(form.params.ap_id, true, function(returned_aps) { //true signals to switch mode
-    apsGbl = returned_aps; //apsGbl.aps is now an array of all aps of opposite mode, and aps.rownum is set 
+  rentap.getaps(form.params.ap_id, apsGbl.rownum, true, function(returned_aps) { //true signals to switch mode
+    apsGbl = returned_aps; //apsGbl.aps is now an array of all aps of opposite mode, 
+    //and apsGbl.rownum is set to 0 if entered trash or what it was before entering trash if just left
     modeGbl = apsGbl.mode;
-    //to next or prev ap_id (next if going to trash and prev if leaving trash, so going to and from trash
-    //returns to same ap_id)
     rentap.names(apsGbl.aps[0].rowid, function(returned_names) { //have to update names to match returned_aps
       namesGbl=returned_names;
       res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
