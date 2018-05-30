@@ -1,67 +1,68 @@
 var rentap = require('./rentapModel.js');
 var apsGbl; 
 var headersGbl;
-let apInvalid = null;
+let apUnsaved = null;
 let namesGbl = null;
 let headerSelected = false; //keep track if header has been selected on a new ap yet or not. set true when header selected, false when ap is saved.
 let headerName = null; //this is for display on a new ap. regular headerName is stored with the ap
 let modeGbl = 'new'; //since each post button has it's own form, form.body.mode is not available to any but save, so a global mode is needed,
                      //and apsGbl is either undefined or not applicable when the mode is 'new' so can't use apsGbl.mode as the global mode
+let unsavedGbl = false;
 let errorGbl = null;
-// all these "exports" methods are for 'get' buttons where rentapRoutes decides which method to use based on the url
-// except for form_submission which uses a switch to decide which var function(form.button
-// because all the submit buttons are named "button", but have distinct values
-// The post button values and (text on button) are:
-// addheader (+)
-// updateheader (~)
-// deleteheader (-)
-// save (Save)
-// row: 
-// search (Search)
-// any other word (selected header from dropdown)
-// any positive intiger (ap_id that matches selected name from dropdown)
+/* all these "exports" methods are for 'get' buttons where rentapRoutes decides which method to use based on the url
+ * except for form_submission which uses a switch to decide which form it came from (hidden input with name of form)
+ *
+ * due to javascript being async, can't rely on getaps finishing before render,
+ * so doing render in getaps callback if need to getaps
+ * can't just have one render at end
+ * as a result, making a "handle_..." function for each function that would otherwise need to repeat the exact same stuff twice
+ * depending on whether or not getaps was needed
+ */
 
-//due to javascript being async, can't rely on getaps finishing before render,
-//so doing render in getaps callback if need to getaps
-//can't just have one render at end
-//as a result, making a "handle_..." function for each function that would otherwise need to repeat the exact same stuff twice
-//depending on whether or not getaps was needed
+var refresh_page_with_unsaved_changes = function(form, res) {
+  unsavedGbl = true;
+  if (undefined===form.body.fullname && apUnsaved) apUnsaved.headerName = form.body.button;
+  else if (!(undefined===form.body.fullname)) {
+    console.log('before: ', ap);
+    apUnsaved = {FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, StateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:headerName} 
+    console.log('after: ', ap);
+  } else 
+    apUnsaved = {FullName:'', SSN:'', BirthDate:'', MaritalStatus:'', Email:'', StateID:'', Phone1:'', Phone2:'', CurrentAddress:'', PriorAddresses:'', ProposedOccupants:'', ProposedPets:'', Income:'', Employment:'', Evictions:'', Felonies:'', dateApplied:'', dateGuested:'', dateRented:'', headerName:headerName};
 
-//methods for 'post' buttons
-
-var refresh_page = function(res) {
-  if (modeGbl === 'new' || undefined===apsGbl || undefined===apsGbl.aps[apsGbl.rownum])
-    res.redirect('/rentap');
-  else
-    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  res.redirect('back');//makes errorGbl available to the view as a variable named 'error', unsavedGbl as a variable named 'unsaved' = true, and apUnsaved as 'ap'
 }
 
 var display_error = function(form, res, message) {
-  console.log('error: ', message);
+  console.error('error: ', message);
   errorGbl = message;
-  apInvalid = {FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, StateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:form.body.headername} 
-  refresh_page(res); //makes message available to the view as a variable named 'error'
+  refresh_page_with_unsaved_changes(form, res); 
 }
 
+/*
+ * Post button methods
+ */
+
 var save = function(form, res) {
-  if (headersGbl && headersGbl.length && headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
-  if (headerName || form.body.headername) {
-    if (!form.body.headername) form.body.headername = headerName;
-    headerName = form.body.headername;
-    if (form.body.fullname) {
-      if (form.body.authdate) {
-        headerSelected = true;
-        rentap.save(form.body, function(returned_ap_id) {
-          rentap.getaps(returned_ap_id, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
-            apsGbl = returned_aps;
-            modeGbl = apsGbl.mode;
-            namesGbl = null; //trigger names to be reloaded in case a new ap was inserted
-            res.redirect('/rentap/show/' + returned_ap_id);
+  if (unsavedGbl && 'save'===form.body.button) { //only save to the database if there are unsaved changes, will set unsavedGbl to false after saving is successful
+    if (headersGbl && headersGbl.length && headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
+    if (headerName) {
+      if (form.body.fullname) {
+        if (form.body.authdate) {
+          headerSelected = true;
+          rentap.save(form.body, headerName, function(returned_ap_id) {
+            rentap.getaps(returned_ap_id, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
+              apsGbl = returned_aps;
+              modeGbl = apsGbl.mode;
+              unsavedGbl = false;
+              namesGbl = null; //trigger names to be reloaded in case a new ap was inserted
+              res.redirect('/rentap/show/' + returned_ap_id);
+            });
           });
-        });
-      } else display_error(form, res, 'Fill in the Applied date before saving');
-    } else display_error(form, res, 'Fill in the Full Name before saving');
-  } else display_error(form, res, 'Choose a Header before saving');
+        } else display_error(form, res, 'Fill in the Applied date before saving');
+      } else display_error(form, res, 'Fill in the Full Name before saving');
+    } else display_error(form, res, 'Choose a Header before saving');
+  } else if ('save'!=form.body.button) refresh_page_with_unsaved_changes(form, res); //save button was not clicked, but changes triggered running this function
+  else res.redirect('back'); //save button was clicked, but there were no changes to save. have to refresh page to stop browser waiting for a response from the post
 };
 
 var handle_show_row = function(row_num, res) {
@@ -82,14 +83,15 @@ var show_ap_rownum = function(row_num, res) {
       handle_show_row(row_num, res);
   } else { //if it's not a valid row number, just redisplay the ap already showing
     console.error("Can't parse row number: ", row_num);
-    refresh_page(res);
+    res.redirect('back');
   }
 };
 
-var header_selected = function(headername, res) {
+var header_selected = function(form, res) {
   headerSelected = true; //gets set true here, and false in save
-  headerName = headername;
-  refresh_page(res);
+  headerName = form.body.button;
+  if (unsavedGbl) refresh_page_with_unsaved_changes(form, res);
+  else res.redirect('back');
 };
 
 var ap_selected = function(ap_id, res) {
@@ -101,7 +103,7 @@ var save_header = function(form, res) {
   let header = { StreetAddress: form.body.rentaladdress, CityStateZip: form.body.rentalcitystzip, Title: form.body.title, Name: form.body.headername };
   rentap.save_header(header, function(returned_headers) {
     headersGbl = returned_headers;
-    refresh_page(res);
+    res.redirect('back');
   });
 };
 
@@ -126,7 +128,7 @@ var handle_search = function(form, res) {
     matching_names.push({ FullName: 'Choose from Search Results', rowid: 0 });
     namesGbl = !Array.isArray(matching_names) || matching_names.length <= 1 ? null : matching_names;
   } else namesGbl=null; //this will triger reloading all names on redirect below
-  refresh_page(res);
+  res.redirect('back');
 };
 
 var search = function(form, res) { //the search results will be displayed in the dropdown list of names, but will not affect other navigation buttons
@@ -147,7 +149,7 @@ var handle_form_submission = function(form, res) {
 
   switch(form.body.label) {
     case 'saveheader': save_header(form, res); break;
-    case 'selectHeader': header_selected(form.body.button, res); break;
+    case 'selectHeader': header_selected(form, res); break;
     case 'search': search(form, res); break;
     case 'row:': show_ap_rownum(form.body.button, res); break;
     case 'selectName': ap_selected(form.body.button, res); break;
@@ -176,17 +178,17 @@ var handle_show_new = function(form, res) {
       namesGbl = returned_names;
       //whenever showing a new ap, there's no valid name to be selected automatically so show "Choose Name" (search also puts in a "Choose..." option)
       if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
-      let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
-      res.render('rentap', {error:errorGbl, mode:'new', rownum: undefined, ap: apInvalid, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
-      apInvalid = null;
+      let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : null;
+      res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
+      apUnsaved = null;
       errorGbl = null;
     }); 
   else {
     //whenever showing a new ap, there's no valid name to be selected automatically so show "Choose Name" (search also puts in a "Choose..." option)
     if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
-    let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : undefined;
-    res.render('rentap', {error:errorGbl, mode:'new', rownum: undefined, ap: apInvalid, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : undefined)});
-    apInvalid = null;
+    let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : null;
+    res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
+    apUnsaved = null;
     errorGbl = null;
   }
 };
@@ -218,10 +220,10 @@ var handle_show_ap = function(form, res) {
   if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /) && apsGbl.aps.length + 1 === namesGbl.length) namesGbl.pop();
   let i = headersGbl.findIndex(header => header.Name  == headerName);
   if (namesGbl) {
-    res.render('rentap', {error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
+    res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   } else rentap.names(form.params.ap_id, function(returned_names) {
     namesGbl = returned_names;
-    res.render('rentap', {error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
+    res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   });
   errorGbl = null;
 };
@@ -252,7 +254,7 @@ var handle_prev_ap = function(form, res) {
 
 exports.show_ap_prev = function(form, res) {
   if (undefined===apsGbl)
-    rentap.getaps(form.params.ap_id, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
+    rentap.getaps(('row0'===form.params.ap_id ? -1 : form.params.ap_id), 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
       apsGbl = returned_aps;
       modeGbl = apsGbl.mode;
       handle_prev_ap(form, res);
@@ -269,7 +271,7 @@ var handle_next_ap = function(form, res) {
 exports.show_ap_next = function(form, res) {
   //triggers show_ap by redirect, after increment aps.rownum, wrapping around to 0 if already on the last ap
   if (undefined===apsGbl)
-    rentap.getaps(form.params.ap_id, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
+    rentap.getaps(('row0'===form.params.ap_id ? -1 : form.params.ap_id), 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
       apsGbl = returned_aps;
       modeGbl = apsGbl.mode;
       handle_next_ap(form, res);
@@ -279,13 +281,12 @@ exports.show_ap_next = function(form, res) {
 };
 
 exports.discard_ap = function(form, res) {
-  //always gets apsGbl whether or not it is already defined
-  //because expecting to change apsGbl by putting one in trash
-  rentap.discard_ap(form.params.ap_id, function(returned_aps) {
-    apsGbl = returned_aps;
-    modeGbl = apsGbl.mode;
-    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-  });
+  if (modeGbl==='new') res.redirect('back')
+  else rentap.discard_ap(form.params.ap_id, function(returned_aps) {
+      apsGbl = returned_aps;
+      modeGbl = apsGbl.mode;
+      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+    });
 };
 
 exports.restore_ap = function(form, res) {
@@ -312,7 +313,7 @@ exports.rm_ap = function(form, res) {
 exports.rm_header = function(form, res) {
   rentap.rm_header(headerName, function(returned_headers) {
     headersGbl = returned_headers;
-    refresh_page(res);
+    res.redirect('back');
   });
 };
 
@@ -322,7 +323,9 @@ exports.rm_header = function(form, res) {
 exports.switch_mode = function(form, res) {
   //always gets apsGbl and namesGbl whether or not it is already defined
   //because expecting to change apsGbl by switching to aps of the opposite mode (edit/discarded)
-  rentap.getaps(form.params.ap_id, apsGbl.rownum, true, function(returned_aps) { //true signals to switch mode
+  let row_to_get = 0;
+  if (apsGbl) if (apsGbl.rownum) row_to_get = apsGbl.rownum;
+  rentap.getaps(form.params.ap_id, row_to_get, true, function(returned_aps) { //true signals to switch mode
     apsGbl = returned_aps; //apsGbl.aps is now an array of all aps of opposite mode, 
     //and apsGbl.rownum is set to 0 if entered trash or what it was before entering trash if just left
     modeGbl = apsGbl.mode;
