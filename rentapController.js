@@ -21,17 +21,11 @@ let errorGbl = null;
 
 var refresh_page_with_unsaved_changes = function(form, res) {
   unsavedGbl = true;
-  console.log('0',form.body.fullname, apUnsaved,'\n');
-  if (undefined===form.body.fullname && apUnsaved) {console.log('1'); apUnsaved.headerName = form.body.button;}
-  else if (!(undefined===form.body.fullname)) {
-    console.log('2');
+  if (undefined===form.body.fullname && apUnsaved) apUnsaved.headerName = form.body.button;
+  else if (!(undefined===form.body.fullname)) 
     apUnsaved = {FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, StateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:headerName} 
-    console.log('2',form.body.fullname, apUnsaved, '\n');
-  } else {
-    console.log('3');
+  else 
     apUnsaved = {FullName:'', SSN:'', BirthDate:'', MaritalStatus:'', Email:'', StateID:'', Phone1:'', Phone2:'', CurrentAddress:'', PriorAddresses:'', ProposedOccupants:'', ProposedPets:'', Income:'', Employment:'', Evictions:'', Felonies:'', dateApplied:'', dateGuested:'', dateRented:'', headerName:headerName};
-    console.log('3',form.body.fullname, apUnsaved, '\n');
-  }
   res.redirect('back');//makes errorGbl available to the view as a variable named 'error', unsavedGbl as a variable named 'unsaved' = true, and apUnsaved as 'ap'
 }
 
@@ -183,7 +177,7 @@ var handle_show_new = function(form, res) {
       if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
       let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : null;
       res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
-      if (!unsavedGbl) {console.log('setting apUnsaved to null'); apUnsaved = null;}
+      if (!unsavedGbl) apUnsaved = null;
       errorGbl = null;
     }); 
   else {
@@ -191,7 +185,7 @@ var handle_show_new = function(form, res) {
     if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
     let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : null;
     res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
-    if (!unsavedGbl) {console.log('setting apUnsaved to null'); apUnsaved = null;}
+    if (!unsavedGbl) apUnsaved = null;
     errorGbl = null;
   }
 };
