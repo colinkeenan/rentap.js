@@ -48,7 +48,7 @@ html(lang='en')
                       if (headers)
                         select.inline(name='button' form='selectHeader' onchange='submit()')
                           each hdr in headers
-                            option(value=hdr.Name selected=(!header ? (ap ? ap.headerName===hdr.Name : 'Choose Header'===hdr.Name) : header.Name===hdr.Name))= hdr.Name
+                            option(value=hdr.Name selected=(!header ? (ap && ap.headerName ? ap.headerName===hdr.Name : 'Choose Header'===hdr.Name) : header.Name===hdr.Name))= hdr.Name
                       =' '
                       button.inline(title='Delete Header' formmethod='get' formaction='/rentap/deleteheader/' + (header ? header.Name : ''))
                         svg(aria-hidden="true" data-prefix="fas" data-icon="heading" class="svg-inline--fa fa-heading fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
