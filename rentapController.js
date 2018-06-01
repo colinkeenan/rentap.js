@@ -23,7 +23,7 @@ var refresh_page_with_unsaved_changes = function(form, res) {
   unsavedGbl = true;
   if (undefined===form.body.fullname && apUnsaved) apUnsaved.headerName = form.body.button;
   else if (!(undefined===form.body.fullname)) 
-    apUnsaved = {FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, StateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:headerName} 
+    apUnsaved = {rowid: form.body.rentapID, FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, StateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:headerName} 
   else 
     apUnsaved = {FullName:'', SSN:'', BirthDate:'', MaritalStatus:'', Email:'', StateID:'', Phone1:'', Phone2:'', CurrentAddress:'', PriorAddresses:'', ProposedOccupants:'', ProposedPets:'', Income:'', Employment:'', Evictions:'', Felonies:'', dateApplied:'', dateGuested:'', dateRented:'', headerName:headerName};
   res.redirect('back');//makes errorGbl available to the view as a variable named 'error', unsavedGbl as a variable named 'unsaved' = true, and apUnsaved as 'ap'
@@ -217,10 +217,10 @@ var handle_show_ap = function(form, res) {
   if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /) && apsGbl.aps.length + 1 === namesGbl.length) namesGbl.pop();
   let i = headersGbl.findIndex(header => header.Name  == headerName);
   if (namesGbl) {
-    res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
+    res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:(unsavedGbl ? apUnsaved : apsGbl.aps[apsGbl.rownum]), Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   } else rentap.names(form.params.ap_id, function(returned_names) {
     namesGbl = returned_names;
-    res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:apsGbl.aps[apsGbl.rownum], Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
+    res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:(unsavedGbl ? apUnsaved : apsGbl.aps[apsGbl.rownum]), Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   });
   errorGbl = null;
 };
