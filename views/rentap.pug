@@ -41,6 +41,51 @@ html(lang='en')
               table#headertable
                 tbody
                   tr
+                    td.max25ch 
+                      if (mode != 'discarded')
+                        button#save.inline(title='Save' name='button' value='save')
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="user" class="svg-inline--fa fa-user fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                            path#alertUnsaved(fill=(unsaved ? "red" : "grey") d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z")
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="download" class="svg-inline--fa fa-download fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
+                            path(fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z")
+                        br
+                        button#new.inline(title='New Blank Application' formaction='/rentap' formmethod='get')
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="user" class="svg-inline--fa fa-user fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                            path(fill="currentColor" d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z")
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="plus" class="svg-inline--fa fa-plus fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                            path(fill="currentColor" d="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z")
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="newspaper" class="svg-inline--fa fa-newspaper fa-w-18" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512")
+                            path(fill="currentColor" d="M552 64H88c-13.255 0-24 10.745-24 24v8H24c-13.255 0-24 10.745-24 24v272c0 30.928 25.072 56 56 56h472c26.51 0 48-21.49 48-48V88c0-13.255-10.745-24-24-24zM56 400a8 8 0 0 1-8-8V144h16v248a8 8 0 0 1-8 8zm236-16H140c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm208 0H348c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm-208-96H140c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm208 0H348c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm0-96H140c-6.627 0-12-5.373-12-12v-40c0-6.627 5.373-12 12-12h360c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12z")
+                      else
+                        button#restore.inline(title='Restore' formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid) formmethod='get') 
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="undo" class="svg-inline--fa fa-undo fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
+                            path(fill="currentColor" d="M212.333 224.333H12c-6.627 0-12-5.373-12-12V12C0 5.373 5.373 0 12 0h48c6.627 0 12 5.373 12 12v78.112C117.773 39.279 184.26 7.47 258.175 8.007c136.906.994 246.448 111.623 246.157 248.532C504.041 393.258 393.12 504 256.333 504c-64.089 0-122.496-24.313-166.51-64.215-5.099-4.622-5.334-12.554-.467-17.42l33.967-33.967c4.474-4.474 11.662-4.717 16.401-.525C170.76 415.336 211.58 432 256.333 432c97.268 0 176-78.716 176-176 0-97.267-78.716-176-176-176-58.496 0-110.28 28.476-142.274 72.333h98.274c6.627 0 12 5.373 12 12v48c0 6.627-5.373 12-12 12z")
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="trash-alt" class="svg-inline--fa fa-trash-alt fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                            path(fill="currentColor" d="M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm416 56v324c0 26.5-21.5 48-48 48H80c-26.5 0-48-21.5-48-48V140c0-6.6 5.4-12 12-12h360c6.6 0 12 5.4 12 12zm-272 68c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208z")
+                        button#delrentap.inline(title='Delete' formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid) formmethod='get') 
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="user" class="svg-inline--fa fa-user fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                            path(fill="currentColor" d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z")
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="minus" class="svg-inline--fa fa-minus fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                            path(fill="currentColor" d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z")
+
+                    td.max25ch 
+                      if (mode != 'discarded')
+                        button#discard.inline(title='Discard' formaction='/rentap/discard/' + (ap ? ap.rowid : 0) formmethod='get')
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="user" class="svg-inline--fa fa-user fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                            path(fill="currentColor" d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z")
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="trash-alt" class="svg-inline--fa fa-trash-alt fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                            path(fill="currentColor" d="M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm416 56v324c0 26.5-21.5 48-48 48H80c-26.5 0-48-21.5-48-48V140c0-6.6 5.4-12 12-12h360c6.6 0 12 5.4 12 12zm-272 68c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208z")
+                        button#trash.inline(title='Enter Trash' formaction='/rentap/show/' + (undefined==ap ? 0 : ap.rowid) + '/switch_mode' formmethod='get' icon='trash')
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="sign-in-alt" class="svg-inline--fa fa-sign-in-alt fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
+                            path(fill="currentColor" d="M416 448h-84c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h84c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32h-84c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h84c53 0 96 43 96 96v192c0 53-43 96-96 96zm-47-201L201 79c-15-15-41-4.5-41 17v96H24c-13.3 0-24 10.7-24 24v96c0 13.3 10.7 24 24 24h136v96c0 21.5 26 32 41 17l168-168c9.3-9.4 9.3-24.6 0-34z")
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="trash-alt" class="svg-inline--fa fa-trash-alt fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                            path(fill="currentColor" d="M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm416 56v324c0 26.5-21.5 48-48 48H80c-26.5 0-48-21.5-48-48V140c0-6.6 5.4-12 12-12h360c6.6 0 12 5.4 12 12zm-272 68c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208z")
+                      else 
+                        button#back.inline(title='Leave Trash' formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') 
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="trash-alt" class="svg-inline--fa fa-trash-alt fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                            path(fill="currentColor" d="M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm416 56v324c0 26.5-21.5 48-48 48H80c-26.5 0-48-21.5-48-48V140c0-6.6 5.4-12 12-12h360c6.6 0 12 5.4 12 12zm-272 68c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208z")
+                          svg(aria-hidden="true" data-prefix="fas" data-icon="sign-out-alt" class="svg-inline--fa fa-sign-out-alt fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
+                            path(fill="currentColor" d="M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z")
                     td.max25ch
                       //- below 'select' is not a button, but will act like a submit button when the value changes. The controller distinguishes
                       //- which button did the submission according to the value of form.button
@@ -50,7 +95,7 @@ html(lang='en')
                           each hdr in headers
                             option(value=hdr.Name selected=(!header ? (ap && ap.headerName ? ap.headerName===hdr.Name : 'Choose Header'===hdr.Name) : header.Name===hdr.Name))= hdr.Name
                       =' '
-                      button.inline(title='Delete Header' formmethod='get' formaction='/rentap/deleteheader/' + (header ? header.Name : ''))
+                      button.inline(title='Delete Header' formmethod='get' form='selectHeader' formaction='/rentap/deleteheader/' + (header ? header.Name : ''))
                         svg(aria-hidden="true" data-prefix="fas" data-icon="heading" class="svg-inline--fa fa-heading fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
                           path(fill="currentColor" d="M496 80V48c0-8.837-7.163-16-16-16H320c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h37.621v128H154.379V96H192c8.837 0 16-7.163 16-16V48c0-8.837-7.163-16-16-16H32c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h37.275v320H32c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h160c8.837 0 16-7.163 16-16v-32c0-8.837-7.163-16-16-16h-37.621V288H357.62v128H320c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h160c8.837 0 16-7.163 16-16v-32c0-8.837-7.163-16-16-16h-37.275V96H480c8.837 0 16-7.163 16-16z")
                         svg(aria-hidden="true" data-prefix="fas" data-icon="minus" class="svg-inline--fa fa-minus fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
@@ -62,7 +107,7 @@ html(lang='en')
                         svg(aria-hidden="true" data-prefix="fas" data-icon="download" class="svg-inline--fa fa-download fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
                           path(fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z")
                       //- value of input#headername changes when the 'select' menu above changes
-                      input(name='headername' type='text' form='saveheader' value=(header ? header.Name : '')) 
+                      input(name='headername' type='text' form='saveheader' value=(header ? header.Name : '') autofocus=(fieldFocused==='headername' ? 'autofocus' : null)) 
                       
                     td.max25ch
                       input#label.invisible.readonly(name='label' type='text' form='search' value='search' readonly)
@@ -75,33 +120,6 @@ html(lang='en')
                           =error
 
                     td.max25ch
-                      //- Not in Trash
-                      if (mode != 'discarded')
-                        button#discard.inline(title='Discard' formaction='/rentap/discard/' + (ap ? ap.rowid : 0) formmethod='get')
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="user" class="svg-inline--fa fa-user fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                            path(fill="currentColor" d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z")
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="trash-alt" class="svg-inline--fa fa-trash-alt fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                            path(fill="currentColor" d="M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm416 56v324c0 26.5-21.5 48-48 48H80c-26.5 0-48-21.5-48-48V140c0-6.6 5.4-12 12-12h360c6.6 0 12 5.4 12 12zm-272 68c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208z")
-                        button#new.inline(title='New Blank Application' formaction='/rentap' formmethod='get')
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="user" class="svg-inline--fa fa-user fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                            path(fill="currentColor" d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z")
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="plus" class="svg-inline--fa fa-plus fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                            path(fill="currentColor" d="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z")
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="newspaper" class="svg-inline--fa fa-newspaper fa-w-18" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512")
-                                                      path(fill="currentColor" d="M552 64H88c-13.255 0-24 10.745-24 24v8H24c-13.255 0-24 10.745-24 24v272c0 30.928 25.072 56 56 56h472c26.51 0 48-21.49 48-48V88c0-13.255-10.745-24-24-24zM56 400a8 8 0 0 1-8-8V144h16v248a8 8 0 0 1-8 8zm236-16H140c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm208 0H348c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm-208-96H140c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm208 0H348c-6.627 0-12-5.373-12-12v-8c0-6.627 5.373-12 12-12h152c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12zm0-96H140c-6.627 0-12-5.373-12-12v-40c0-6.627 5.373-12 12-12h360c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12z")
-                      //- In Trash
-                      else 
-                        button#restore.inline(title='Restore' formaction='/rentap/restore/' + (undefined==ap ? '' : ap.rowid) formmethod='get') 
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="undo" class="svg-inline--fa fa-undo fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
-                            path(fill="currentColor" d="M212.333 224.333H12c-6.627 0-12-5.373-12-12V12C0 5.373 5.373 0 12 0h48c6.627 0 12 5.373 12 12v78.112C117.773 39.279 184.26 7.47 258.175 8.007c136.906.994 246.448 111.623 246.157 248.532C504.041 393.258 393.12 504 256.333 504c-64.089 0-122.496-24.313-166.51-64.215-5.099-4.622-5.334-12.554-.467-17.42l33.967-33.967c4.474-4.474 11.662-4.717 16.401-.525C170.76 415.336 211.58 432 256.333 432c97.268 0 176-78.716 176-176 0-97.267-78.716-176-176-176-58.496 0-110.28 28.476-142.274 72.333h98.274c6.627 0 12 5.373 12 12v48c0 6.627-5.373 12-12 12z")
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="trash-alt" class="svg-inline--fa fa-trash-alt fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                            path(fill="currentColor" d="M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm416 56v324c0 26.5-21.5 48-48 48H80c-26.5 0-48-21.5-48-48V140c0-6.6 5.4-12 12-12h360c6.6 0 12 5.4 12 12zm-272 68c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208z")
-                        button#delrentap.inline(title='Delete' formaction='/rentap/delete/' + (undefined==ap ? '' : ap.rowid) formmethod='get') 
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="user" class="svg-inline--fa fa-user fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                            path(fill="currentColor" d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z")
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="minus" class="svg-inline--fa fa-minus fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                            path(fill="currentColor" d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z")
-
                       input#label.sameline_input.readonly(name='label' type='text' form='jump' value='row:' readonly)
                       input#row.sameline_input(name='button' type='text' form='jump' value=(undefined===rownum? '' : rownum) onchange='submit()')
                       =' '
@@ -111,13 +129,6 @@ html(lang='en')
                       button#next.inlinebutton(title='Next' formaction='/rentap/show/' + (undefined==ap ? row0 : ap.rowid) + '/next' formmethod='get')
                         svg(aria-hidden="true" data-prefix="fas" data-icon="long-arrow-alt-right" class="svg-inline--fa fa-long-arrow-alt-right fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
                           path(fill="currentColor" d="M313.941 216H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h301.941v46.059c0 21.382 25.851 32.09 40.971 16.971l86.059-86.059c9.373-9.373 9.373-24.569 0-33.941l-86.059-86.059c-15.119-15.119-40.971-4.411-40.971 16.971V216z")
-                      br
-                      if (mode != 'discarded')
-                        button#save.inline(title='Save' name='button' value='save')
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="user" class="svg-inline--fa fa-user fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                            path#alertUnsaved(fill=(unsaved ? "red" : "grey") d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z")
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="download" class="svg-inline--fa fa-download fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
-                            path(fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z")
                       //- like with the select for headers above, this will submit the form when it changes
                       input#label.invisible.readonly(name='label' type='text' form='selectName' value='selectName' readonly)
                       if (Names)
@@ -126,18 +137,6 @@ html(lang='en')
                             option(value=Name.rowid selected=(Names[Names.length - 1].FullName.match(/^Choose /) ? Name.FullName.match(/^Choose /) : ap.rowid===Name.rowid))= Name.FullName
                     td.max25ch
                       input#mode.readonly.newline(name='mode' type='text' value=(undefined===mode ? 'new' : mode) style=('new'===mode ? "color:white" : ('edit'===mode ? "color:green" : ('discarded'===mode ? "color:red" : false))) readonly) 
-                      if (mode != 'discarded')
-                        button#trash.inline(title='Enter Trash' formaction='/rentap/show/' + (undefined==ap ? 0 : ap.rowid) + '/switch_mode' formmethod='get' icon='trash')
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="sign-in-alt" class="svg-inline--fa fa-sign-in-alt fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
-                            path(fill="currentColor" d="M416 448h-84c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h84c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32h-84c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h84c53 0 96 43 96 96v192c0 53-43 96-96 96zm-47-201L201 79c-15-15-41-4.5-41 17v96H24c-13.3 0-24 10.7-24 24v96c0 13.3 10.7 24 24 24h136v96c0 21.5 26 32 41 17l168-168c9.3-9.4 9.3-24.6 0-34z")
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="trash-alt" class="svg-inline--fa fa-trash-alt fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                            path(fill="currentColor" d="M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm416 56v324c0 26.5-21.5 48-48 48H80c-26.5 0-48-21.5-48-48V140c0-6.6 5.4-12 12-12h360c6.6 0 12 5.4 12 12zm-272 68c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208z")
-                      else 
-                        button#back.inline(title='Leave Trash' formaction='/rentap/show/' + (undefined==ap ? '' : ap.rowid) + '/switch_mode' formmethod='get') 
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="trash-alt" class="svg-inline--fa fa-trash-alt fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
-                            path(fill="currentColor" d="M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm416 56v324c0 26.5-21.5 48-48 48H80c-26.5 0-48-21.5-48-48V140c0-6.6 5.4-12 12-12h360c6.6 0 12 5.4 12 12zm-272 68c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208zm96 0c0-8.8-7.2-16-16-16s-16 7.2-16 16v224c0 8.8 7.2 16 16 16s16-7.2 16-16V208z")
-                          svg(aria-hidden="true" data-prefix="fas" data-icon="sign-out-alt" class="svg-inline--fa fa-sign-out-alt fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
-                            path(fill="currentColor" d="M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z")
 
                         
           //- 2nd row of table#oftables
@@ -159,7 +158,7 @@ html(lang='en')
 
                     td.lowpadding  
                       label.smalllabel(for='authdate') Applied 
-                      input#authdate(name='authdate' type='text' value=(ap ? ap.dateApplied: '') onchange='submit()') 
+                      input#authdate(name='authdate' type='text' value=(ap ? ap.dateApplied: '') autofocus=(fieldFocused==='authdate' ? 'autofocus' : null) onchange='submit()') 
 
                       label.sameline_label(for='rowprint') Row: 
                       input#rowprint.readonly.sameline_input(name='rowprint' type='text' value=(undefined===rownum? '' : rownum) readonly) 
@@ -170,12 +169,12 @@ html(lang='en')
                     td.lowpadding 
                       label.smalllabel(for='guestdate') Guested 
                       - var rentapDateGuested = ap ? ap.dateGuested : ''
-                      textarea#guestdate(name='guestdate' cols='8' rows='4' onchange='submit()')= rentapDateGuested
+                      textarea#guestdate(name='guestdate' cols='8' rows='4' onchange='submit()' autofocus=(fieldFocused==='guestdate' ? 'autofocus' : null))= rentapDateGuested
 
                     td.lowpadding 
                       label.smalllabel(for='rentdate') Rented 
                       - var rentapDateRented = ap ? ap.dateRented : ''
-                      textarea#rentdate(name='rentdate' cols='8' rows='4' onchange='submit()')= rentapDateRented
+                      textarea#rentdate(name='rentdate' cols='8' rows='4' onchange='submit()' autofocus=(fieldFocused==='rentdate' ? 'autofocus' : null))= rentapDateRented
 
                   //- rentaps[{FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented, headerName}, ...], 
                   table#rentapbody 
@@ -186,76 +185,76 @@ html(lang='en')
 
                           li
                             label.personalinfo(for='fullname') Full Name 
-                            input#fullname(name='fullname' type='text' value=(ap ? ap.FullName : '') onchange='submit()')
+                            input#fullname(name='fullname' type='text' value=(ap ? ap.FullName : '') onchange='submit()' autofocus=(fieldFocused==='fullname' ? 'autofocus' : null))
 
                           li 
                             label.personalinfo(for='ssnumber') Social Security Number 
-                            input#ssnumber(name='ssnumber' type='text' value=(ap ? ap.SSN : '') onchange='submit()')
+                            input#ssnumber(name='ssnumber' type='text' value=(ap ? ap.SSN : '') onchange='submit()' autofocus=(fieldFocused==='ssnumber' ? 'autofocus' : null))
 
                           li 
                             label.personalinfo(for='birthdate') Birth Date 
-                            input#birthdate(name='birthdate' type='text' value=(ap? ap.BirthDate : '') onchange='submit()')
+                            input#birthdate(name='birthdate' type='text' value=(ap? ap.BirthDate : '') onchange='submit()' autofocus=(fieldFocused==='birthdate' ? 'autofocus' : null))
 
                           li 
                             label.personalinfo(for='maritalstatus') Marital Status 
-                            input#maritalstatus(name='maritalstatus' type='text' value=(ap? ap.MaritalStatus : '') onchange='submit()')
+                            input#maritalstatus(name='maritalstatus' type='text' value=(ap? ap.MaritalStatus : '') onchange='submit()' autofocus=(fieldFocused==='maritalstatus' ? 'autofocus' : null))
 
                           li 
                             label.personalinfo(for='email') Email 
-                            input#email(name='email' type='text' value=(ap ? ap.Email : '') onchange='submit()')
+                            input#email(name='email' type='text' value=(ap ? ap.Email : '') onchange='submit()' autofocus=(fieldFocused==='email' ? 'autofocus' : null))
 
                           li 
                             label.personalinfo(for='stateid') State ID# 
-                            input#stateid(name='stateid' type='text' value=(ap? ap.StateID : '') onchange='submit()')
+                            input#stateid(name='stateid' type='text' value=(ap? ap.StateID : '') onchange='submit()' autofocus=(fieldFocused==='stateid' ? 'autofocus' : null))
 
                           li 
                             label.personalinfo(for='phone1') Phone 1 
-                            input#phone1(name='phone1' type='text' value=(ap ? ap.Phone1 : '') onchange='submit()')
+                            input#phone1(name='phone1' type='text' value=(ap ? ap.Phone1 : '') onchange='submit()' autofocus=(fieldFocused==='phone1' ? 'autofocus' : null))
 
                           li 
                             label.personalinfo(for='phone2') Phone 2 
-                            input#phone2(name='phone2' type='text' value=(ap ? ap.Phone2 : '') onchange='submit()')
+                            input#phone2(name='phone2' type='text' value=(ap ? ap.Phone2 : '') onchange='submit()' autofocus=(fieldFocused==='phone2' ? 'autofocus' : null))
 
                           li 
                             - var ca = ap ? ap.CurrentAddress : ''
                             label#currentaddresslabel(for='currentaddress') #[strong Current Address, City, State, Zip, Dates, Rent, Landlord name and phone number]...  
-                            textarea#currentaddress(name='currentaddress' onchange='submit()')= ca
+                            textarea#currentaddress(name='currentaddress' onchange='submit()' autofocus=(fieldFocused==='currentaddress' ? 'autofocus' : null))= ca
 
                           li 
                             - var pa = ap ? ap.PriorAddresses : ''
                             label(for='previousaddresses') #[strong Prior Addresses, Cities, States, Zips, Dates, Rents, Landlords]...  
-                            textarea#previousaddresses(name='previousaddresses' onchange='submit()')= pa
+                            textarea#previousaddresses(name='previousaddresses' onchange='submit()' autofocus=(fieldFocused==='previousaddresses' ? 'autofocus' : null))= pa
 
                       td 
                         ul 
                           li 
                             - var po = ap ? ap.ProposedOccupants : ''
                             label(for='occupants') #[strong Proposed Occupants: self+age, other+age]...  
-                            textarea#occupants(name='occupants' onchange='submit()')= po
+                            textarea#occupants(name='occupants' onchange='submit()' autofocus=(fieldFocused==='occupants' ? 'autofocus' : null))= po
 
                           li 
                             - var pp = ap ? ap.ProposedPets : ''
                             label(for='pets') #[<strong>Proposed Pets] 
-                            textarea#pets(name='pets' onchange='submit()')= pp
+                            textarea#pets(name='pets' onchange='submit()' autofocus=(fieldFocused==='pets' ? 'autofocus' : null))= pp
 
                           li 
                             - var inc = ap ? ap.Income : ''
                             label(for='income') #[strong Income &amp Food Stamps] 
-                            textarea#income(name='income' onchange='submit()')= inc
+                            textarea#income(name='income' onchange='submit()' autofocus=(fieldFocused==='income' ? 'autofocus' : null))= inc
 
                           li
                             - var emp = ap ? ap.Employment : ''
                             label(for='employment') #[strong Employment: address, job, dates, hours, supervisor name and phone number]... 
-                            textarea#employment(name='employment' onchange='submit()')= emp
+                            textarea#employment(name='employment' onchange='submit()' autofocus=(fieldFocused==='employment' ? 'autofocus' : null))= emp
 
                       td
                         ul
                           li
                             - var ev = ap ? ap.Evictions : ''
                             label(for='evictions') #[strong Evictions Past 10 Years] 
-                            textarea#evictions(name='evictions' onchange='submit()')= ev
+                            textarea#evictions(name='evictions' onchange='submit()' autofocus=(fieldFocused==='evictions' ? 'autofocus' : null))= ev
 
                           li
                             - var fe = ap ? ap.Felonies : ''
                             label(for='felonies') #[strong Felonies/Drug Convictions] 
-                            textarea#felonies(name='felonies' onchange='submit()')= fe
+                            textarea#felonies(name='felonies' onchange='submit()' autofocus=(fieldFocused==='felonies' ? 'autofocus' : null))= fe

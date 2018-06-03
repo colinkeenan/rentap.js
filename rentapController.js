@@ -3,6 +3,7 @@ var apsGbl;
 var headersGbl;
 let unsavedGbl = false;
 let apUnsaved = null;
+let fieldFocused = 'fullname';
 let namesGbl = null;
 let headerSelected = false; //keep track if header has been selected on a new ap yet or not. set true when header selected, false when ap is saved.
 let headerName = null; //this is for display on a new ap. regular headerName is stored with the ap
@@ -19,13 +20,25 @@ let errorGbl = null;
  * depending on whether or not getaps was needed
  */
 
-var refresh_page_with_unsaved_changes = function(form, res) {
+var refresh_page_with_unsaved_changes = function(form, res) { //all rentap input fields trigger a post onchange, which triggers this since Save button wasn't clicked
   unsavedGbl = true;
-  if (undefined===form.body.fullname && apUnsaved) apUnsaved.headerName = form.body.button;
-  else if (!(undefined===form.body.fullname)) 
-    apUnsaved = {rowid: form.body.rentapID, FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, StateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:headerName} 
-  else 
+  if (undefined===form.body.fullname && apUnsaved) apUnsaved.headerName = form.body.button; //The header is selected on it's own form so there is no "fullname"
+  else if (!(undefined===form.body.fullname)) {
+    let i = 1;
+    let updatedApUnsaved = {rowid: form.body.rentapID, FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, StateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:headerName};
+    let arrayApUnsaved = Object.entries(updatedApUnsaved);
+    for (i = 1; i < arrayApUnsaved.length - 1; i++) {
+      if (arrayApUnsaved[i][1] !== (apUnsaved ? Object.entries(apUnsaved)[i][1] : null)) break;
+    }
+    if (i >= arrayApUnsaved.length - 1) i = 1;
+    else i++;
+    apUnsaved = updatedApUnsaved;
+    let fieldNames = ['rentapID', 'fullname', 'ssnumber', 'birthdate', 'maritalstatus', 'email', 'stateid', 'phone1', 'phone2', 'currentaddress', 'previousaddresses', 'occupants', 'pets', 'income', 'employment', 'evictions', 'felonies', 'authdate', 'guestdate', 'rentdate', 'headername'];
+    fieldFocused = fieldNames[i];
+  } else {
     apUnsaved = {FullName:'', SSN:'', BirthDate:'', MaritalStatus:'', Email:'', StateID:'', Phone1:'', Phone2:'', CurrentAddress:'', PriorAddresses:'', ProposedOccupants:'', ProposedPets:'', Income:'', Employment:'', Evictions:'', Felonies:'', dateApplied:'', dateGuested:'', dateRented:'', headerName:headerName};
+    fieldFocused = 'fullname';
+  }
   res.redirect('back');//makes errorGbl available to the view as a variable named 'error', unsavedGbl as a variable named 'unsaved' = true, and apUnsaved as 'ap'
 }
 
@@ -40,7 +53,7 @@ var display_error = function(form, res, message) {
  */
 
 var save = function(form, res) {
-  if (unsavedGbl && 'save'===form.body.button) { //only save to the database if there are unsaved changes, will set unsavedGbl to false after saving is successful
+  if (unsavedGbl && 'save'===form.body.button) {
     if (headersGbl && headersGbl.length && headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) headersGbl.pop();
     if (headerName) {
       if (form.body.fullname) {
@@ -176,7 +189,7 @@ var handle_show_new = function(form, res) {
       //whenever showing a new ap, there's no valid name to be selected automatically so show "Choose Name" (search also puts in a "Choose..." option)
       if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
       let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : null;
-      res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
+      res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
       if (!unsavedGbl) apUnsaved = null;
       errorGbl = null;
     }); 
@@ -184,7 +197,7 @@ var handle_show_new = function(form, res) {
     //whenever showing a new ap, there's no valid name to be selected automatically so show "Choose Name" (search also puts in a "Choose..." option)
     if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
     let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : null;
-    res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
+    res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
     if (!unsavedGbl) apUnsaved = null;
     errorGbl = null;
   }
@@ -217,10 +230,10 @@ var handle_show_ap = function(form, res) {
   if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /) && apsGbl.aps.length + 1 === namesGbl.length) namesGbl.pop();
   let i = headersGbl.findIndex(header => header.Name  == headerName);
   if (namesGbl) {
-    res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:(unsavedGbl ? apUnsaved : apsGbl.aps[apsGbl.rownum]), Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
+    res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:(unsavedGbl ? apUnsaved : apsGbl.aps[apsGbl.rownum]), Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   } else rentap.names(form.params.ap_id, function(returned_names) {
     namesGbl = returned_names;
-    res.render('rentap', {unsaved:unsavedGbl, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:(unsavedGbl ? apUnsaved : apsGbl.aps[apsGbl.rownum]), Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
+    res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:(unsavedGbl ? apUnsaved : apsGbl.aps[apsGbl.rownum]), Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   });
   errorGbl = null;
 };
