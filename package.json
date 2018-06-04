@@ -1,6 +1,6 @@
 {
   "name": "rentap",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "Create Rental Applications offline on your own computer.",
   "scripts": {
     "start": "node ./bin/www"
