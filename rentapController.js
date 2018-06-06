@@ -1,6 +1,7 @@
 var rentap = require('./rentapModel.js');
 var apsGbl; 
 var headersGbl;
+let noDatabase = true;
 let unsavedGbl = false;
 let apUnsaved = null;
 let fieldFocused = 'fullname';
@@ -203,7 +204,7 @@ var handle_show_new = function(form, res) {
   }
 };
 
-exports.show_new_ap = function(form, res) {
+var do_show_new_ap = function(form, res) {
   if (undefined===headersGbl) 
     rentap.getheaders(function(returned_headers) {
       headersGbl=returned_headers;
@@ -217,6 +218,18 @@ exports.show_new_ap = function(form, res) {
       headersGbl.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
     handle_show_new(form, res);
   }
+}
+
+exports.show_new_ap = function(form, res) {
+  if (noDatabase) rentap.create_db(function(err) {
+    console.log('Created store.db and last error was: ', err);
+    if (!err) {
+      console.log('No error');
+      noDatabase = false;
+      do_show_new_ap(form, res);
+    } else next(err);
+  });
+  else do_show_new_ap(form, res);
 };
 
 var handle_show_ap = function(form, res) {
@@ -291,7 +304,7 @@ exports.show_ap_next = function(form, res) {
 };
 
 exports.discard_ap = function(form, res) {
-  if (modeGbl==='new') res.redirect('back')
+  if (modeGbl==='new') res.redirect('back');
   else rentap.discard_ap(form.params.ap_id, function(returned_aps) {
       apsGbl = returned_aps;
       modeGbl = apsGbl.mode;

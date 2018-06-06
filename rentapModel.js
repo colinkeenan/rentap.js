@@ -1,3 +1,40 @@
+exports.create_db = function(callback) {
+  const sqlite3 = require('sqlite3');
+  let db = new sqlite3.Database('./store.db'); //the database being created (or opened if already exists)
+  db.serialize(function() {
+    let lastError = null;
+    //create tbl (if it doesn't already exist) with all 20 columns accepting text (sqlite only has a few datatypes and text is the only suitable one)
+    db.run("CREATE TABLE IF NOT EXISTS tbl (FullName text, SSN text, BirthDate text, MaritalStatus text, Email text, StateID text, Phone1 text, Phone2 text, CurrentAddress text, PriorAddresses text, ProposedOccupants text, ProposedPets text, Income text, Employment text, Evictions text, Felonies text, dateApplied text, dateGuested text, dateRented text, headerName text)", 
+      function(err) { 
+        if (err) {
+          console.error('Create tbl table', err); 
+          lastError = err;
+        } 
+      }
+    ); 
+    //create headers with 4 columns, all text again
+    db.run("CREATE TABLE IF NOT EXISTS headers (StreetAddress text, CityStateZip text, Title text, Name text PRIMARY Key)", 
+      function(err) { 
+        if (err) {
+          console.error('Create headers table', err); 
+          lastError = err;
+        } 
+      }
+    ); 
+    //create trash with just 1 column of integers (the rows in tbl that are discarded)
+    db.run("CREATE TABLE IF NOT EXISTS trash (discardedRow integer)", 
+      function(err) { 
+        if (err) {
+          console.error('Create trash table', err); 
+          lastError = err;
+        } 
+      }
+    ); 
+    callback(lastError);
+  });
+  db.close();
+}
+
 // if ap_id is in trash, mode is 'discarded', else 'edit' 
 // (don't need to call on the database to figure out if an ap is 'new') 
 // getmode is not exported, just used as needed by other methods
