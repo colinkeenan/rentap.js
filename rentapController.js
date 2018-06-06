@@ -188,7 +188,8 @@ var handle_show_new = function(form, res) {
     rentap.names(form.params.ap_id, function(returned_names) {
       namesGbl = returned_names;
       //whenever showing a new ap, there's no valid name to be selected automatically so show "Choose Name" (search also puts in a "Choose..." option)
-      if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
+      if (!Array.isArray(namesGbl) || !namesGbl.length) namesGbl = { FullName: 'Choose Name', rowid: 0 };
+      else if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
       let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : null;
       res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
       if (!unsavedGbl) apUnsaved = null;
@@ -210,21 +211,21 @@ var do_show_new_ap = function(form, res) {
       headersGbl=returned_headers;
       //showing headers for first time on a new ap, so put the "Choose" option on
       headerSelected = false;
-      headersGbl.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
+      if (headersGbl) headersGbl.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
+      else headersGbl = { StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' };
       handle_show_new(form, res);
     });
   else {
     if (!headerSelected && !headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) 
-      headersGbl.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
+      if (headersGbl) headersGbl.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
+      else headersGbl = { StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' };
     handle_show_new(form, res);
   }
-}
+};
 
 exports.show_new_ap = function(form, res) {
   if (noDatabase) rentap.create_db(function(err) {
-    console.log('Created store.db and last error was: ', err);
     if (!err) {
-      console.log('No error');
       noDatabase = false;
       do_show_new_ap(form, res);
     } else next(err);

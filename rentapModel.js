@@ -44,7 +44,7 @@ var getmode = function (ap_id, switch_mode, callback) { //callback gets mode of 
   db.serialize(function() {
     db.get("SELECT CASE WHEN (?) IN (SELECT discardedRow FROM trash) THEN 'discarded' ELSE 'edit' END mode", ap_id, function(err, ap) {
       if (err) console.error(err);
-      callback(!switch_mode ? ap.mode : (ap.mode==='discarded' ? 'edit' : 'discarded'));
+      callback(!switch_mode && ap ? ap.mode : (ap && ap.mode==='discarded' ? 'edit' : 'discarded'));
     });
   });
   db.close();
