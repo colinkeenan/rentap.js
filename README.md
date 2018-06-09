@@ -11,6 +11,6 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 3. `npm install rentap`
 
 ## Run
-1. `cd ~/nodejs/rentap/node\_modules/rentap`
+1. `cd ~/nodejs/rentap/node_modules/rentap`
 2. `npm start`
 3. `Open any browser to http://localhost:3000 or http://127.0.0.1:3000`
