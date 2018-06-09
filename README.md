@@ -1,4 +1,16 @@
 # Rental Application
 Create/save/print Rental Applications (Node.js version)
 
-Since Mozilla will be completely dropping support for legacy extensions beginning with Firefox ESR 60 (scheduled to be released May 2018 which is just one month fron now), I'm going to try and learn enough Node.js to port [rentap](https://github.com/colinkeenan/rentap) to [npm](https://www.npmjs.com/).
+This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colinkeenan/rentap) to [npm](https://www.npmjs.com/). You must [install npm](https://docs.npmjs.com/getting-started/installing-node#1-install-nodejs--npm). 
+
+*Rental Application* can easily be run from your user's home folder by following these steps:
+
+##Install
+1. mkdir -p ~/nodejs/rentap
+2. cd ~/nodejs/rentap
+3. npm install rentap
+
+##Run
+4. cd ~/nodjs/rentap/node\_modules/rentap
+5. npm start
+6. Open any browser to http://localhost:3000 or http://127.0.0.1:3000
