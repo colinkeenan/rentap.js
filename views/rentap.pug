@@ -133,7 +133,7 @@ html(lang='en')
                       if (Names)
                         select.inline(name='button' form='selectName' onchange='submit()')
                           each Name in Names
-                            option(value=Name.rowid selected=(Names[Names.length - 1].FullName.match(/^Choose /) ? Name.FullName.match(/^Choose /) : ap.rowid===Name.rowid))= Name.FullName
+                            option(value=Name.rowid selected=(undefined===Names[Names.length-1] ? 'No Saved Headers' : (Names[Names.length - 1].FullName.match(/^Choose /) ? Name.FullName.match(/^Choose /) : ap.rowid===Name.rowid)))= Name.FullName
                     td.max25ch
                       input#mode.readonly.newline(name='mode' type='text' value=(undefined===mode ? 'new' : mode) style=('new'===mode ? "color:white" : ('edit'===mode ? "color:green" : ('discarded'===mode ? "color:red" : false))) readonly) 
 

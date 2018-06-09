@@ -223,12 +223,13 @@ var do_show_new_ap = function(form, res) {
   }
 };
 
-exports.show_new_ap = function(form, res) {
+exports.show_new_ap = function(form, res, next) {
   if (noDatabase) rentap.create_db(function(err) {
-    if (!err) {
+    if (err) return next(err);
+    else {
       noDatabase = false;
       do_show_new_ap(form, res);
-    } else next(err);
+    }
   });
   else do_show_new_ap(form, res);
 };

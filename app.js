@@ -16,8 +16,8 @@ app.set('view engine', 'pug');
 
 // error handler
 app.use(function(err, req, res, next) {
+  console.error(err);
   res.locals.error = err;
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500).render('error');
 });
 module.exports = app;

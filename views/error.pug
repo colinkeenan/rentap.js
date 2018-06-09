@@ -4,6 +4,8 @@ html(lang='en')
     meta(charset='utf-8')
     meta(name='viewport', content='width=device-width, initial-scale=1')
     link(rel='shortcut icon' href='/images/icon.png')
-  body
-    pre(style='font-size:18px') #{error.status}
-    pre(style='font-size:18px') #{error.stack}
+  body(style='font-size:20px')
+    img(src='/images/icon.png')
+    =' '
+    h1(style='display:inline-block') Rental Application: Error
+    pre #{error}
