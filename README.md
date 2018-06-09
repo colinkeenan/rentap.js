@@ -5,12 +5,12 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 
 *Rental Application* can easily be run from your user's home folder by following these steps:
 
-##Install
+## Install
 1. mkdir -p ~/nodejs/rentap
 2. cd ~/nodejs/rentap
 3. npm install rentap
 
-##Run
-4. cd ~/nodjs/rentap/node\_modules/rentap
-5. npm start
-6. Open any browser to http://localhost:3000 or http://127.0.0.1:3000
+## Run
+1. cd ~/nodjs/rentap/node\_modules/rentap
+2. npm start
+3. Open any browser to http://localhost:3000 or http://127.0.0.1:3000
