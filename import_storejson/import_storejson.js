@@ -190,9 +190,7 @@ db.serialize(function() {
     }, //end 1st callback (row callback) 
 
     function(err,rowcount) { //2nd callback function: complete callback which is called after the row callback is called for the last row
-      let db = new sqlite3.Database('./store.db'); //the database being verified has been closed by now, but I don't know why
-        db.serialize(function() {
-
+      db.serialize(function() {
         //update tbl with answers that are in headerNameArray
         stmt = db.prepare("UPDATE tbl SET headerName = (?) WHERE rowid = (?)");
         for (i = 0; i < headerNameArray.length; i++) {
@@ -231,7 +229,7 @@ db.serialize(function() {
           console.log(row.id + " " + row.Name + ": " + row.FullName);
         });
       }); //ends db.serialize(function() inside 2nd callback
-      db.close(); //closing the 2nd time opened the database
+      db.close();
     }//ends 2nd callback (complete callback)
   );//ends db.each for rows with null headerNames showing the corresponding headerAddress 
 
@@ -239,6 +237,5 @@ db.serialize(function() {
   db.run("DROP TABLE headerAddresses");
 
 }); //ends db.serialize(function() {
-db.close(); //this one gets called first, or the database just closes for some other reason before the 2nd callback is called, I don't know
 
 
