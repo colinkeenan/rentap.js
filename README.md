@@ -29,17 +29,17 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 3. Checkmark "Open As Window" if you want it to look like a separate ap instead of a tab
 4. Find the desktop file created by Google Chrome: `grep "Rental Application" ~/.local/share/applications/*desktop`
 5. Find the Exec command in the desktop file using the file found in the previous step. For example, `grep Exec ~/.local/share/applications/chrome-onobjhkphejolhnnbkgckmkjhpoelkgh-Default.desktop`
-5. Create `rentap` with the following code in it where the last line is the Exec command found in the previous step.
+6. Create `rentap` with the following code in it where the last line is the Exec command found in the previous step.
 
-```bash
-#!/bin/sh
-if test x$(pgrep npm) = x 
-then
-  cd ~/github/rentap.js
-  npm start &
-fi
-/opt/google/chrome/google-chrome --profile-directory=Default --app-id=onobjhkphejolhnnbkgckmkjhpoelkgh
-```
+    ```bash
+    #!/bin/sh
+    if test x$(pgrep npm) = x 
+    then
+      cd ~/github/rentap.js
+      npm start &
+    fi
+    /opt/google/chrome/google-chrome --profile-directory=Default --app-id=onobjhkphejolhnnbkgckmkjhpoelkgh
+        ```
 
 6. `chmod +x rentap`
 7. `sudo mv rentap /usr/local/bin`
