@@ -39,7 +39,7 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
       npm start &
     fi
     /opt/google/chrome/google-chrome --profile-directory=Default --app-id=onobjhkphejolhnnbkgckmkjhpoelkgh
-        ```
+    ```
 
 6. `chmod +x rentap`
 7. `sudo mv rentap /usr/local/bin`
