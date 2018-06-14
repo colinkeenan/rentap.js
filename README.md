@@ -35,7 +35,7 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
     #!/bin/sh
     if test x$(pgrep npm) = x 
     then
-      cd ~/github/rentap.js
+      cd ~/nodejs/node_modules/rentap
       npm start &
     fi
     /opt/google/chrome/google-chrome --profile-directory=Default --app-id=onobjhkphejolhnnbkgckmkjhpoelkgh
