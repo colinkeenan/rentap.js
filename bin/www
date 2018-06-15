@@ -29,6 +29,16 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
+// Below "io" stuff is from https://stackoverflow.com/questions/23258421/how-to-stop-app-that-node-js-express-npm-start/39128820#39128820
+// We are only using socket.io here to respond to the npmStop signal
+// To support IPC (Inter Process Communication) AKA RPC (Remote P.C.)
+const io = require('socket.io')(server);
+io.on('connection', (socketServer) => {
+  socketServer.on('npmStop', () => {
+    process.exit(0);
+  });
+});
+
 /**
  * Normalize a port into a number, string, or false.
  */
