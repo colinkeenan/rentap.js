@@ -22,6 +22,7 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 1. `cd ~/nodejs/node_modules/rentap`
 2. `npm start`
 3. Open any browser to http://localhost:3000 or http://127.0.0.1:3000
+4. Stop the www server with `npm stop`
 
 ### Google Appifying it and using a script to automatically run npm start
 1. Run as above and open in Google Chrome
@@ -45,7 +46,7 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 7. `sudo mv rentap /usr/local/bin`
 8. Edit the desktop file found previously and set `Exec=rentap`
 
-Now you can launch *Rental Application* like any other on your linux desktop. To stop the server `pkill npm`.
+Now you can launch *Rental Application* like any other on your linux desktop. To stop the www server, `npm stop`.
 
 ## Windows Powershell (ordinary user, no Adminstrator privilages needed)
 ### Install
@@ -64,3 +65,4 @@ Now you can launch *Rental Application* like any other on your linux desktop. To
 1. `cd ~\nodejs\node_modules\rentap`
 2. `npm start`
 3. Open any browser to http://localhost:3000 or http://127.0.0.1:3000
+4. Stop the www server with `npm stop`
