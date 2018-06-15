@@ -23,22 +23,25 @@ let errorGbl = null;
 
 var refresh_page_with_unsaved_changes = function(form, res) { //all rentap input fields trigger a post onchange, which triggers this since Save button wasn't clicked
   unsavedGbl = true;
-  if (undefined===form.body.fullname && apUnsaved) apUnsaved.headerName = form.body.button; //The header is selected on it's own form so there is no "fullname"
-  else if (!(undefined===form.body.fullname)) {
+  fieldFocused = 'fullname';
+  if (modeGbl !== 'new' && !apUnsaved && apsGbl && apsGbl.aps && apsGbl.aps[apsGbl.rownum]) 
+    apUnsaved = apsGbl.aps[apsGbl.rownum];
+  else if (!apUnsaved) 
+    apUnsaved = {FullName:'', SSN:'', BirthDate:'', MaritalStatus:'', Email:'', StateID:'', Phone1:'', Phone2:'', CurrentAddress:'', PriorAddresses:'', ProposedOccupants:'', ProposedPets:'', Income:'', Employment:'', Evictions:'', Felonies:'', dateApplied:'', dateGuested:'', dateRented:'', headerName:''};
+  if (undefined===form.body.fullname) //The header is selected on it's own form so there is no "fullname"
+    apUnsaved.headerName = form.body.button; 
+  else {
     let i = 1;
     let updatedApUnsaved = {rowid: form.body.rentapID, FullName:form.body.fullname, SSN:form.body.ssnumber, BirthDate:form.body.birthdate, MaritalStatus:form.body.maritalstatus, Email:form.body.email, StateID:form.body.stateid, Phone1:form.body.phone1, Phone2:form.body.phone2, CurrentAddress:form.body.currentaddress, PriorAddresses:form.body.previousaddresses, ProposedOccupants:form.body.occupants, ProposedPets:form.body.pets, Income:form.body.income, Employment:form.body.employment, Evictions:form.body.evictions, Felonies:form.body.felonies, dateApplied:form.body.authdate, dateGuested:form.body.guestdate, dateRented:form.body.rentdate, headerName:headerName};
-    let arrayApUnsaved = Object.entries(updatedApUnsaved);
-    for (i = 1; i < arrayApUnsaved.length - 1; i++) {
+    let arrayApUnsaved = Object.entries(updatedApUnsaved); //get an array of the entries in updatedApUnsaved
+    for (i = 1; i < arrayApUnsaved.length - 1; i++) { //find the index of the changed entry in the array of entries
       if (arrayApUnsaved[i][1] !== (apUnsaved ? Object.entries(apUnsaved)[i][1] : null)) break;
     }
     if (i >= arrayApUnsaved.length - 1) i = 1;
-    else i++;
+    else i++; //set the index to the next field (not the one that just changed) this will be the focused field when the page is refreshed
     apUnsaved = updatedApUnsaved;
     let fieldNames = ['rentapID', 'fullname', 'ssnumber', 'birthdate', 'maritalstatus', 'email', 'stateid', 'phone1', 'phone2', 'currentaddress', 'previousaddresses', 'occupants', 'pets', 'income', 'employment', 'evictions', 'felonies', 'authdate', 'guestdate', 'rentdate', 'headername'];
     fieldFocused = fieldNames[i];
-  } else {
-    apUnsaved = {FullName:'', SSN:'', BirthDate:'', MaritalStatus:'', Email:'', StateID:'', Phone1:'', Phone2:'', CurrentAddress:'', PriorAddresses:'', ProposedOccupants:'', ProposedPets:'', Income:'', Employment:'', Evictions:'', Felonies:'', dateApplied:'', dateGuested:'', dateRented:'', headerName:headerName};
-    fieldFocused = 'fullname';
   }
   res.redirect('back');//makes errorGbl available to the view as a variable named 'error', unsavedGbl as a variable named 'unsaved' = true, and apUnsaved as 'ap'
 }
@@ -84,6 +87,7 @@ var handle_show_row = function(row_num, res) {
 
 var show_ap_rownum = function(row_num, res) { 
   if (row_num >= 0) {
+    unsavedGbl = false;
     if (undefined===apsGbl) 
       rentap.getaps(-1, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
         apsGbl = returned_aps;
@@ -101,13 +105,14 @@ var show_ap_rownum = function(row_num, res) {
 var header_selected = function(form, res) {
   headerSelected = true; //gets set true here, and false in save
   headerName = form.body.button;
-  if (unsavedGbl) refresh_page_with_unsaved_changes(form, res);
-  else res.redirect('back');
+  refresh_page_with_unsaved_changes(form, res);
 };
 
 var ap_selected = function(ap_id, res) {
-  if (ap_id > 0) res.redirect('/rentap/show/' + ap_id);
-  else console.error("There are no rental applications with this ID: ", ap_id);
+  if (ap_id > 0) {
+    unsavedGbl = false;
+    res.redirect('/rentap/show/' + ap_id);
+  } else console.error("There are no rental applications with this ID: ", ap_id);
 };
 
 var save_header = function(form, res) {
@@ -191,16 +196,16 @@ var handle_show_new = function(form, res) {
       if (!Array.isArray(namesGbl) || !namesGbl.length) namesGbl = { FullName: 'Choose Name', rowid: 0 };
       else if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
       let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : null;
-      res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
       if (!unsavedGbl) apUnsaved = null;
+      res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
       errorGbl = null;
     }); 
   else {
     //whenever showing a new ap, there's no valid name to be selected automatically so show "Choose Name" (search also puts in a "Choose..." option)
     if (!namesGbl[namesGbl.length - 1].FullName.match(/^Choose /)) namesGbl.push({ FullName: 'Choose Name', rowid: 0 });
     let i = headerName ? headersGbl.findIndex(header => header.Name  == headerName) : null;
-    res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
     if (!unsavedGbl) apUnsaved = null;
+    res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:'new', rownum: null, ap: apUnsaved, Names:namesGbl, headers:headersGbl, header:(headerName ? headersGbl[i] : null)});
     errorGbl = null;
   }
 };
@@ -245,9 +250,11 @@ var handle_show_ap = function(form, res) {
   if (namesGbl && namesGbl[namesGbl.length - 1].FullName.match(/^Choose /) && apsGbl.aps.length + 1 === namesGbl.length) namesGbl.pop();
   let i = headersGbl.findIndex(header => header.Name  == headerName);
   if (namesGbl) {
+    if (!unsavedGbl) apUnsaved = null;
     res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:(unsavedGbl ? apUnsaved : apsGbl.aps[apsGbl.rownum]), Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   } else rentap.names(form.params.ap_id, function(returned_names) {
     namesGbl = returned_names;
+    if (!unsavedGbl) apUnsaved = null;
     res.render('rentap', {unsaved:unsavedGbl, fieldFocused:fieldFocused, error:errorGbl, mode:apsGbl.mode, rownum:apsGbl.rownum, ap:(unsavedGbl ? apUnsaved : apsGbl.aps[apsGbl.rownum]), Names:namesGbl, headers:headersGbl, header:headersGbl[i]});
   });
   errorGbl = null;
@@ -274,6 +281,7 @@ exports.show_ap = function(form, res) {
 var handle_prev_ap = function(form, res) {
   //triggers show_ap by redirect, after decrement aps.rownum, wrapping around to the last ap if already on 0
   apsGbl.rownum = apsGbl.rownum<=0 ? (apsGbl.aps.length - 1) : (apsGbl.rownum - 1); //down one if can, otherwise goto end
+  unsavedGbl = false;
   res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
 };
 
@@ -290,6 +298,7 @@ exports.show_ap_prev = function(form, res) {
 
 var handle_next_ap = function(form, res) {
   apsGbl.rownum = apsGbl.rownum>=(apsGbl.aps.length - 1) ? 0 : (apsGbl.rownum + 1); //up one if can, else goto 0
+  unsavedGbl = false;
   res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
 };
 
