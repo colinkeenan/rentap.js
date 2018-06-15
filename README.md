@@ -45,7 +45,7 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 7. `sudo mv rentap /usr/local/bin`
 8. Edit the desktop file found previously and set `Exec=rentap`
 
-Now you can launch *Rental Application* like any other on your linux desktop.
+Now you can launch *Rental Application* like any other on your linux desktop. To stop the server `pkill npm`.
 
 ## Windows Powershell (ordinary user, no Adminstrator privilages needed)
 ### Install
