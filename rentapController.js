@@ -317,10 +317,11 @@ exports.show_ap_next = function(form, res) {
 exports.discard_ap = function(form, res) {
   if (modeGbl==='new') res.redirect('back');
   else rentap.discard_ap(form.params.ap_id, function(returned_aps) {
-      apsGbl = returned_aps;
-      modeGbl = apsGbl.mode;
-      res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
-    });
+    apsGbl = returned_aps;
+    modeGbl = apsGbl.mode;
+    namesGbl = null; //trigger getting names for dropdown menu again because switched to trash
+    res.redirect('/rentap/show/' + apsGbl.aps[apsGbl.rownum].rowid);
+  });
 };
 
 exports.restore_ap = function(form, res) {
