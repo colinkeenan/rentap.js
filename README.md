@@ -60,8 +60,8 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 12. Edit the desktop file found previously and set `Exec=rentap`
 
 Now you can launch *Rental Application* like any other on your linux desktop. 
-To stop the www server (and delete the file indicating it's running), `rentap-stop`.
-Since the file `/tmp/rentap-server-running` is in `/tmp`, it will be deleted on reboot even if `rentap-stop` was never executed.
+To stop the www server (and delete the file indicating it's running), run `rentap-stop` in the terminal.
+Since the file `/tmp/rentap-server-running` is in `/tmp` (which is in memory only), it will be deleted on reboot even if `rentap-stop` was never executed.
 
 ## Windows Powershell (ordinary user, no Adminstrator privilages needed)
 ### Install
@@ -122,8 +122,18 @@ Since the file `/tmp/rentap-server-running` is in `/tmp`, it will be deleted on 
     ```
   Of course, replace "Colin" with your username.
 
-Now you can launch *Rental Application* like any other. If on first launch, the page displays an error, press F5 to refresh the page because it tried to display the page before the server was up. You may need to play around with the line that says `sleep 4` in the example script above.
-To stop the www server (and delete the file indicating it's running), `~/rentap-stop.ps1`.
-Since the file `~\AppData\Local\Temp\rentap-server-running` is in `Temp`, it will be deleted on reboot even if `rentap-stop` was never executed.
+11. Turns out Windows doesn't delete the contents of `~\AppData\Local\Temp\` on reboot, so it's necessary to create a script to delete `rentap-server-running` and put it in the startup folder.
+    1. Create `~\rentap-not-running.ps1` with just one line:
 
-Currently, the scripts for Windows don't quite work as expected on my own computer. The terminal showing the server running closes quickly and Google Chrome never sees it running. In order to get it to work, have to stop the server with `~/rentap-stop.ps1` in PowerShell, and then clicking the Rental Application icon works. It continues to work after that. Will update this README if I come up with something better. Of course, you can just run `rentap-server.ps1` on startup.
+    ```ps1
+    rm "~\AppData\Local\Temp\rentap-server-running"
+    ```
+    2. Open Windows startup folder: Right-click on the start menu, choose Run, and type `Shell:common startup`. This should bring up `"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"`.
+    3. Open your home folder, Right-click on `rentap-not-running.ps1` and create a shortcut.
+    4. Drag the shortcut to the Startup folder (and allow administrative privilages to do it).
+    5. Right-click the shortcut just moved to the Startup folder and change the Target, inserting the following at the beginning: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File ` (and allow administrative privilages to do it).
+    6. For example, my Target looks like this: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File C:\Users\Colin\rentap-not-running.ps1`
+
+Now you can launch *Rental Application* like any other. If on first launch, the page displays an error, press F5 to refresh the page because it tried to display the page before the server was up. You may need to play around with the line that says `sleep 4` in the example script above.
+To stop the www server (and delete the file indicating it's running), run `~/rentap-stop.ps1` in PowerShell.
+
