@@ -97,7 +97,8 @@ Since the file `/tmp/rentap-server-running` is in `/tmp`, it will be deleted on 
     }
     Start -FilePath "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" -ArgumentList "--profile-directory=Default --app-id=onobjhkphejolhnnbkgckmkjhpoelkgh"
     ```
-  My Windows computer is slow, so I added a sleep 4. This line may not be necessary, or 4 may be too long or too short - experiment.
+  My Windows computer is slow, so I added a `sleep 4`. This line may not be necessary, or 4 may be too long or too short - experiment.
+
 7. Create `~\rentap-server.ps1` with the following code in it:
 
     ```ps1
