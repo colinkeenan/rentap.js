@@ -5,7 +5,7 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 
 *Rental Application* can easily be run from your user's home folder by following these steps:
 
-##For Windows instructions, click [here](https://github.com/colinkeenan/rentap.js#windows-powershell-ordinary-user-no-adminstrator-privilages-needed)
+## For Windows instructions, click [here](https://github.com/colinkeenan/rentap.js#windows-powershell-ordinary-user-no-adminstrator-privilages-needed)
 
 ## Linux Terminal (ordinary user, no root privilages needed)
 ### Install
