@@ -84,10 +84,10 @@ Since the file `/tmp/rentap-server-running` is in `/tmp`, it will be deleted on 
 2. Click the 3-vertical-dot Google Chrome menu and choose More Tools -> Create Shortcut...
 3. Checkmark "Open As Window" if you want it to look like a separate ap instead of a tab
 4. Get the command that launches the ap:
-  1. Windows Menu -> All apps -> Recently added -> Rental Application, right click it and choose More...-> Open file location
-  2. In the window that pops up, find the Rental Application shortcut and right click it, choosing Properties
-  3. The "Target" will already be highlighted, so press Ctrl+c to copy it.
-5. Cancel the Properties window but keep the window showing the shortcut..
+    1. Windows Menu -> All apps -> Recently added -> Rental Application, right click it and choose More...-> Open file location
+    2. In the window that pops up, find the Rental Application shortcut and right click it, choosing Properties
+    3. The "Target" will already be highlighted, so press Ctrl+c to copy it.
+5. Cancel the Properties window but keep the window showing the shortcut.
 6. Create `~\rentap.ps1` with the following code in it where the last line is a modified version of the "Target" that was copied in step 4. That last line splits the "Target" into a FilePath and an ArgumentList. Looking at the example in this script should make it clear how to do it.
 
     ```ps1
