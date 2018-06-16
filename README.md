@@ -4,7 +4,9 @@ Create/save/print Rental Applications (Node.js version)
 This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colinkeenan/rentap) to [npm](https://www.npmjs.com/). You must [install npm](https://docs.npmjs.com/getting-started/installing-node#1-install-nodejs--npm). 
 
 *Rental Application* can easily be run from your user's home folder by following these steps:
-For Windows instructions, click [here](https://github.com/colinkeenan/rentap.js#windows-powershell-ordinary-user-no-adminstrator-privilages-needed)
+
+##For Windows instructions, click [here](https://github.com/colinkeenan/rentap.js#windows-powershell-ordinary-user-no-adminstrator-privilages-needed)
+
 ## Linux Terminal (ordinary user, no root privilages needed)
 ### Install
 1. `mkdir ~/nodejs`
