@@ -24,7 +24,7 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 3. Open any browser to http://localhost:3000 or http://127.0.0.1:3000
 4. Stop the www server with `npm stop`
 
-### Google Appifying it and using a script to automatically run npm start
+### (Optional) Google Appifying it and using a script to automatically run npm start
 1. Run as above and open in Google Chrome
 2. Click the 3-vertical-dot Google Chrome menu and choose More Tools -> Create Shortcut...
 3. Checkmark "Open As Window" if you want it to look like a separate ap instead of a tab
@@ -34,19 +34,31 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 
     ```bash
     #!/bin/sh
-    if test x$(pgrep npm) = x 
+    if test ! -f /tmp/rentap-server-running
     then
-      cd ~/nodejs/node_modules/rentap
-      npm start &
+      cd ~/github/rentap.js
+      npm start > /tmp/rentap-server-running &
     fi
     /opt/google/chrome/google-chrome --profile-directory=Default --app-id=onobjhkphejolhnnbkgckmkjhpoelkgh
     ```
 
-6. `chmod +x rentap`
-7. `sudo mv rentap /usr/local/bin`
-8. Edit the desktop file found previously and set `Exec=rentap`
+7. `chmod +x rentap`
+8. `sudo mv rentap /usr/local/bin`
+9. Create `rentap-stop` with the following code in it.
 
-Now you can launch *Rental Application* like any other on your linux desktop. To stop the www server, `npm stop`.
+    ```bash
+    #!/bin/sh
+    npm stop
+    rm /tmp/rentap-server-running
+    ```
+
+10. `chmod +x rentap-stop`
+11. `sudo mv rentap-stop /usr/local/bin`
+12. Edit the desktop file found previously and set `Exec=rentap`
+
+Now you can launch *Rental Application* like any other on your linux desktop. 
+To stop the www server (and delete the file indicating it's running), `rentap-stop`.
+Since the file `/tmp/rentap-server-running` is in `/tmp`, it will be deleted on reboot even if `rentap-stop` was never executed.
 
 ## Windows Powershell (ordinary user, no Adminstrator privilages needed)
 ### Install
