@@ -125,3 +125,5 @@ Since the file `/tmp/rentap-server-running` is in `/tmp`, it will be deleted on 
 Now you can launch *Rental Application* like any other. If on first launch, the page displays an error, press F5 to refresh the page because it tried to display the page before the server was up. You may need to play around with the line that says `sleep 4` in the example script above.
 To stop the www server (and delete the file indicating it's running), `~/rentap-stop.ps1`.
 Since the file `~\AppData\Local\Temp\rentap-server-running` is in `Temp`, it will be deleted on reboot even if `rentap-stop` was never executed.
+
+Currently, the scripts for Windows don't quite work as expected on my own computer. The terminal showing the server running closes quickly and Google Chrome never sees it running. In order to get it to work, have to stop the server with `~/rentap-stop.ps1` in PowerShell, and then clicking the Rental Application icon works. It continues to work after that. Will update this README if I come up with something better. Of course, you can just run `rentap-server.ps1` on startup.
