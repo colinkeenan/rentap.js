@@ -42,7 +42,7 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
     fi
     /opt/google/chrome/google-chrome --profile-directory=Default --app-id=onobjhkphejolhnnbkgckmkjhpoelkgh
     ```
-  If the page displays an error, then press F5 to refresh, and maybe ad a `sleep 4` or whatever length of time works after `npm start ...`
+    If the page displays an error, then press F5 to refresh, and maybe ad a `sleep 4` or whatever length of time works after `npm start ...`
 
 7. `chmod +x rentap`
 8. `sudo mv rentap /usr/local/bin`
