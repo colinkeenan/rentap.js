@@ -221,7 +221,7 @@ var do_show_new_ap = function(form, res) {
       handle_show_new(form, res);
     });
   else {
-    if (!headerSelected && !headersGbl[headersGbl.length - 1].Name.match(/^Choose /)) 
+    if (!headersGbl[headersGbl.length -1] || (!headerSelected && !headersGbl[headersGbl.length - 1].Name.match(/^Choose /))) 
       if (headersGbl) headersGbl.push({ StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' });
       else headersGbl = { StreetAddress: '', CityStateZip: '', Title: '', Name: 'Choose Header' };
     handle_show_new(form, res);
