@@ -95,34 +95,31 @@ Since the file `/tmp/rentap-server-running` is in `/tmp` (which is in memory onl
     ```ps1
     if (!(Test-Path "~\AppData\Local\Temp\rentap-server-running")) {
       Start-Job -FilePath "~\rentap-server.ps1"
-      sleep 4
+      sleep 5
     }
     Start -FilePath "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" -ArgumentList "--profile-directory=Default --app-id=onobjhkphejolhnnbkgckmkjhpoelkgh"
+    cd ~\nodejs\node_modules\rentap
     ```
-  My Windows computer is slow, so I added a `sleep 4`. This line may not be necessary, or 4 may be too long or too short - experiment.
+    My Windows computer is slow, so I added a `sleep 5`. This line may not be necessary, or 5 may be too long or too short - experiment.
 
 7. Create `~\rentap-server.ps1` with the following code in it:
 
     ```ps1
     cd ~\nodejs\node_modules\rentap
     npm start > "~\AppData\Local\Temp\rentap-server-running"
-    ```
-
-8. Create `~\rentap-stop.ps1` with the following code in it:
-
-    ```ps1
-    npm stop
     rm "~\AppData\Local\Temp\rentap-server-running"
     ```
+    The `rentap-server-running` file won't be deleted until the server is stopped with `npm stop` in the window showing the server is running.
+
 9. Go back to the window showing the `Rental Application` shortcut, right click it, and choose Properties.
 10. Delete the highlighted "Target" and insert the following:
 
     ```ps1
-    C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File C:\Users\Colin\rentap.ps1
+    C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoExit -File C:\Users\Colin\rentap.ps1
     ```
-  Of course, replace "Colin" with your username.
+    Of course, replace "Colin" with your username.
 
-11. Turns out Windows doesn't delete the contents of `~\AppData\Local\Temp\` on reboot, so it's necessary to create a script to delete `rentap-server-running` and put it in the startup folder.
+11. Turns out Windows doesn't delete the contents of `~\AppData\Local\Temp\` on reboot, so it's necessary to create a script to delete `rentap-server-running` and put it in the startup folder (in case the computer reboots before `rentap-server.ps1` has the chance to delete the file).
     1. Create `~\rentap-not-running.ps1` with just one line:
 
     ```ps1
@@ -134,6 +131,6 @@ Since the file `/tmp/rentap-server-running` is in `/tmp` (which is in memory onl
     5. Right-click the shortcut just moved to the Startup folder and change the Target, inserting the following at the beginning: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File ` (and allow administrative privilages to do it).
     6. For example, my Target looks like this: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File C:\Users\Colin\rentap-not-running.ps1`
 
-Now you can launch *Rental Application* like any other. If on first launch, the page displays an error, press F5 to refresh the page because it tried to display the page before the server was up. You may need to play around with the line that says `sleep 4` in the example script above.
-To stop the www server (and delete the file indicating it's running), run `~/rentap-stop.ps1` in PowerShell.
+Now you can launch *Rental Application* like any other. If on first launch, the page displays an error, press F5 to refresh the page because it tried to display the page before the server was up. You may need to play around with the line that says `sleep 5` in the example script above.
+To stop the www server, run `~/rentap-stop.ps1` in the PowerShell window showing that it is running.
 
