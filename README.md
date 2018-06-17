@@ -42,8 +42,6 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
     fi
     /opt/google/chrome/google-chrome --profile-directory=Default --app-id=onobjhkphejolhnnbkgckmkjhpoelkgh
     ```
-    If the page displays an error, then press F5 to refresh, and maybe ad a `sleep 4` or whatever length of time works after `npm start ...`
-
 7. `chmod +x rentap`
 8. `sudo mv rentap /usr/local/bin`
 9. Create `rentap-server` with the following code in it.
@@ -54,11 +52,14 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
     npm start > /tmp/rentap-server-running
     rm /tmp/rentap-server-running
     ```
+
 10. `chmod +x rentap-server`
 11. `sudo mv rentap-server /usr/local/bin`
 12. Edit the desktop file found previously and set `Exec=rentap`
 
 Now you can launch *Rental Application* like any other on your linux desktop. 
+If the page displays an error, then press F5 to refresh, and maybe ad a `sleep 4` or whatever length of time works after `npm start ...` in `rentap-server`.
+
 To stop the www server, run `npm stop` in `~/nodejs/node_modules/rentap`.
 Since the file `/tmp/rentap-server-running` is in `/tmp` (which is in memory only), it will be deleted on reboot even if `rentap` didn't get to delete it.
 
