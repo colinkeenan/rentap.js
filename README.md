@@ -24,7 +24,7 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 1. `cd ~/nodejs/node_modules/rentap`
 2. `npm start`
 3. Open any browser to http://localhost:3000 or http://127.0.0.1:3000
-4. Stop the www server with `npm stop`
+4. To stop the www server, run `npm stop` in `~/nodejs/node_modules/rentap`.
 
 ### (Optional) Google Appifying it and using a script to automatically run npm start
 1. Run as above and open in Google Chrome
@@ -80,6 +80,7 @@ Since the file `/tmp/rentap-server-running` is in `/tmp` (which is in memory onl
 1. `cd ~\nodejs\node_modules\rentap`
 2. `npm start`
 3. Open any browser to http://localhost:3000 or http://127.0.0.1:3000
+4. To stop the www server, run `npm stop` in `~/nodejs/node_modules/rentap`.
 
 ### (Optional) Google Appifying it and using a script to automatically run npm start
 1. Run as above and open in Google Chrome
