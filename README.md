@@ -38,8 +38,7 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
     #!/bin/sh
     if test ! -f /tmp/rentap-server-running
     then
-      cd ~/github/rentap.js
-      npm start > /tmp/rentap-server-running &
+      rentap-server &
     fi
     /opt/google/chrome/google-chrome --profile-directory=Default --app-id=onobjhkphejolhnnbkgckmkjhpoelkgh
     ```
@@ -47,21 +46,21 @@ This is a port of my Mozilla Firefox Extension [rentap](https://github.com/colin
 
 7. `chmod +x rentap`
 8. `sudo mv rentap /usr/local/bin`
-9. Create `rentap-stop` with the following code in it.
+9. Create `rentap-server` with the following code in it.
 
     ```bash
     #!/bin/sh
-    npm stop
+    cd ~/nodejs/node_modules/rentap
+    npm start > /tmp/rentap-server-running
     rm /tmp/rentap-server-running
     ```
-
-10. `chmod +x rentap-stop`
-11. `sudo mv rentap-stop /usr/local/bin`
+10. `chmod +x rentap-server`
+11. `sudo mv rentap-server /usr/local/bin`
 12. Edit the desktop file found previously and set `Exec=rentap`
 
 Now you can launch *Rental Application* like any other on your linux desktop. 
-To stop the www server (and delete the file indicating it's running), run `rentap-stop` in the terminal.
-Since the file `/tmp/rentap-server-running` is in `/tmp` (which is in memory only), it will be deleted on reboot even if `rentap-stop` was never executed.
+To stop the www server, run `npm stop` in `~/nodejs/node_modules/rentap`.
+Since the file `/tmp/rentap-server-running` is in `/tmp` (which is in memory only), it will be deleted on reboot even if `rentap` didn't get to delete it.
 
 ## Windows Powershell (ordinary user, no Adminstrator privilages needed)
 ### Install
