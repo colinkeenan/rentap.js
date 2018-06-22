@@ -1,34 +1,6 @@
 // Run this with nodejs. It converts store.json (must be in same directory as this script) 
 // to an sqlite database named store.db for use in rentap.js (a nodejs app).
 
-// INTITcsv would only be necessary if store.json was empty, but there's no reason to use this script in that case. Including for completeness.
-var INITcsv = ['"My First M Last","###-##-####","mo/dy/year","Single/Divorced/Seperated/Married","emailname@emailprovider.com","driver\'s license/ID# and State","555-321-4321","555-123-1234","9080 Example Blvd, $200/mo' +
-'\nCity, ST  Zip' +
-'\nJun\'09 - present' +
-'\nMr. Landlord 555-555-5555","7060 Example Ave, $525/mo' +
-'\nCity, ST  Zip, Aug\'08 - Jun\'09' +
-'\nMr. Landlord 555-444-4444' +
-'\n' +
-'\n5040 Example St, Free' +
-'\nCity, ST  Zip, Jun\'08 - July\'08' +
-'\nRelative/Shelter 555-333-3333' +
-'\n' +
-'\n3020 Example Rd, $175/wk' +
-'\nCity, ST  Zip, -Dec\'07 - May\'08' +
-'\nHotel 555-222-2222","My First M Last, age' +
-'\nFirst M Last, age, friend/spouse/relative","name, age, type of animal & breed, size' +
-'\n' +
-'\nor N/A","$200/mo Food Stamps' +
-'\n$175 every two weeks from job listed below","Company Name' +
-'\nAddress' +
-'\nCity, ST  Zip' +
-'\n' +
-'\nas' +
-'\n' +
-'\nPosition, # hours/wk, under' +
-'\nMs. Supervisor 555-111-1111' +
-'\nfor # months/years","Company or Person that evicted you in Month/Year from Address, City, ST  Zip","Offense, County, State, Date, D.O.C. ID, and, if currently on parole/probation, include P.O. name and phone number.","mo/dy/year","","","","","Instructions by Example"'];
-
 /*
  * Here is the structure for the sqlite db, store.db, that will be created.
  * Only 3 tables: tbl, header, and trash
@@ -71,31 +43,26 @@ var INITcsv = ['"My First M Last","###-##-####","mo/dy/year","Single/Divorced/Se
  */
 var CSV = require('./ucsv-1.2.0.min.js'); //! ucsv v1.2.0 2014-04-09 * Copyright 2014 Peter Johnson * Licensed MIT, GPL-3.0 * https://github.com/uselesscode/ucsv
 
-function arrayofcsvToArrayofArrays(arrayofcsv) {
-   var INITARRAY = [[]];
-   var arrayofArrays = [[]];
-   if (typeof(arrayofcsv) != 'undefined') {
-      for(var i=0; i<arrayofcsv.length; i++) {
-         if (typeof(arrayofcsv[i]) === 'string') {
-            arrayofArrays[i] = CSV.csvToArray(arrayofcsv[i])[0];
-         } else if (i === 0) {
-               arrayofArrays = CSV.csvToArray(INITcsv)[0];
-         } else {
-            arrayofArrays[i] = [null];
-         }
-      }
-   } else {  
-      arrayofArrays = INITcsv;
-   }
-   if (arrayofArrays === INITARRAY)
-      arrayofArrays = INITcsv;
-   return arrayofArrays;
-}
+let storejson = require('./store.json'); //from rentap firefox addon - want to convert it to sqlite and save as store.db
+let headers = storejson.RHEADER;
+let trash = storejson.trash;
 
-var storejson = require('./store.json'); //from rentap firefox addon - want to convert it to sqlite and save as store.db
-var rentaps = arrayofcsvToArrayofArrays(storejson.csv);
-var headers = storejson.RHEADER;
-var trash = storejson.trash;
+function arrayofcsvToArrayofArrays(arrayofcsv) {
+  var arrayofArrays = [[]];
+  if (typeof(arrayofcsv) != 'undefined') {
+    for(var i=0; i<arrayofcsv.length; i++) {
+      if (typeof(arrayofcsv[i]) === 'string') {
+        arrayofArrays[i] = CSV.csvToArray(arrayofcsv[i])[0];
+      } else {
+        arrayofArrays[i] = [null]; //these null rows were deleted from trash - need to keep this somehow in store.db. Don't want to lose/change ID's
+      }
+    }
+  }
+  return arrayofArrays;
+}
+let rentaps = arrayofcsvToArrayofArrays(storejson.csv);
+
+let not_shifted = 1;
 
 const sqlite3 = require('sqlite3');
 let db = new sqlite3.Database('./store.db'); //the database being created
@@ -105,15 +72,19 @@ db.serialize(function() {
   db.run("CREATE TABLE tbl (FullName text, SSN text, BirthDate text, MaritalStatus text, Email text, StateID text, Phone1 text, Phone2 text, CurrentAddress text, PriorAddresses text, ProposedOccupants text, ProposedPets text, Income text, Employment text, Evictions text, Felonies text, dateApplied text, dateGuested text, dateRented text, headerName text)"); 
   //insert all the rentaps read from store.json
   var stmt = db.prepare("INSERT INTO tbl (FullName, SSN, BirthDate, MaritalStatus, Email, StateID, Phone1, Phone2, CurrentAddress, PriorAddresses, ProposedOccupants, ProposedPets, Income, Employment, Evictions, Felonies, dateApplied, dateGuested, dateRented) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+  //I've decided not to use "Instructions by Example" which was rentaps[0] by default. The title was stored in rentaps[i][21].
+  //If it was in trash, have to remove that too
+  if (trash[0] === 0 && rentaps[0][21] === "Instructions by Example") trash.shift() //removes first element
+  if (rentaps[0][21] === "Instructions by Example") {
+    rentaps.shift();
+    not_shifted = 0;
+  }
   for (i = 0; i < rentaps.length; i++) {
     //inserts the ith rentap into db (store.db) up to dateRented, will later lookup headerName based on 
     //[headers.StreetAddress, headers.CityStateZip] = [rentaps[i][19], rentaps[i][20]]
     stmt.run(rentaps[i].slice(0,19));
   } 
   stmt.finalize();
-
-  //remove null rows
-  db.run("DELETE FROM tbl WHERE FullName IS NULL"); //this will leave blank-space names, which is fine - just getting rid of actually null rows
 
   //create headers with 4 columns, all text again
   db.run("CREATE TABLE headers (StreetAddress text, CityStateZip text, Title text, Name text PRIMARY Key)"); 
@@ -144,7 +115,7 @@ db.serialize(function() {
   stmt = db.prepare("INSERT INTO trash (discardedRow) VALUES (?)");
   for (i = 0; i < trash.length; i++) {
     //inserts the ith discardedRow (just the row number) into db (store.db) 
-    stmt.run(trash[i] + 1); //have to add one because sqlite starts from 1 instead of 0
+    stmt.run(trash[i] + not_shifted); //have to add one (unless did rentap.shift()) because sqlite3 starts from 1 instead of 0
   } 
   stmt.finalize();
 
@@ -161,7 +132,8 @@ db.serialize(function() {
     badcount++;
   });
 
-  //give list of headers
+  //give list of headers and make array of headerNames so can verify user enters valid response when getting correct headerNames
+  let headerNames = [];
   var header1st = 1;
   db.each("SELECT rowid AS id, * FROM headers", function(err,row) {
     if (header1st) {
@@ -169,12 +141,13 @@ db.serialize(function() {
       header1st = 0;
     }
     console.log(row.id + " " + row.Name + ": " + row.StreetAddress + ", " + row.CityStateZip + " " + row.Title);
+    headerNames.push(row.Name);
   });
 
   //then, get correct headerName for each null
-  var answers = 0;
-  var headerNameArray = [];
-  var readlineSync = require('readline-sync');
+  let answers = 0;
+  let headerNameArray = [];
+  let readlineSync = require('readline-sync');
 
   //db.each rows with null headerNames showing the corresponding headerAddress
   db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerName, ha.StreetAddress, ha.CityStateZip FROM tbl JOIN headerAddresses AS ha ON id = ha.rowid WHERE headerName IS NULL",
@@ -184,7 +157,9 @@ db.serialize(function() {
         console.log("\nSUPPLY " + badcount + " headerNames THAT COULD NOT BE DETERMINED AUTOMATICALLY\n");
       }
       console.log(row.id + ": " + row.FullName + ", " + row.StreetAddress + ", " + row.CityStateZip);
-      var answer = readlineSync.question('Correct headerName? ');
+      do {
+        var answer = readlineSync.question('Correct headerName? ');
+      } while (!headerNames.includes(answer))
       answers++;
       headerNameArray.push([answer, row.id]);
     }, //end 1st callback (row callback) 
