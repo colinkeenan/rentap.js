@@ -53,8 +53,9 @@ function arrayofcsvToArrayofArrays(arrayofcsv) {
     for(var i=0; i<arrayofcsv.length; i++) {
       if (typeof(arrayofcsv[i]) === 'string') {
         arrayofArrays[i] = CSV.csvToArray(arrayofcsv[i])[0];
+        if (null === arrayofArrays[i][0]) arrayofArrays[i][0] = 'EmptyName';
       } else {
-        arrayofArrays[i] = [null]; //these null rows were deleted from trash - need to keep this somehow in store.db. Don't want to lose/change ID's
+        arrayofArrays[i] = ['Deleted',,,,,,,,,,,,,,,,'Deleted',,,,,]; //these null rows were deleted from trash - need to keep them in store.db. Don't want to lose/change ID's
       }
     }
   }
@@ -119,12 +120,22 @@ db.serialize(function() {
   } 
   stmt.finalize();
 
+  //create deleted with just 1 column of integers (the rows in tbl that are deleted)
+  db.run("CREATE TABLE deleted (deletedRow integer)"); 
+  //insert all the deleted read from store.json (they were null and now have FullName==='Deleted' && dateApplied==='Deleted')
+  stmt = db.prepare("INSERT INTO deleted (deletedRow) VALUES (?)");
+  for (i = 0; i < rentaps.length; i++) {
+    if (rentaps[i][0]==='Deleted' && rentaps[i][16]==='Deleted')
+      stmt.run(i + 1); //the ID (rowid in tbl) is one more than the index since array starts at 0 and SQLITE3 tables start with 1
+  } 
+  stmt.finalize();
+
   //because the rentap extension allowed user to change the header address without assigning it to a new header, many tbl.headerName will be null now
   //So, find those null's and get user to choose correct header
   
   //show records not matching headers.rowid, if any
   var badcount = 0;
-  db.each("SELECT rowid AS id, FullName, headerName FROM tbl WHERE headerName IS NULL OR headerName NOT IN (SELECT headerName FROM headers)", function(err, row) {
+  db.each("SELECT rowid AS id, FullName, headerName FROM tbl WHERE id NOT IN (SELECT deletedRow FROM deleted) AND headerName IS NULL OR headerName NOT IN (SELECT headerName FROM headers)", function(err, row) {
     if (!badcount) {
       console.log("\nNAMES WITH IMPROPER headerName (shown between angle brackets <>)\n");
     }
@@ -150,7 +161,7 @@ db.serialize(function() {
   let readlineSync = require('readline-sync');
 
   //db.each rows with null headerNames showing the corresponding headerAddress
-  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerName, ha.StreetAddress, ha.CityStateZip FROM tbl JOIN headerAddresses AS ha ON id = ha.rowid WHERE headerName IS NULL",
+  db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerName, ha.StreetAddress, ha.CityStateZip FROM tbl JOIN headerAddresses AS ha ON id = ha.rowid WHERE id NOT IN (SELECT deletedRow FROM deleted) AND headerName IS NULL",
 
     function(err, row) { //1st callback function: row callback (for each null headerName, get the correct one from user)
       if (!answers) {
@@ -187,7 +198,7 @@ db.serialize(function() {
         //show it worked by listing good names and discarded ones separately along with header names
 
         var good1st = 1;
-        db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerName, headers.Name FROM tbl JOIN headers ON tbl.headerName = headers.Name WHERE id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
+        db.each("SELECT tbl.rowid AS id, tbl.FullName, tbl.headerName, headers.Name FROM tbl JOIN headers ON tbl.headerName = headers.Name WHERE id NOT IN (SELECT deletedRow FROM deleted) AND id NOT IN (SELECT discardedRow FROM trash)", function(err, row) {
           if (good1st) {
             console.log("\nGOOD NAMES WITH HEADER NAME\n");
             good1st = 0;
