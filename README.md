@@ -133,5 +133,5 @@ Since the file `/tmp/rentap-server-running` is in `/tmp` (which is in memory onl
     6. For example, my Target looks like this: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File C:\Users\Colin\rentap-not-running.ps1`
 
 Now you can launch *Rental Application* like any other. If on first launch, the page displays an error, press F5 to refresh the page because it tried to display the page before the server was up. You may need to play around with the line that says `sleep 5` in the example script above.
-To stop the www server, run `~/rentap-stop.ps1` in the PowerShell window showing that it is running.
+To stop the www server, run `npm stop` in the PowerShell window showing that it is running.
 
