@@ -31,6 +31,16 @@ exports.create_db = function(callback) {
       }
     ); 
   });
+  //create deleted with just 1 column of integers (the rows in tbl that are deleted)
+  db.run("CREATE TABLE IF NOT EXISTS deleted (deletedRow integer)", 
+      function(err) { 
+        if (err) {
+          console.error('Create deleted table', err); 
+          callback(err);
+        } 
+        else callback(null);
+      }
+  ); 
   db.close();
 }
 
@@ -57,7 +67,7 @@ exports.getaps = function(ap_id, rownum, switch_mode, callback) { //callback {ap
   let db = new sqlite3.Database('./store.db');
   if (ap_id < 0 ) { // negative ap_id means set mode to edit and return all goodaps. 
     db.serialize(function() {
-      db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
+      db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT deletedRow FROM deleted) AND rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
         if (err) console.error(err);
         callback({aps:aps, rownum:rownum, mode:'edit'});
       });
@@ -79,7 +89,7 @@ exports.getaps = function(ap_id, rownum, switch_mode, callback) { //callback {ap
             callback({aps:aps, rownum:rownum, mode:mode});
           });
         else // just leaving trash if switch_mode
-          db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
+          db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT deletedRow FROM deleted) AND rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
             if (err) console.error(err);
             if (!switch_mode) rownum = aps.findIndex(ap => ap.rowid == ap_id); //this is where rownum gets assigned when not switch_mode
             else rownum = savedRownum; // just left trash so display same ap that entered trash from
@@ -161,7 +171,7 @@ exports.names = function(ap_id, callback) { //for dropdown list of full names to
           callback(names);
         });
       else
-        db.all("SELECT FullName, rowid FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, names) {
+        db.all("SELECT FullName, rowid FROM tbl WHERE rowid NOT IN (SELECT deletedRow FROM deleted) AND rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, names) {
           if (err) console.error(err);
           callback(names);
         });
@@ -200,7 +210,7 @@ exports.restore_ap = function (ap_id, callback) {
       if (err) console.error(err);
     });
     //update aps now that this ap has been restored
-    db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
+    db.all("SELECT rowid, * FROM tbl WHERE rowid NOT IN (SELECT deletedRow FROM deleted) AND rowid NOT IN (SELECT discardedRow FROM trash) ORDER BY rowid", function(err, aps) {
       if (err) console.error(err);
       let rownum = aps.findIndex(ap => ap.rowid == ap_id);
       callback({aps:aps, rownum:rownum, mode:'edit'});
