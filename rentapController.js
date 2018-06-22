@@ -167,7 +167,7 @@ var handle_form_submission = function(form, res) {
     case 'saveheader': save_header(form, res); break;
     case 'selectHeader': header_selected(form, res); break;
     case 'search': search(form, res); break;
-    case 'row:': show_ap_rownum(form.body.button, res); break;
+    case 'row:': show_ap_rownum(form.body.button - 1, res); break;
     case 'selectName': ap_selected(form.body.button, res); break;
     default: save(form, res);
   }

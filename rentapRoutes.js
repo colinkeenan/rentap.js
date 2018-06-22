@@ -19,6 +19,8 @@ router.get('/restore/:ap_id', rentap_controller.restore_ap); //restores by remov
 router.get('/delete/:ap_id', rentap_controller.rm_ap); //actually deletes the row from tbl, but only if in trash, then shows next in trash
 router.get('/deleteheader/:headername', rentap_controller.rm_header); //deletes the header
 router.get('/deleteheader', rentap_controller.rm_header); //deletes header with no name
-router.post('*', rentap_controller.form_submission); //although there are many submit buttons, there is only one post method. all the buttons
-//are named 'button', but have distinct values, so the form_submission method switches on the value of 'form.button'
+router.post('*', rentap_controller.form_submission); //post can happen on any route because it's based on user clicking a button or pressing enter, 
+//so form_submission ignores the route and determines what to do from info on the form
+//the result of a submission is to always go back to the route the post came from
+
 module.exports = router;

@@ -120,7 +120,7 @@ html(lang='en')
 
                     td.max25ch
                       input#label.sameline_input.readonly(name='label' type='text' form='jump' value='row:' readonly)
-                      input#row.sameline_input(name='button' type='text' form='jump' value=(undefined===rownum? '' : rownum) onchange='submit()')
+                      input#row.sameline_input(name='button' type='text' form='jump' value=(undefined===rownum ? '' : (null===rownum ? null : rownum + 1)) onchange='submit()')
                       =' '
                       button#prev.inlinebutton(title='Previous' formaction='/rentap/show/' + (undefined==ap ? row0 : ap.rowid) + '/prev' formmethod='get')
                         svg(aria-hidden="true" data-prefix="fas" data-icon="long-arrow-alt-left" class="svg-inline--fa fa-long-arrow-alt-left fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
@@ -160,10 +160,10 @@ html(lang='en')
                       input#authdate(name='authdate' type='text' value=(ap ? ap.dateApplied: '') autofocus=(fieldFocused==='authdate' ? 'autofocus' : null) onchange='submit()') 
 
                       label.sameline_label(for='rowprint') Row: 
-                      input#rowprint.readonly.sameline_input(name='rowprint' type='text' value=(undefined===rownum? '' : rownum) readonly) 
+                      input#rowprint.readonly.sameline_input(name='rowprint' type='text' value=(undefined===rownum ? '' : (null===rownum ? null : rownum + 1)) readonly) 
                       br 
                       label.sameline_label(for='rentapID') ID: 
-                      input#rentapID.readonly.sameline_input(name='rentapID' type='text' value=(ap? ap.rowid : 'New') readonly) 
+                      input#rentapID.readonly.sameline_input(name='rentapID' type='text' value=(ap ? ap.rowid : 'New') readonly) 
                       
                     td.lowpadding 
                       label.smalllabel(for='guestdate') Guested 
