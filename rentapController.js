@@ -62,7 +62,6 @@ var save = function(form, res) {
     if (headerName) {
       if (form.body.fullname) {
         if (form.body.authdate) {
-          headerSelected = true;
           rentap.save(form.body, headerName, function(returned_ap_id) {
             rentap.getaps(returned_ap_id, 0, false, function(returned_aps) { // rownum will be assigned in getaps because switch_mode is false, so just using 0
               apsGbl = returned_aps;
@@ -103,7 +102,7 @@ var show_ap_rownum = function(row_num, res) {
 };
 
 var header_selected = function(form, res) {
-  headerSelected = true; //gets set true here, and false in save
+  headerSelected = true; //gets set true here, and false in show_ap
   headerName = form.body.button;
   refresh_page_with_unsaved_changes(form, res);
 };
