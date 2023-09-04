@@ -41,6 +41,7 @@ exports.create_db = function(callback) {
         else callback(null);
       }
   ); 
+  db.sync();
   db.close();
 }
 
@@ -56,6 +57,7 @@ var getmode = function (ap_id, switch_mode, callback) { //callback gets mode of 
       callback(!switch_mode && ap ? ap.mode : (ap && ap.mode==='discarded' ? 'edit' : 'discarded'));
     });
   });
+  db.sync();
   db.close();
 };
 
@@ -72,6 +74,7 @@ exports.getaps = function(ap_id, rownum, switch_mode, callback) { //callback {ap
         callback({aps:aps, rownum:rownum, mode:'edit'});
       });
     });
+    db.sync();
     db.close();
   } else {
     // if switch_mode is true, then instead of returning aps in the same mode as ap_id, return aps of the opposite mode
@@ -96,6 +99,7 @@ exports.getaps = function(ap_id, rownum, switch_mode, callback) { //callback {ap
             callback({aps:aps, rownum:rownum, mode:mode});
           });
       });
+      db.sync();
       db.close();
     });
   }
@@ -110,6 +114,7 @@ exports.getheaders = function(callback) {
       callback(headers);
     });
   });
+  db.sync();
   db.close();
 }
 
@@ -133,9 +138,11 @@ exports.save_header = function(hdr, callback) {
           callback(headers);
         });
       });
+      db.sync();
       db.close();
     });
   });
+  db.sync();
   db.close();
 }
 
@@ -154,6 +161,7 @@ exports.rm_header = function(headername, callback) {
       callback(headers);
     });
   });
+  db.sync();
   db.close();
 }
 
@@ -176,6 +184,7 @@ exports.names = function(ap_id, callback) { //for dropdown list of full names to
           callback(names);
         });
     });
+    db.sync();
     db.close();
   });
 };
@@ -230,6 +239,7 @@ exports.save = function (ap, headerName, callback) {
         }
       ); 
     });
+    db.sync();
     db.close();
   } else {
     db.serialize(function() {
@@ -240,6 +250,7 @@ exports.save = function (ap, headerName, callback) {
         }
       ); 
     });
+    db.sync();
     db.close();
   }
 }
