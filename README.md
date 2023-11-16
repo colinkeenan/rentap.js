@@ -1,5 +1,5 @@
 # Rental Application
-Note: this application has serious bugs that I won't be fixing. I've moved on to usin Bun on a very fast computer version without the bugs: https://github.com/colinkeenan/rentapBun, and even have a version that works on Android using Termux linux terminal emulator: https://github.com/colinkeenan/rentapTermux. Both versions work very well and look better too.
+Note: this application has serious bugs that I won't be fixing. I've moved on to using Bun on a very fast computer version without the bugs: https://github.com/colinkeenan/rentapBun, and even have a version that works on Android using Termux linux terminal emulator: https://github.com/colinkeenan/rentapTermux. Both versions work very well and look better too.
 
 Create/save/print Rental Applications (Node.js version)
 
